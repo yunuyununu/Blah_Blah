@@ -21,7 +21,7 @@ public class GCSServiceImpl implements GCSService {
 
     public void uploadObject(GCSRequest gcsRequest) throws IOException {
 
-        String keyFileName = "blahblah-storage-487dfe261be1.json";
+        String keyFileName = "blahblah-storage-08872a7fc585.json";
         InputStream keyFile = ResourceUtils.getURL("classpath:" + keyFileName).openStream();
 
         Storage storage = StorageOptions.newBuilder()
