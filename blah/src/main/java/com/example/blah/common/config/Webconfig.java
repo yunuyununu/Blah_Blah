@@ -29,18 +29,18 @@ public class Webconfig implements WebMvcConfigurer {
 	요청을 보내면 서버에서 설정한 값에 의헤 index.html을 반환
 	브라우저는 요청을 받아 index.html을 읽으면서 속에 있는 script와 css 요청을 서버에 다시 보냄
 	해당 js, css 파일을 받아 렌더링하면서 vue-router에 의해 routes로 설정한 페이지로 이동 */
-	@Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/static/")
-                .resourceChain(true)
-                .addResolver(new PathResourceResolver() {
-                    @Override
-                    protected Resource getResource(String resourcePath, Resource location) throws IOException {
-                        Resource resource = location.createRelative(resourcePath);
-                        // 요청한 리소스가 존재하고 읽을 수 있으면 반환, 아니면 index.html 반환
-                        return resource.exists() && resource.isReadable() ? resource : new ClassPathResource("/static/index.html");
-                    }
-                });
-    }
+//	@Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        registry.addResourceHandler("/**")
+//                .addResourceLocations("classpath:/static/")
+//                .resourceChain(true)
+//                .addResolver(new PathResourceResolver() {
+//                    @Override
+//                    protected Resource getResource(String resourcePath, Resource location) throws IOException {
+//                        Resource resource = location.createRelative(resourcePath);
+//                        // 요청한 리소스가 존재하고 읽을 수 있으면 반환, 아니면 index.html 반환
+//                        return resource.exists() && resource.isReadable() ? resource : new ClassPathResource("/static/index.html");
+//                    }
+//                });
+//    }
 }
