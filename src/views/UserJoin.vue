@@ -66,14 +66,33 @@
         <div class="row">
           <div class="col-2"></div>
           <div class="col-2">
+            <label>전화번호</label>
+          </div>
+          <div class="col-6">
+            <input type="text" v-model="userTel"
+            ref="userTelInput"
+            placeholder="숫자만 입력하세요 (자동 하이픈)"
+            @input="formatPhoneNumber"
+            :class="['custom-input', { 'input-error': errors.userTel }]"/>
+            <p v-if="errors.userTel" class="error-text">{{ errors.userTel }}</p>
+          </div>
+          <div class="col-2"></div>
+        </div>
+
+        <div class="row">
+          <div class="col-2"></div>
+          <div class="col-2">
             <label>이메일</label>
           </div>
           <div class="col-6">
-            <input type="email" v-model="email" ref="emailInput" placeholder="개인/회사 이메일"
+            <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com"
             :class="['custom-input', { 'input-error': errors.email  }]"/>
             &nbsp;&nbsp;
             <button type="button" class="btn btn-dark" @click="sendAuthCode">인증번호 전송</button>
             <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
+
+             <!-- <div v-if="emailCheckMessage" style="margin-top: 5px; color: green;">{{ emailCheckMessage }}</div> -->
+            
           </div>
           <div class="col-2"></div>
         </div>
@@ -87,7 +106,7 @@
             <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리"
             :class="['custom-input', { 'input-error': errors.authcode  }]"/>&nbsp;&nbsp;
             <button type="button" class="btn btn-dark" @click="authcodeVerify">인증번호확인</button>&nbsp;&nbsp;
-            <button type="button" class="btn btn-dark">재전송</button>
+            <!-- <button type="button" class="btn btn-dark">재전송</button> -->
             <p v-if="errors.authcode" class="error-text">{{ errors.authcode }}</p>
             <!-- 타이머 -->
             <div v-if="timerVisible" style="margin-top: 3px;">
@@ -105,41 +124,14 @@
           </div>
         </div>
 
-
-        <div class="row">
-          <div class="col-2"></div>
-          <div class="col-2">
-            <label>전화번호</label>
-          </div>
-          <div class="col-6">
-            <input type="text" v-model="userTel"
-            ref="userTelInput"
-            placeholder="숫자만 입력하세요 (자동 하이픈)"
-            @input="formatPhoneNumber"
-            :class="['custom-input', { 'input-error': errors.userTel }]"/>
-            <p v-if="errors.userTel" class="error-text">{{ errors.userTel }}</p>
-          </div>
-          <div class="col-2"></div>
-        </div>
-
         <div class="row">
           <div class="col-2"></div>
           <div class="col-2">
             <label>회사인증파일</label>
           </div>
           <div class="col-6">
-            <input type="file"/>
-          </div>
-          <div class="col-2">
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-2"></div>
-          <div class="col-2">
-          </div>
-          <div class="col-6">
-            <a style="color: gray; font-size: small;">* 개인이메일 가입 시 필수 첨부</a>
+            <input type="file" ref="userFileInput" @change="handleFileChange"/>
+            <p style="margin-top: 5px; color: red;">{{ errors.userFile }}</p>
           </div>
           <div class="col-2">
           </div>
@@ -166,12 +158,20 @@ const userPw = ref('')
 const pwCheck = ref('')
 const nickname = ref('')
 const userTel = ref('')
+const userFile = ref('')
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0]
+  userFile.value = file
+  console.log("선택된 파일:", file)
+}
 
 const userIdInput = ref(null)
 const userPwInput = ref(null)
 const pwCheckInput = ref(null)
 const nicknameInput = ref(null)
 const userTelInput = ref(null)
+const userFileInput = ref(null)
 
 //이메일관련
 const emailInput = ref(null)
@@ -184,6 +184,7 @@ const countdown = ref(300) // 5분 = 300초
 const timer = ref(null)
 const timerVisible = ref(false)
 const isEmailChecked = ref(false)
+// const emailCheckMessage = ref(false)
 
 const errors = ref({
       userId : '',
@@ -229,6 +230,7 @@ const checkUserId = async () => {
             isIdAvailable.value = false
             isIdChecked.value = true
             errors.value.userId = '중복된 아이디입니다.'
+            idCheckMessage.value = false
             console.log('아이디 :'+userId.value)
             if (isValid) userIdInput.value.focus()
             isValid = false
@@ -270,10 +272,16 @@ const sendAuthCode = async () => {
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-    if (!emailPattern.test(email.value)) {
-      errors.value.email = '이메일 주소를 입력해 주세요'
+    if (!email.value) {
+      errors.value.email = '이메일 주소를 입력하세요.'
       emailInput.value.focus()
       isValid = false
+      return
+    } else if (!emailPattern.test(email.value)) {
+      errors.value.email = '이메일 형식에 맞게 입력하세요.'
+      emailInput.value.focus()
+      isValid = false
+      return
     }
 
     try {
@@ -330,7 +338,6 @@ const sendAuthCode = async () => {
         email : email.value,
         authcode: authcode.value
       })
-      alert('인증번호가 검증되었습니다.')
       console.log('응답:', response.data)
 
       if (response.data === 'success') {
@@ -454,12 +461,40 @@ const submit = () => {
     return
   }
 
-  //이메일
+  // 첨부파일 체크
+  if (!userFile.value) {
+    errors.value.userFile = '회사 인증 파일을 첨부하세요.'
+    if (isValid) userFileInput.value.click() // focus 대신 click으로 파일 선택 창 띄우기
+    isValid = false
+    return
+  } else {
+    errors.value.userFile = ''
+  }
 
+  // 회원가입 폼
+  const formData = new FormData()
+  formData.append('userId', userId.value)
+  formData.append('userPw', userPw.value)
+  formData.append('nickname', nickname.value)
+  formData.append('userTel', userTel.value)
+  formData.append('email', email.value)
+  formData.append('userFile', userFile.value)
 
   
-  // 이 외의 추가 검증 로직도 여기에 작성 가능
-  alert('회원가입 하시겠습니까?')
+  console.log("@폼데이터에 담긴 파일:", formData.get("userFile"))
+
+  axios.post('http://localhost:80/join/userJoin', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }}).then(response => {
+      alert('회원가입이 완료되었습니다.')
+      console.log("회원가입 성공 =="+response.data)
+      // router.push('/login')
+    }).catch(error => {
+      alert('회원가입에 실패했습니다. 관리자에게 문의하세요.')
+      console.error(error)
+    })
+
 }
   
 watch(userId, () => {
