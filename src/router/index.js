@@ -1,74 +1,63 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '@/views/HomeView.vue';
-import MyInformation from '@/views/MyInformation.vue';
-import MyReview from '@/views/MyReview.vue';
-import MyPage from '@/views/MyPage.vue';
-import CompanyVue from '@/views/CompanyVue.vue';
-import CompanyList from '@/views/CompanyList.vue';
-import CompanyChange from '@/views/CompanyChange.vue';
-import BoardVue from '@/views/BoardVue.vue';
-import BoardList from '@/views/BoardList.vue';
-import BoardRegistration from '@/views/BoardRegistration.vue';
-import UserJoin from '@/views/UserJoin.vue';
 
 //라우트(routes) 정의 : URL 요청에 대해 어떤 페이지(컴포넌트)를 보여줄지에 대한 매핑정보를 정의
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: () => import('@/views/HomeView')
   },
   {
     path: '/join',
     name: 'join',
-    component: UserJoin
+    component: () => import('@/views/UserJoin')
   },
   {
     path: '/mypage',
     name: 'mypage',
-    component: MyPage,
+    component: () => import('@/views/MyPage.vue'),
     children: [
       {
         path: 'myinformation', // 기본 Router
         name: 'myinformation',
-        component: MyInformation
+        component: () => import('@/views/MyInformation')
       },
       {
         path: 'myreview',
         name: 'myreview',
-        component: MyReview
+        component: () => import('@/views/MyReview')
       }
     ]
   },
   {
     path: '/company',
-      component: CompanyVue,
+      component: () => import('@/views/CompanyVue'),
       children: [
         {
           path: 'companylist',
           name: 'companylist',
-          component: CompanyList,
+          component: () => import('@/views/CompanyList'),
         },
         {
           path: 'companychange',
           name: 'companychange',
-          component: CompanyChange,
+          component: () => import('@/views/CompanyChange'),
         },
       ],
   },
   {
     path: '/board',
-      component: BoardVue,
+      component: () => import('@/views/BoardVue'),
       children: [
         {
           path: 'boardlist',
           name: 'boardlist',
-          component: BoardList,
+          component: () => import('@/views/BoardList'),
         },
         {
           path: 'boardregistration',
           name: 'boardregistration',
-          component: BoardRegistration,
+          component: () => import('@/views/BoardRegistration'),
         },
       ],
   }
