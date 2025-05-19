@@ -46,8 +46,8 @@
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
-            <button type="button" class="btn btn-light" @click="goJoin">아이디 찾기</button>&nbsp;&nbsp;
-            <button type="button" class="btn btn-light" @click="goJoin">비밀번호 찾기</button>&nbsp;&nbsp;
+            <button type="button" class="btn btn-light" @click="goSearchId">아이디 찾기</button>&nbsp;&nbsp;
+            <button type="button" class="btn btn-light" @click="goSearchPw">비밀번호 찾기</button>&nbsp;&nbsp;
             <button class="btn btn-danger" @click="goJoin">회원가입</button>
             <br>
             <br>
@@ -64,6 +64,8 @@
    import { ref, watch } from 'vue'
    import axios from 'axios'
   const goJoin = () => router.push('/join');
+  const goSearchId = () => router.push('/searchid');
+  const goSearchPw = () => router.push('/searchpw');
 
 const userId = ref('')
 const userPw = ref('')

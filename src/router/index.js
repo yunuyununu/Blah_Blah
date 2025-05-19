@@ -13,6 +13,16 @@ const routes = [
     component: () => import('@/views/UserLogin')
   },
   {
+    path: '/searchid',
+    name: 'searchid',
+    component: () => import('@/views/SearchId')
+  },
+  {
+    path: '/searchpw',
+    name: 'searchpw',
+    component: () => import('@/views/SearchPw')
+  },
+  {
     path: '/join',
     name: 'join',
     component: () => import('@/views/UserJoin')

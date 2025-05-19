@@ -71,7 +71,7 @@
           <div class="col-6">
             <input type="text" v-model="userTel"
             ref="userTelInput"
-            placeholder="숫자만 입력하세요 (자동 하이픈)"
+            placeholder="숫자만 입력하세요."
             @input="formatPhoneNumber"
             :class="['custom-input', { 'input-error': errors.userTel }]"/>
             <p v-if="errors.userTel" class="error-text">{{ errors.userTel }}</p>
