@@ -23,7 +23,7 @@
             <RouterLink to="/board/boardlist">게시판</RouterLink>
           </li>
           <li class="nav-item">
-            <button class="btn btn-danger" @click="goJoin">회원가입</button>
+            <button class="btn btn-danger" @click="goLogin">로그인</button>
           </li>
         </ul>
         </div>
@@ -39,7 +39,7 @@ const route = useRoute(); //정보
 console.log('route.name: ', route.name); // home
 console.log('route.path: ', route.path); // /
 
-const goJoin = () => router.push('/join');
+const goLogin = () => router.push('/login');
 </script>
 
 <style scoped>
