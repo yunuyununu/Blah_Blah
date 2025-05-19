@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/image")
-public class GCSController {
+public class GCSController { // 현재 미사용
 	
 	private final GCSService gcsService;
 

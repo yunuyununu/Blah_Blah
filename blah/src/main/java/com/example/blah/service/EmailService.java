@@ -1,7 +1,6 @@
 package com.example.blah.service;
 
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 
 public interface EmailService {
 	

@@ -5,15 +5,16 @@
 
 <mapper namespace="com.example.blah.mapper.JoinMapper">
 
-    <select id="userjoin" resultType="String">
-	
+    <insert id="userjoin">
+		INSERT INTO USER (U_ID,U_PASSWORD,U_NICNAME,U_EMAIL,U_PHONE,U_FILE) 
+		VALUES (#{u_id},#{u_password},#{u_nicname},#{u_email},#{u_tel},#{u_file})
         
-    </select>
+    </insert>
     
     <!-- 아이디 중복체크 -->
 	<select id="idCheck" resultType="int">
 		SELECT count(*) FROM user
-		WHERE U_ID = #{U_ID}
+		WHERE U_ID = #{u_id}
 	</select>
 
 </mapper>
