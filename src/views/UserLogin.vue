@@ -59,6 +59,8 @@
   
   <script setup>
   import { useRouter } from 'vue-router';
+  import { useUserStore } from '@/store/userStore'
+
   const router = useRouter(); //기능
   // const route = useRoute(); //정보
    import { ref, watch } from 'vue'
@@ -67,16 +69,18 @@
   const goSearchId = () => router.push('/searchid');
   const goSearchPw = () => router.push('/searchpw');
 
-const userId = ref('')
-const userPw = ref('')
+  const userId = ref('')
+  const userPw = ref('')
 
-const userIdInput = ref(null)
-const userPwInput = ref(null)
+  const userIdInput = ref(null)
+  const userPwInput = ref(null)
 
-const errors = ref({
-      userId : '',
-      userPw : ''
-    })
+  const errors = ref({
+        userId : '',
+        userPw : ''
+      })
+  
+  const userStore = useUserStore()
 
 // const isIdChecked = ref(false)
 // const isIdAvailable = ref(false)
@@ -114,7 +118,7 @@ const errors = ref({
 //       }
 // }
 
-const submit = () => {
+const submit = async () => {
 
   let isValid = true
 
@@ -172,22 +176,25 @@ const submit = () => {
   console.log("로그인 시도 아이디:", formData.get("userId"))
   console.log("로그인 시도 비밀번호:", formData.get("userPw"))
 
-  axios.post('http://localhost:80/login/userlogin',
-    formData
-  ).then(response => {
+  try {
+    const response = await axios.post('http://localhost:80/login/userlogin', {
+       userId : userId.value,
+       userPw : userPw.value
+    })
     if (response.data === 'success') {
-        alert('로그인 성공!')
-        console.log("회원가입 성공 =="+response.data)
-        router.push('/')
-      } else { // 로그인 정보 불일치
-        alert('아이디 또는 비밀번호가 일치하지 않습니다. 다시 확인 후 입력해주시기 바랍니다.')
-        errors.value.userId = '아이디를 다시 입력하세요.'
-        errors.value.userPw = '비밀번호를 다시 입력하세요.'
-      }
-  }).catch(error => {
-    alert('로그인 실패!')
-    console.error(error)
-  })
+      userStore.setLoginSuccess()
+     alert('로그인 성공!')
+     console.log('로그인 응답:', response.data)
+       router.push('/')
+     } else { // 로그인 정보 불일치
+       alert('아이디 또는 비밀번호가 일치하지 않습니다. 다시 확인 후 입력해주시기 바랍니다.')
+       errors.value.userId = '아이디를 다시 입력하세요.'
+       errors.value.userPw = '비밀번호를 다시 입력하세요.'
+     }
+  } catch (error) {
+     console.error('로그인 전송 실패: '+error)
+     alert('이메일 전송에 실패했습니다.')
+  }
  }
   
 watch(userId, () => {
