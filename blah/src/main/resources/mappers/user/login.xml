@@ -5,10 +5,10 @@
 
 <mapper namespace="com.example.blah.mapper.LoginMapper">
 	<!--회원 로그인-->
-    <select id="userLogin" resultType="com.example.blah.domain.LoginDTO">
+    <select id="userLogin" parameterType="string" resultType="com.example.blah.domain.LoginDTO">
 		select u_id, u_password, u_nicname, u_email, u_phone
 		from USER
-		where U_ID = #{u_id} and U_PASSWORD = #{u_password}
+		where U_ID = #{u_id}
     </select>
 	
 	<!--비밀번호 체크-->
