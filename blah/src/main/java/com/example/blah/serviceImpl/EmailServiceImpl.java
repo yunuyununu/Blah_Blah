@@ -11,8 +11,12 @@ import com.example.blah.service.EmailService;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 	
 	@Autowired
@@ -64,8 +68,8 @@ public class EmailServiceImpl implements EmailService {
         	message.setSubject("Blah Blah 회원가입 이메일 인증"); // 제목
         	message.setText(body, "UTF-8", "html"); // 내용
         	mailSender.send(message); // 메일 발송
-        	System.out.print("메세지=="+ message);
-        	System.out.print("인증번호==="+ authCode);
+//        	System.out.print("메세지=="+ message);
+//        	System.out.print("인증번호==="+ authCode);
             return authCode; // 인증코드 일치 여부를 비교하기 위해 인증코드 반환
 	       
 	        

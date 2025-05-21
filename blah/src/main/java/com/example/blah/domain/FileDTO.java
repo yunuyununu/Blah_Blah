@@ -9,12 +9,13 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDTO {
-	private int u_idx;
-	private String u_id;
-    private String u_password;
-    private String u_nicname;
-    private String u_email;
-    private String u_phone;
+public class FileDTO {
+	private int i_idx;
+    private int i_b_idx;
+    private String i_image;
+    private String i_date;
     
+    public void setI_b_id(int i_b_idx) {
+        this.i_b_idx = i_b_idx;
+    }
 }

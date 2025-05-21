@@ -11,8 +11,21 @@
 		where U_ID = #{u_id}
     </select>
 	
-	<!--비밀번호 체크-->
-	<select id="pwCheck" resultType="String">
-		select IFNULL((SELECT U_PASSWORD from user where U_ID = #{u_id}), 'N')
+	<!--아이디 찾기-->
+	<select id="searchId" parameterType="map" resultType="com.example.blah.domain.LoginDTO">
+		SELECT U_ID from user where U_EMAIL = #{u_email} AND U_PHONE = #{u_phone}
 	</select>
+	
+	<!--비밀번호 찾기 정보 검증-->
+	<select id="searchPw">
+		select u_idx, u_id
+		from user
+		where U_EMAIL=#{u_email} and U_ID=#{u_id} AND U_PHONE=#{u_phone}
+	</select>
+	
+	<!--비밀번호 재설정-->
+	<update id="pwReset">
+		update user set U_PASSWORD = #{u_password} where U_IDX = #{u_idx} AND U_ID=#{u_id}
+	</update>
+	
 </mapper>

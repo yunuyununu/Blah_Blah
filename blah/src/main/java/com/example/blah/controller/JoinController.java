@@ -44,10 +44,10 @@ public class JoinController {
 	@PostMapping("emailsend")
 	public ResponseEntity<String> sendEmail(@RequestBody Map<String, String> request) throws MessagingException {
 	    String sendEmail = request.get("email");
-	    System.out.println("수신자 이메일주소 : " + sendEmail);
+	    //System.out.println("수신자 이메일주소 : " + sendEmail);
 	    
 	    String authCode = emailService.createMailsend(sendEmail);
-	    System.out.println("이메일 전송 완료!!");
+	    //System.out.println("이메일 전송 완료!!");
 	    redisService.saveVerificationCode(sendEmail, authCode); // 인증코드 redis에 저장
 	    return ResponseEntity.ok("이메일 전송 완료");
 	}
@@ -57,8 +57,8 @@ public class JoinController {
 	public String verifyEmail(@RequestBody Map<String, String> request) {
 		String sendemail = request.get("email");
 		String code = request.get("authcode");
-		System.out.println("수신자 이메일주소 : " + sendemail);
-		System.out.println("인증번호 : " + code);
+		//System.out.println("수신자 이메일주소 : " + sendemail);
+		//System.out.println("인증번호 : " + code);
 		
 		String result ="";
 		if (redisService.verifyEmail(sendemail,code)) {
@@ -74,9 +74,9 @@ public class JoinController {
 	@PostMapping("idCheck")
 	public int idCheck(@RequestBody Map<String, String> request) {
 		String userid = request.get("userId");
-		System.out.println("이용자 아이디 : " + userid);
+		//System.out.println("이용자 아이디 : " + userid);
 		int checkId = service.idCheck(userid);
-		System.out.println("사용가능여부 : " + checkId);
+		//System.out.println("사용가능여부 : " + checkId);
 		return checkId;
 		
 	}

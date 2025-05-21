@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.blah.mapper.ReplyMapper">
+
+    <select id="replyList" resultType="com.example.blah.domain.ReplyDTO">
+        SELECT B_IDX,U_NICNAME, B_U_IDX,B_TITLE,B_CONTENT,B_HITS,DATE_FORMAT(B_DATE, '%y-%m-%d') AS B_DATE
+        from BOARD B, USER U
+        WHERE B.B_U_IDX = U.U_IDX
+        
+    </select>
+
+</mapper>

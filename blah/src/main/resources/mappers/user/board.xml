@@ -4,11 +4,54 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.blah.mapper.BoardMapper">
+
     <select id="list" resultType="com.example.blah.domain.BoardDTO">
         SELECT B_IDX,U_NICNAME, B_U_IDX,B_TITLE,B_CONTENT,B_HITS,DATE_FORMAT(B_DATE, '%y-%m-%d') AS B_DATE
         from BOARD B, USER U
         WHERE B.B_U_IDX = U.U_IDX
         
     </select>
+    
+    <!--처음 게시글 12개-->
+    <select id="firstList" resultType="com.example.blah.domain.BoardDTO">
+    	SELECT B_IDX, B_U_IDX, B_TITLE, B_CONTENT, B_HITS, B_DATE, B_MODIFY, B_VOTE, B_DELETE,
+		U_NICNAME, C_NAME
+    	FROM BOARD B, USER U, COMPANY C
+        WHERE B.B_U_IDX = U.U_IDX
+        AND U.U_C_IDX = C.C_IDX
+    	ORDER BY B_IDX DESC
+    	LIMIT 12
+    </select>
 
+	<!--더보기 요청 시-->
+	<select id="plusList" resultType="com.example.blah.domain.BoardDTO">
+		SELECT B_IDX, B_U_IDX, B_TITLE, B_CONTENT, B_HITS, B_DATE, B_MODIFY, B_VOTE, B_DELETE
+		FROM BOARD
+		WHERE B_DELETE = 'N' AND B_IDX &lt; #{lastBIdx}
+		ORDER BY B_IDX DESC
+		LIMIT 12
+	</select>
+	
+	<!--게시글 상세-->
+	<select id="boardDetails" resultType="map">
+		SELECT B_IDX, B_U_IDX, B_TITLE, B_CONTENT, B_HITS, B_DATE, B_MODIFY, B_VOTE, B_DELETE, U_NICNAME, C_NAME
+		FROM BOARD B, USER U, COMPANY C
+        WHERE B.B_U_IDX = U.U_IDX
+        AND U.U_C_IDX = C.C_IDX
+        AND B_IDX = #{b_idx}
+	</select>
+	
+	<!--조회수 증가-->
+	<update id="updateHit">
+		UPDATE BOARD
+		SET B_HITS = B_HITS + 1
+		WHERE B_IDX = #{b_idx}
+	</update>
+	
+	<!--게시글 등록-->
+	<insert id="insertBoard">
+		INSERT INTO BOARD (B_U_IDX,B_TITLE,B_CONTENT) 
+		VALUES (#{b_u_idx}, #{b_title}, #{b_content})
+	</insert>
+	
 </mapper>
