@@ -163,18 +163,6 @@ const submit = async () => {
 //     errors.value.pwCheck = ''
 //   }
 
-   // 로그인 폼
-  const formData = new FormData()
-  formData.append('userId', userId.value)
-  formData.append('userPw', userPw.value)
-//   formData.append('nickname', nickname.value)
-//   formData.append('userTel', userTel.value)
-//   formData.append('email', email.value)
-//   formData.append('userFile', userFile.value)
-
-  
-  console.log("로그인 시도 아이디:", formData.get("userId"))
-  console.log("로그인 시도 비밀번호:", formData.get("userPw"))
 
   try {
     const response = await axios.post('http://localhost:80/login/userlogin', {

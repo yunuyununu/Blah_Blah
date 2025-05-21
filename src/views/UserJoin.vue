@@ -91,8 +91,6 @@
             <button type="button" class="btn btn-dark" @click="sendAuthCode">인증번호 전송</button>
             <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
 
-             <!-- <div v-if="emailCheckMessage" style="margin-top: 5px; color: green;">{{ emailCheckMessage }}</div> -->
-            
           </div>
           <div class="col-2"></div>
         </div>
@@ -180,11 +178,10 @@ const email = ref('')
 const authcode = ref('')
 const verifyMessage = ref('')
 const verifySuccess = ref(null)
-const countdown = ref(300) // 5분 = 300초
+const countdown = ref(180) // 3분
 const timer = ref(null)
 const timerVisible = ref(false)
 const isEmailChecked = ref(false)
-// const emailCheckMessage = ref(false)
 
 const errors = ref({
       userId : '',
@@ -480,8 +477,6 @@ const submit = () => {
   formData.append('email', email.value)
   formData.append('userFile', userFile.value)
 
-  
-  console.log("@폼데이터에 담긴 파일:", formData.get("userFile"))
 
   axios.post('http://localhost:80/join/userJoin', formData, {
     headers: {

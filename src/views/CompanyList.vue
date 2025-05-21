@@ -3,7 +3,6 @@
     <div class="container">
       <div class="row">
         <div class="col">
-          <a>회사 목록 리스트</a>
           <table>
               <thead>
                 <tr>

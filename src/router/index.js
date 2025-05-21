@@ -23,13 +23,17 @@ const routes = [
     component: () => import('@/views/SearchPw')
   },
   {
+    path: '/passwdreset',
+    name: 'passwdreset',
+    component: () => import('@/views/PasswdReset')
+  },
+  {
     path: '/join',
     name: 'join',
     component: () => import('@/views/UserJoin')
   },
   {
     path: '/mypage',
-    name: 'mypage',
     component: () => import('@/views/MyPage.vue'),
     children: [
       {
@@ -74,8 +78,14 @@ const routes = [
           name: 'boardregistration',
           component: () => import('@/views/BoardRegistration'),
         },
+        {
+          path: '/boarddtails/:b_idx',
+          name: 'boarddtails',
+          component: () => import('@/views/BoardDetails')
+        },
       ],
   }
+
 ];
 const router = createRouter({
   history: createWebHistory('/'),

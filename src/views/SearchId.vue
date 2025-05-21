@@ -39,7 +39,7 @@
 
       <div class="row" v-if="foundId">
         <div class="col" style="text-align: center;">
-          <p><strong>회원님의 아이디는 "{{ foundId }}" 입니다.</strong></p>
+          <p><strong>{{ foundId }}</strong></p>
         </div>
       </div>
 
@@ -98,20 +98,21 @@ const submit = async () => {
     return
   }
   if (!userTel.value) {
-    errors.value.userTel = '이메일을 입력하세요.'
+    errors.value.userTel = '전화번호를 입력하세요.'
     userTelInput.value.focus()
     return
   }
 
   try {
-    const response = await axios.post('http://localhost:80/user/find-id', {
-      email: email.value
+    const response = await axios.post('http://localhost:80/login/searchId', {
+      email: email.value,
+      userTel: userTel.value
     })
 
-    if (response.data && response.data.userId) {
-      foundId.value = response.data.userId
+    if (response.data) {
+      foundId.value = '회원님의 아이디는 "'+response.data.u_id+'" 입니다.'
     } else {
-      alert('해당 이메일로 등록된 아이디가 없습니다.')
+      foundId.value = '해당 이메일/전화번호로 등록된 아이디가 없습니다.';
     }
 
   } catch (error) {
@@ -133,7 +134,13 @@ watch(userTel, () => {
 </script>
 
 <style scoped>
-/* 기존 스타일 재사용 */
+.row {
+  gap: 23px 43px;
+}
+label {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
 input[type="text"],
 input[type="email"],
 input[type="password"] {
