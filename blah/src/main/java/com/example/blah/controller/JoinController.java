@@ -42,14 +42,38 @@ public class JoinController {
 	
 	// 이메일 인증번호 전송 
 	@PostMapping("emailsend")
-	public ResponseEntity<String> sendEmail(@RequestBody Map<String, String> request) throws MessagingException {
+	public String sendEmail(@RequestBody Map<String, String> request) throws MessagingException {
+		String result ="";
 	    String sendEmail = request.get("email");
 	    //System.out.println("수신자 이메일주소 : " + sendEmail);
-	    
-	    String authCode = emailService.createMailsend(sendEmail);
-	    //System.out.println("이메일 전송 완료!!");
-	    redisService.saveVerificationCode(sendEmail, authCode); // 인증코드 redis에 저장
-	    return ResponseEntity.ok("이메일 전송 완료");
+	    int emailCheck = service.emailCheck(sendEmail);
+	    if(emailCheck == 0) {
+	    	String authCode = emailService.createMailsend(sendEmail);
+	    	//System.out.println("이메일 전송 완료!!");
+	    	redisService.saveVerificationCode(sendEmail, authCode); // 인증코드 redis에 저장
+	    	result = "success";
+	    } else {
+	    	result = "fail";
+	    }
+	    return result;
+	}
+	
+	// 비밀번호찾기 이메일 전송
+	@PostMapping("pwEmailsend")
+	public String pwEmailSend(@RequestBody Map<String, String> request) throws MessagingException {
+		String result ="";
+	    String sendEmail = request.get("email");
+	    //System.out.println("수신자 이메일주소 : " + sendEmail);
+	    int emailCheck = service.emailCheck(sendEmail);
+	    if(emailCheck == 1) {
+	    	String authCode = emailService.createMailsend(sendEmail);
+	    	//System.out.println("이메일 전송 완료!!");
+	    	redisService.saveVerificationCode(sendEmail, authCode); // 인증코드 redis에 저장
+	    	result = "success";
+	    } else {
+	    	result = "fail";
+	    }
+	    return result;
 	}
 	
 	// 인증번호 검증
@@ -74,9 +98,7 @@ public class JoinController {
 	@PostMapping("idCheck")
 	public int idCheck(@RequestBody Map<String, String> request) {
 		String userid = request.get("userId");
-		//System.out.println("이용자 아이디 : " + userid);
 		int checkId = service.idCheck(userid);
-		//System.out.println("사용가능여부 : " + checkId);
 		return checkId;
 		
 	}

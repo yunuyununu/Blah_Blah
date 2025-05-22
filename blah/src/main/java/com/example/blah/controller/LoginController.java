@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.blah.domain.JoinDTO;
+import com.example.blah.common.SessionConst;
 import com.example.blah.domain.LoginDTO;
 import com.example.blah.service.LoginService;
 
@@ -40,7 +40,8 @@ public class LoginController {
 	    LoginDTO login = service.userLogin(userId,userPw);
 
 	    if (login != null) { // 로그인 성공
-	    	session.setAttribute("userId", login.getU_id());
+	    	session.setAttribute(SessionConst.LOGIN_USERID, login.getU_id());
+	    	session.setAttribute(SessionConst.LOGIN_USERIDX, login.getU_idx());
 	    	return "success";
 	    } else {
 	    	return "fail";
@@ -51,8 +52,8 @@ public class LoginController {
 	// 세션체크
 	@GetMapping("/checkSession")
 	public ResponseEntity<?> checkSession(HttpSession session) {
-	    Object loginUser = session.getAttribute("userId");
-	    if (loginUser != null) {
+		
+	    if (session.getAttribute("UserId") != null) {
 	        return ResponseEntity.ok(true);
 	    } else {
 	        return ResponseEntity.ok(false);

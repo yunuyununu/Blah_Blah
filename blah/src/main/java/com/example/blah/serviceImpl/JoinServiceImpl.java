@@ -33,4 +33,10 @@ public class JoinServiceImpl implements JoinService {
 		return result;
 	}
 	
+	@Override
+	public int emailCheck(String U_EMAIL) {
+		return joinMapper.emailCheck(U_EMAIL);
+	}
+	
+	
 }

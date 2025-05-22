@@ -9,4 +9,7 @@ public interface JoinService {
 	
 	// 회원가입
 	String join(JoinDTO dto);
+	
+	// 이메일 중복체크
+	int emailCheck(String U_EMAIL);
 }

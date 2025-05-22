@@ -16,5 +16,11 @@
 		SELECT count(*) FROM user
 		WHERE U_ID = #{u_id}
 	</select>
+	
+	<!--이메일 중복체크-->
+	<select id="emailCheck" resultType="int">
+		SELECT count(*) FROM user
+		WHERE U_EMAIL = #{u_emial}
+	</select>
 
 </mapper>

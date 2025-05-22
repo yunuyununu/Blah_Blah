@@ -1,8 +1,11 @@
 package com.example.blah.serviceImpl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.example.blah.domain.FileDTO;
 import com.example.blah.mapper.FileMapper;
@@ -16,24 +19,14 @@ public class FileServiceImpl implements FileService {
 
 	@Override
 	@Transactional
-	public void saveFiles(int i_b_idx,FileDTO files) {
-//		int idx = dto.getB_idx();
-//		
-//		try {
-//			if (CollectionUtils.isEmpty(files)) {
-//				boardMapper.boardInsert(dto);
-//			} else {
-//				for (BoardDTO file : files) {
-//					file.setI_idx(idx);
-//				}
-//				boardMapper.boardInsert(dto);
-//				boardMapper.saveAll(files);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			System.out.println("게시글 저장 실패!!!");
-//		}
-		
+	public void saveFiles(int i_b_idx,List<FileDTO> files) {
+		if (CollectionUtils.isEmpty(files)) {
+	        return;
+	    }
+	    for (FileDTO file : files) {
+	        file.setIbidx(i_b_idx);
+	    }
+	    fileMapper.saveAll(files);
 	}
 	
 }

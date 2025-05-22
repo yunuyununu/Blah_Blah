@@ -25,7 +25,7 @@
               #{file.i_idx}
             , #{file.i_b_idx}
             , #{file.i_image}
-            , NOW()
+            , CURRENT_TIMESTAMP
         )
         </foreach>
 	</insert>

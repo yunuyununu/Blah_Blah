@@ -44,6 +44,7 @@ public class EmailServiceImpl implements EmailService {
         return key.toString();
 	}
 	
+	// 이메일 발송
 	@Override
 	public String createMailsend(String sendEmail) throws MessagingException {
 		

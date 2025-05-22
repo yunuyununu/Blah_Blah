@@ -21,6 +21,7 @@ import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.FileDTO;
 import com.example.blah.domain.JoinDTO;
 import com.example.blah.service.BoardService;
+import com.example.blah.service.FileService;
 import com.example.blah.serviceImpl.BoardServiceImpl;
 import com.example.blah.serviceImpl.CompanyServiceImpl;
 import jakarta.servlet.http.Cookie;
@@ -33,6 +34,9 @@ public class BoardController {
 
 	@Autowired
 	BoardService service;
+	
+	@Autowired
+	FileService fileservice;
 	
 	@Autowired
 	GCSService gcsService;
@@ -118,33 +122,51 @@ public class BoardController {
 	}
 	
 	// 신규 게시글 생성
-//    @PostMapping("saveBoard")
-//    public String savePost(@RequestParam(name="userId", defaultValue="") int b_u_idx, 
-//			@RequestParam(name="title", defaultValue="") String b_title,
-//			@RequestParam(name="content", defaultValue="") String b_content,
-//			@RequestParam(name="files", defaultValue="") List<MultipartFile> files) {
-//    	
-//    	// dto에 담아 보내기
-//    				BoardDTO dto = new BoardDTO();
-//    		        dto.setB_u_idx(b_u_idx);
-//    		        dto.setB_title(b_title);
-//    		        dto.setB_content(b_content);
-//    		        dto.setFiles(files);
-//    	
-//        int id = dto.getB_u_idx();
-//        		//service.boardInsert(dto);
-//        
-//        List<FileDTO> fileList = new ArrayList<>();
-//        for (MultipartFile files : multipartFiles) {
-//            if (multipartFile.isEmpty()) {
-//                continue;
-//            }
-//            files.add(uploadFile(multipartFile));
-//        }
-//        
-//        List<FileDTO> files = fileUtils.uploadFiles(params.getFiles());
-//        fileService.saveFiles(id, files);
-//        MessageDto message = new MessageDto("게시글 생성이 완료되었습니다.", "/post/list.do", RequestMethod.GET, null);
-//        return showMessageAndRedirect(message, model);
-//    }
+    @PostMapping("saveBoard")
+    public String savePost(@RequestParam(name="userId", defaultValue="") int b_u_idx, 
+			@RequestParam(name="title", defaultValue="") String b_title,
+			@RequestParam(name="content", defaultValue="") String b_content,
+			@RequestParam(name="files", defaultValue="") List<MultipartFile> files) {
+    	
+    	String result ="";
+    	
+    	try {
+    		// dto에 담아 보내기
+    		BoardDTO dto = new BoardDTO();
+    		dto.setB_u_idx(b_u_idx);
+    		dto.setB_title(b_title);
+    		dto.setB_content(b_content);
+    		dto.setFiles(files);
+    		
+    		int id = dto.getB_u_idx();
+    		//service.boardInsert(dto);
+    		
+    		List<FileDTO> filelist = new ArrayList<>();
+    		
+    		if(files != null) {
+    			// 파일명 처리
+    			for(int i=0;i<((CharSequence) files).length();i++) {
+    				String originalFilename = files.get(i).getOriginalFilename();
+    				String uuid = UUID.randomUUID().toString();
+    				String fileName = uuid + "_" + originalFilename;
+    				
+    				// GCS에 업로드
+    				GCSRequest gcsRequest = new GCSRequest();
+    				gcsRequest.setName(fileName); // GCS에 저장될 파일명
+    				gcsRequest.setFile(files.get(i)); // 실제 파일
+    				gcsService.uploadObject(gcsRequest); // 업로드 실행
+    				//filelist.addAll(files.get(i).getName());
+    			}
+    			
+    		}
+    		
+    		fileservice.saveFiles(b_u_idx, filelist);
+    		result ="success";
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		result = "fail";
+    	}
+    	
+        return result;
+    }
 }

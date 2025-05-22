@@ -9,4 +9,7 @@ public interface JoinMapper {
 	
 	// 회원가입
 	void userjoin(JoinDTO dto);
+	
+	// 이메일 중복체크
+	int emailCheck(String U_EMAIL);
 }
