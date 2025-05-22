@@ -3,6 +3,13 @@
     <div class="container">
       <div class="row">
         <div class="col">
+           <div class="search-box">
+            <input
+              type="text"
+              placeholder="회사명을 입력하세요"
+            />
+          </div>
+
           <table>
               <thead>
                 <tr>
@@ -32,12 +39,19 @@
   import axios from 'axios'
 
   const company = ref([]);
+  // const searchKeyword = ref('')
   
   onMounted(async () => {
     const response = await axios.get('http://localhost:80/company/list');
     console.log(response.data)
     company.value = response.data;
   });
+  // const filteredCompany = computed(() => {
+  //   if (!searchKeyword.value) return company.value
+  //   return company.value.filter(c =>
+  //     c.c_name.toLowerCase().includes(searchKeyword.value.toLowerCase())
+  //   )
+  // })
   </script>
   
   <style scoped>
@@ -48,5 +62,14 @@
   th, td {
     border: 1px solid #ddd;
     padding: 8px;
+  }
+  .search-box {
+  margin-bottom: 12px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
   </style>

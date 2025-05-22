@@ -8,10 +8,12 @@ export const useUserStore = defineStore('user', {
   actions: {
     async checkSession() {
       try {
-        const res = await axios.get('/login/checkSession')
+        const res = await axios.get('/login/checkSession', { withCredentials: true })
         this.isLogin = res.data === true
+         console.log('로그인상태', this.isLogin)
       } catch (e) {
         this.isLogin = false
+         console.log('로그아웃상태',this.isLogin)
       }
     },
     async logout() {

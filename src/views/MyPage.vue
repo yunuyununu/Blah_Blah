@@ -16,9 +16,19 @@
     </div>
   </div>
   </template>
-  
   <script setup>
-  
+  // import api from '@/plugin/axios'
+  // import { onMounted } from 'vue';
+
+  // onMounted(() => {
+  // api.get('/mypage')
+  //     .then(res => {
+  //       console.log(res.data);
+  //     })
+  //     .catch(err => {
+  //       console.error(err);
+  //     });
+  //   });
   </script>
   
   <style scoped>

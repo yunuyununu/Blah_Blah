@@ -82,6 +82,19 @@
   <script setup>
   import { ref } from 'vue';
 
+  // import api from '@/plugin/axios'
+  // import { onMounted } from 'vue';
+
+  // onMounted(() => {
+  // api.get('/mypage/myinformation')
+  //   .then(res => {
+  //     console.log(res.data);
+  //   })
+  //   .catch(err => {
+  //     console.error(err);
+  //   });
+  // });
+
 // const form = reactive({
 //   id: 'Jane',
 //   name: 'Jane',

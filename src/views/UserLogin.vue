@@ -181,7 +181,6 @@ const submit = async () => {
      }
   } catch (error) {
      console.error('로그인 전송 실패: '+error)
-     alert('이메일 전송에 실패했습니다.')
   }
  }
   

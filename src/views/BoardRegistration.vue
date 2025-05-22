@@ -14,12 +14,13 @@
               <textarea v-model="content" placeholder="내용을 입력하세요"></textarea>
             </div>
 
-            <input type="file" multiple @change="handleFileChange" />
-              <div v-if="previewUrls.length">
-                <div v-for="(url, idx) in previewUrls" :key="idx">
-                  <img :src="url" alt="preview" width="100" />
-                </div>
+            <input type="file" multiple @change="handleFileChange" class="custom-file-input"/>
+            <div v-if="previewUrls.length" class="image-preview">
+              <div v-for="(url, idx) in previewUrls" :key="idx">
+                <img :src="url" alt="preview" width="100" @click="removeImage(idx)" />
               </div>
+            </div>
+
             <div style="text-align: center;">
               <button @click="submitPost" class="btn btn-dark">등록</button>
             </div>
@@ -28,9 +29,9 @@
       </div>
     </div>
   </div>
-  </template>
-  
-  <script setup>
+</template>
+
+<script setup>
 import { ref } from 'vue';
 
 const title = ref('');
@@ -42,41 +43,28 @@ const handleFileChange = (e) => {
   const files = Array.from(e.target.files);
   imageFiles.value = files;
 
-  // 미리보기 생성
+  // 기존 URL 해제
+  previewUrls.value.forEach((url) => URL.revokeObjectURL(url));
+
+  // 새로운 미리보기 생성
   previewUrls.value = files.map(file => URL.createObjectURL(file));
 };
 
-// const submitPost = () => {
-//   if (!title.value || !content.value) {
-//     alert('제목과 내용을 모두 입력해주세요.');
-//     return;
-//   }
+const removeImage = (index) => {
+  // 미리보기 URL 해제
+  URL.revokeObjectURL(previewUrls.value[index]);
 
-//   const formData = new FormData();
-//   formData.append('title', title.value);
-//   formData.append('content', content.value);
-//   if (imageFile.value) {
-//     formData.append('image', imageFile.value);
-//   }
+  // 해당 인덱스의 파일 및 URL 제거
+  imageFiles.value.splice(index, 1);
+  previewUrls.value.splice(index, 1);
+};
 
-//   // 예: 게시글 등록 API 호출
-//   fetch('/api/posts', {
-//     method: 'POST',
-//     body: formData,
-//   })
-//     .then(res => res.json())
-//     .then(data => {
-//       alert('게시글이 등록되었습니다.');
-//       // 입력 초기화
-//       title.value = '';
-//       content.value = '';
-//       imageFile.value = null;
-//     })
-//     .catch(err => {
-//       console.error(err);
-//       alert('게시글 등록에 실패했습니다.');
-//     });
-// };
+const submitPost = () => {
+  // 여기에 폼 제출 로직 추가
+  console.log('제목:', title.value);
+  console.log('내용:', content.value);
+  console.log('이미지 파일:', imageFiles.value);
+};
 </script>
 
 <style scoped>
@@ -99,10 +87,16 @@ textarea {
 
 .image-preview img {
   margin-top: 10px;
-  max-width: 100%;
+  margin-right: 10px;
+  max-width: 100px;
   height: auto;
   border: 1px solid #ccc;
   border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+.image-preview img:hover {
+  opacity: 0.7;
 }
 label {
   font-weight: bold;

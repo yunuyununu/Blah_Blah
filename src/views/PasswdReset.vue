@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref,watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
@@ -132,6 +132,12 @@ const resetPassword = async () => {
     alert('서버 오류')
   }
 }
+watch(newPassword, () => {
+    errors.value.newPassword = ''
+  })
+watch(confirmPassword, () => {
+  errors.value.confirmPassword = ''
+})
 </script>
 
 <style scoped>

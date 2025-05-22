@@ -133,16 +133,18 @@ const sendAuthCode = async () => {
   }
 
   try {
-    const response = await axios.post('http://localhost:80/join/emailsend', {
+    const response = await axios.post('http://localhost:80/join/pwEmailsend', {
       email: email.value
     })
 
-    if (response.data) {
+    if (response.data === 'success') {
       alert('인증코드가 이메일로 전송되었습니다.')
       startTimer()
       timerVisible.value = true
     } else {
-      alert('등록되지 않은 이메일입니다.')
+      errors.value.email = '등록되지 않은 이메일입니다.'
+        emailInput.value.focus()
+        return
     }
   } catch (err) {
     console.error(err)
