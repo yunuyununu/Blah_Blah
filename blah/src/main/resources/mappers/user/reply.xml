@@ -6,9 +6,23 @@
 <mapper namespace="com.example.blah.mapper.ReplyMapper">
 
     <select id="replyList" resultType="com.example.blah.domain.ReplyDTO">
-        SELECT B_IDX,U_NICNAME, B_U_IDX,B_TITLE,B_CONTENT,B_HITS,DATE_FORMAT(B_DATE, '%y-%m-%d') AS B_DATE
-        from BOARD B, USER U
-        WHERE B.B_U_IDX = U.U_IDX
+    
+		SELECT COM.CM_IDX AS CM_IDX,			<!--댓글 번호-->
+			   COM.CM_B_IDX AS CM_B_IDX,		<!--게시글 번호-->
+			   COM.CM_CONTENT AS CM_CONTENT,		<!--댓글 내용-->
+			   COM.CM_DATE AS CM_DATE,			<!--작성 일자-->
+			   COM.CM_MODIFY AS CM_MODIFY,		<!--수정 일자-->
+			   COM.CM_PARENT_IDX AS CM_PARENT_IDX,	<!--부모 댓글 번호-->
+			   USR.U_NICNAME AS U_NICNAME,		<!--회원 닉네임-->
+			   CPN.C_NICNAME AS C_NICNAME		<!--회사 닉네임-->
+		FROM COMMENT AS COM 		<!--댓글 테이블-->
+		INNER JOIN USER AS USR		<!--회원 테이블-->
+				ON COM.CM_U_IDX = USR.U_IDX
+		INNER JOIN BOARD AS BRD		<!--게시판 테이블-->
+				ON COM.CM_B_IDX = BRD.B_IDX
+		INNER JOIN COMPANY AS CPN		<!--회사 테이블-->
+				ON CPN.C_IDX = USR.U_C_IDX
+		WHERE CM_B_IDX = #{cm_b_idx}
         
     </select>
 

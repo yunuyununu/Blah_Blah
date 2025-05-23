@@ -6,40 +6,82 @@
 <mapper namespace="com.example.blah.mapper.BoardMapper">
 
     <select id="list" resultType="com.example.blah.domain.BoardDTO">
-        SELECT B_IDX,U_NICNAME, B_U_IDX,B_TITLE,B_CONTENT,B_HITS,DATE_FORMAT(B_DATE, '%y-%m-%d') AS B_DATE
-        from BOARD B, USER U
-        WHERE B.B_U_IDX = U.U_IDX
-        
+        SELECT 
+        		B.B_IDX AS B_IDX,          <!--게시판 번호-->
+			    U.U_NICNAME AS U_NICNAME,  <!--회원 닉네임-->
+			    B.B_U_IDX AS B_U_IDX,      <!--게시글 작성자-->
+			    B.B_TITLE AS B_TITLE,      <!--게시글 제목-->
+			    B.B_CONTENT AS B_CONTENT,  <!--게시글 내용-->
+			    B.B_HITS AS B_HITS,        <!--게시글 조회수-->
+			    DATE_FORMAT(B.B_DATE, '%y-%m-%d') AS B_DATE  <!--게시글 작성일-->
+        FROM 
+		    BOARD B
+		INNER JOIN 
+		    USER U ON B.B_U_IDX = U.U_IDX
     </select>
     
     <!--처음 게시글 12개-->
     <select id="firstList" resultType="com.example.blah.domain.BoardDTO">
-    	SELECT B_IDX, B_U_IDX, B_TITLE, B_CONTENT, B_HITS, B_DATE, B_MODIFY, B_VOTE, B_DELETE,
-		U_NICNAME, C_NAME
-    	FROM BOARD B, USER U, COMPANY C
-        WHERE B.B_U_IDX = U.U_IDX
-        AND U.U_C_IDX = C.C_IDX
-    	ORDER BY B_IDX DESC
-    	LIMIT 12
+	    SELECT 
+		    B.B_IDX AS B_IDX,        	<!--게시판 번호-->
+		    B.B_U_IDX AS B_U_IDX,       <!--게시글 작성자-->
+		    B.B_TITLE AS B_TITLE,       <!--게시글 제목-->
+		    B.B_CONTENT AS B_CONTENT,   <!--게시글 내용-->
+		    B.B_HITS AS B_HITS,         <!--게시글 조회수-->
+		    B.B_DATE AS B_DATE,         <!--게시글 작성일-->
+		    B.B_MODIFY AS B_MODIFY,     <!--수정일-->
+		    B.B_VOTE AS B_VOTE,         <!--투표존재여부-->
+		    B.B_DELETE AS B_DELETE,     <!--삭제여부-->
+		    U.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
+		    C.C_NAME AS C_NAME          <!--회사명-->
+		FROM BOARD B
+		JOIN USER U ON B.B_U_IDX = U.U_IDX
+		JOIN COMPANY C ON U.U_C_IDX = C.C_IDX
+		ORDER BY B.B_IDX DESC
+		LIMIT 12
     </select>
 
 	<!--더보기 요청 시-->
 	<select id="plusList" resultType="com.example.blah.domain.BoardDTO">
-		SELECT B_IDX, B_U_IDX, B_TITLE, B_CONTENT, B_HITS, B_DATE, B_MODIFY, B_VOTE, B_DELETE,U_NICNAME, C_NAME
-		FROM BOARD B, USER U, COMPANY C
-		WHERE B.B_U_IDX = U.U_IDX
-        AND U.U_C_IDX = C.C_IDX AND B_DELETE = 'N' AND B_IDX &lt; #{lastBIdx}
-		ORDER BY B_IDX DESC
+	
+		SELECT 
+		    B.B_IDX AS B_IDX,           <!--게시판 번호-->
+		    B.B_U_IDX AS B_U_IDX,       <!--게시글 작성자-->
+		    B.B_TITLE AS B_TITLE,       <!--게시글 제목-->
+		    B.B_CONTENT AS B_CONTENT,   <!--게시글 내용-->
+		    B.B_HITS AS B_HITS,         <!--게시글 조회수-->
+		    B.B_DATE AS B_DATE,         <!--게시글 작성일-->
+		    B.B_MODIFY AS B_MODIFY,     <!--수정일-->
+		    B.B_VOTE AS B_VOTE,         <!--투표존재여부-->
+		    B.B_DELETE AS B_DELETE,     <!--삭제여부-->
+		    U.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
+		    C.C_NAME AS C_NAME          <!--회사명-->
+		FROM BOARD B
+		JOIN USER U ON B.B_U_IDX = U.U_IDX
+		JOIN COMPANY C ON U.U_C_IDX = C.C_IDX
+		WHERE B.B_DELETE = 'N' 
+		  AND B.B_IDX &lt; #{lastBIdx}
+		ORDER BY B.B_IDX DESC
 		LIMIT 12
 	</select>
 	
 	<!--게시글 상세-->
 	<select id="boardDetails" resultType="map">
-		SELECT B_IDX, B_U_IDX, B_TITLE, B_CONTENT, B_HITS, B_DATE, B_MODIFY, B_VOTE, B_DELETE, U_NICNAME, C_NAME
-		FROM BOARD B, USER U, COMPANY C
-        WHERE B.B_U_IDX = U.U_IDX
-        AND U.U_C_IDX = C.C_IDX
-        AND B_IDX = #{b_idx}
+		SELECT B.B_IDX AS B_IDX,			<!--게시판 번호-->
+			   B.B_U_IDX AS B_U_IDX,		<!--게시글 작성자-->
+			   B.B_TITLE AS B_TITLE,		<!--게시글 제목-->
+			   B.B_CONTENT AS B_CONTENT,	<!--게시글 내용-->
+			   B.B_HITS AS B_HITS,		<!--게시글 조회수-->
+			   B.B_DATE AS B_DATE,		<!--게시글 작성일-->
+			   B.B_MODIFY AS B_MODIFY,	<!--수정일-->
+			   B.B_VOTE AS B_VOTE,		<!--투표존재여부-->
+			   B.B_DELETE AS B_DELETE,	<!--삭제여부-->
+			   U.U_NICNAME AS U_NICNAME,	<!--회원 닉네임-->
+			   C.C_NAME AS C_NAME			<!--회사명-->
+		FROM BOARD B
+		JOIN USER U ON B.B_U_IDX = U.U_IDX
+		JOIN COMPANY C ON U.U_C_IDX = C.C_IDX
+		WHERE B.B_IDX = #{b_idx}
 	</select>
 	
 	<!--조회수 증가-->

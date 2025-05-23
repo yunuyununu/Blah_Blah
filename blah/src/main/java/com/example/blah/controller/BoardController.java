@@ -44,12 +44,16 @@ public class BoardController {
 	// 게시판 목록
 	@GetMapping("boards")
 	public List<BoardDTO> getBoardList(@RequestParam(name = "lastBIdx", required = false) Long lastBIdx) {
-	    return service.getBoard(lastBIdx);
+		System.out.println("lastBIdx=>"+lastBIdx);
+		System.out.println("게시판 목록=="+service.getBoard(lastBIdx));
+		return service.getBoard(lastBIdx);
 	}
 	
 	// 게시글 상세
 	@GetMapping("details")
 	public Map<String, Object> boardDetails(@RequestParam(name = "b_idx") int b_idx) {
+		System.out.println("b_idx=>"+b_idx);
+		System.out.println("게시판 상세=="+service.details(b_idx));
 	    return service.details(b_idx);
 	}
 	

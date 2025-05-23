@@ -10,15 +10,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReplyDTO {
-	private int b_idx;
-    private int b_u_idx;
-    private String b_title;
-    private String b_content;
-    private String b_hits;
-    private String b_date;
-    private String b_modify;
-    private String b_vote;
-    private String b_delete;
+	private int cm_idx;
+    private int cm_b_idx;
+    private int cm_u_idx;
+    private String cm_content;
+    private String cm_date;
+    private String cm_modify;
+    private String cm_parent_idx;
     private String u_nicname;
-    private String c_name;
+    private String c_nicname;
 }

@@ -40,8 +40,8 @@ public class LoginController {
 	    LoginDTO login = service.userLogin(userId,userPw);
 
 	    if (login != null) { // 로그인 성공
-	    	session.setAttribute(SessionConst.LOGIN_USERID, login.getU_id());
-	    	session.setAttribute(SessionConst.LOGIN_USERIDX, login.getU_idx());
+	    	session.setAttribute("userId", login.getU_id());
+	    	System.out.println("세션 아이디=="+session);
 	    	return "success";
 	    } else {
 	    	return "fail";
@@ -52,8 +52,9 @@ public class LoginController {
 	// 세션체크
 	@GetMapping("/checkSession")
 	public ResponseEntity<?> checkSession(HttpSession session) {
-		
-	    if (session.getAttribute("UserId") != null) {
+	    Object loginUser = session.getAttribute("userId");
+	    System.out.println("세션 아이디=="+session);
+	    if (loginUser != null) {
 	        return ResponseEntity.ok(true);
 	    } else {
 	        return ResponseEntity.ok(false);
@@ -64,6 +65,7 @@ public class LoginController {
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(HttpSession session) {
 	    session.invalidate();
+	    System.out.println("세션 아이디 로그아웃시=="+session);
 	    return ResponseEntity.ok("로그아웃 완료");
 	}
 	
@@ -75,7 +77,7 @@ public class LoginController {
 		
 		Map<String, String> map = new HashMap<>();
 		map.put("u_email",userEmail);
-		map.put("u_phone",userPhone);
+		map.put("u_phone",userPhone.replaceAll("-", ""));
 
 		LoginDTO result = service.searchId(map);
 		
@@ -93,7 +95,7 @@ public class LoginController {
 		Map<String, String> map = new HashMap<>();
 		map.put("u_id",userId);
 		map.put("u_email",userEmail);
-		map.put("u_phone",userPhone);
+		map.put("u_phone",userPhone.replaceAll("-", ""));
 
 		LoginDTO result = service.searchPw(map);
 		

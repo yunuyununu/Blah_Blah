@@ -45,17 +45,24 @@ public class JoinController {
 	public String sendEmail(@RequestBody Map<String, String> request) throws MessagingException {
 		String result ="";
 	    String sendEmail = request.get("email");
-	    //System.out.println("수신자 이메일주소 : " + sendEmail);
-	    int emailCheck = service.emailCheck(sendEmail);
-	    if(emailCheck == 0) {
+	    
+	    try {
 	    	String authCode = emailService.createMailsend(sendEmail);
 	    	//System.out.println("이메일 전송 완료!!");
 	    	redisService.saveVerificationCode(sendEmail, authCode); // 인증코드 redis에 저장
 	    	result = "success";
-	    } else {
+	    } catch (Exception e) {
+	    	e.printStackTrace();
 	    	result = "fail";
 	    }
 	    return result;
+	}
+	
+	@PostMapping("emailCheck")
+	public int emailCheck(@RequestBody Map<String, String> request) throws MessagingException {
+		
+		String sendEmail = request.get("email");
+		return service.emailCheck(sendEmail);
 	}
 	
 	// 비밀번호찾기 이메일 전송
@@ -130,7 +137,7 @@ public class JoinController {
 	        dto.setU_id(userId);
 	        dto.setU_password(encodedPw);
 	        dto.setU_nicname(nickname);
-	        dto.setU_tel(userTel);
+	        dto.setU_tel(userTel.replaceAll("-", ""));
 	        dto.setU_email(email);
 	        dto.setU_file(fileName);
 

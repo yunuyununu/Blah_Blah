@@ -5,6 +5,7 @@
 
 <mapper namespace="com.example.blah.mapper.JoinMapper">
 
+	<!--회원가입-->
     <insert id="userjoin">
 		INSERT INTO USER (U_ID,U_PASSWORD,U_NICNAME,U_EMAIL,U_PHONE,U_FILE) 
 		VALUES (#{u_id},#{u_password},#{u_nicname},#{u_email},#{u_tel},#{u_file})
@@ -13,13 +14,15 @@
     
     <!-- 아이디 중복체크 -->
 	<select id="idCheck" resultType="int">
-		SELECT count(*) FROM user
+		SELECT count(1)
+		FROM user
 		WHERE U_ID = #{u_id}
 	</select>
 	
 	<!--이메일 중복체크-->
 	<select id="emailCheck" resultType="int">
-		SELECT count(*) FROM user
+		SELECT count(1)
+		FROM user
 		WHERE U_EMAIL = #{u_emial}
 	</select>
 
