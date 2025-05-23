@@ -1,7 +1,9 @@
 <template>
   <div class="content">
     <div class="container">
-
+      <v-overlay :model-value="loading" class="d-flex align-center justify-center" persistent>
+        <v-progress-circular indeterminate color="primary" size="64" />
+      </v-overlay>
      <div class="row">
         <div class="col" style="text-align: center;">
           <h2>비밀번호 찾기</h2>
@@ -18,7 +20,7 @@
             <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com"
             :class="['custom-input', { 'input-error': errors.email  }]"/>
             &nbsp;&nbsp;
-            <button type="button" class="btn btn-dark" @click="sendAuthCode">인증번호 전송</button>
+            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode">인증번호 전송</button>
             <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
           </div>
           <div class="col-2"></div>
@@ -32,7 +34,7 @@
           <div class="col-6">
             <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리"
             :class="['custom-input', { 'input-error': errors.authcode  }]"/>&nbsp;&nbsp;
-            <button type="button" class="btn btn-dark" @click="authcodeVerify">인증번호확인</button>&nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-dark" @click="authcodeVerify">인증번호확인</button>&nbsp;&nbsp;
             <p v-if="errors.authcode" class="error-text">{{ errors.authcode }}</p>
             <!-- 타이머 -->
             <div v-if="timerVisible" style="margin-top: 3px;">
@@ -55,7 +57,7 @@
           <br>
         </div>
         <div class="col-6" style="gap: 5px;">
-          <input type="text"  v-model="userId" ref="userIdInput" placeholder="영문,숫자 공백없이 6~12자리"
+          <input type="text"  v-model="userId" ref="userIdInput" placeholder="영문,숫자 공백없이 6~12자리를 입력하세요."
            :class="['custom-input', { 'input-error': errors.userId  }]"/>
           <p v-if="errors.userId" class="error-text">{{ errors.userId }}</p>
           <div v-if="idCheckMessage" style="margin-top: 5px; color: green;">{{ idCheckMessage }}</div>
@@ -114,6 +116,8 @@ const countdown = ref(180)
 const timer = ref(null)
 const timerVisible = ref(false)
 
+const loading = ref(false)
+
 const errors = ref({
   email: '',
   authcode: '',
@@ -133,21 +137,25 @@ const sendAuthCode = async () => {
   }
 
   try {
+    loading.value = true
     const response = await axios.post('http://localhost:80/join/pwEmailsend', {
       email: email.value
     })
 
     if (response.data === 'success') {
-      alert('인증코드가 이메일로 전송되었습니다.')
+      loading.value = false
       startTimer()
+      alert('인증코드가 이메일로 전송되었습니다.')
       timerVisible.value = true
     } else {
+      loading.value = false
       errors.value.email = '등록되지 않은 이메일입니다.'
-        emailInput.value.focus()
-        return
+      emailInput.value.focus()
+      return
     }
   } catch (err) {
     console.error(err)
+    loading.value = false
     alert('서버 오류')
   }
 }
@@ -184,7 +192,7 @@ const authcodeVerify = async () => {
     })
 
     if (response.data === 'success') {
-      verifyMessage.value = '이메일 인증 성공'
+      verifyMessage.value = '이메일 인증에 성공했습니다.'
       timerVisible.value = false
       verifySuccess.value = true
       isCodeVerified.value = true
@@ -238,8 +246,6 @@ const resetPassword = async () => {
     })
     if (response.data) {
       router.push({ path: '/passwdreset', query: { u_idx: response.data.u_idx, u_id: response.data.u_id } })
-      console.log("보내는 idx=="+response.data.u_idx)
-      console.log("보내는 id=="+response.data.u_id)
     } else {
       alert('일치하는 회원 정보가 없습니다.')
     }

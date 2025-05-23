@@ -30,6 +30,7 @@ export const useUserStore = defineStore('user', {
     },
     setLoginSuccess() {
       this.isLogin = true
+      console.log('로그인상태', this.isLogin)
     }
   },
 })

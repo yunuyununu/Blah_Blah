@@ -59,8 +59,6 @@ const router = useRouter()
 
 const idx = route.query.u_idx
 const id = route.query.u_id
-console.log("idx=="+idx)
-console.log("id=="+id)
 
 const newPassword = ref('')
 const confirmPassword = ref('')

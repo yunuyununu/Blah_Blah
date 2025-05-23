@@ -75,6 +75,7 @@ onMounted(() => {
   color: Black;
   padding: 16px;
   text-align: center;
+  border-bottom: 1px solid #dee2e6;
 }
 nav {
   color: Black;

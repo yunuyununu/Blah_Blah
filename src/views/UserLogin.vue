@@ -37,7 +37,7 @@
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
-            <button type="button" class="btn btn-dark" @click="submit">로그인</button>&nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-dark" @click="submit">로그인</button>&nbsp;&nbsp;
             <br>
             <br>
           </div>

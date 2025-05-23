@@ -32,7 +32,7 @@
 
       <div class="row">
         <div class="col" style="text-align: center;">
-          <button type="button" class="btn btn-dark" @click="submit">아이디 찾기</button>
+          <button type="button" class="btn btn-outline-dark" @click="submit">아이디 찾기</button>
           <br><br>
         </div>
       </div>
@@ -68,13 +68,13 @@ const userTel = ref('')
 const userTelInput = ref(null)
 
 const errors = ref({
-  email: ''
+  email: '',
+  userTel: ''
 })
 
 const formatPhoneNumber = () => {
-  let digits = userTel.value.replace(/\D/g, '') // 숫자만 추출
+  let digits = userTel.value.replace(/\D/g, '')
 
-  // 최대 11자리까지만 허용
   if (digits.length > 11) {
     digits = digits.slice(0, 11)
   }
@@ -90,6 +90,7 @@ const formatPhoneNumber = () => {
 
 const submit = async () => {
   errors.value.email = ''
+  errors.value.userTel = ''
   foundId.value = ''
 
   if (!email.value) {
@@ -109,10 +110,14 @@ const submit = async () => {
       userTel: userTel.value
     })
 
-    if (response.data) {
-      foundId.value = '회원님의 아이디는 "'+response.data.u_id+'" 입니다.'
+    if (response.data && response.data.u_id) {
+      const id = response.data.u_id
+      const maskedId = id.length > 4 
+        ? id.slice(0, 4) + '*'.repeat(id.length - 4)
+        : id[0] + '*'.repeat(id.length - 1)
+      foundId.value = `회원님의 아이디는 "${maskedId}" 입니다.`
     } else {
-      foundId.value = '해당 이메일/전화번호로 등록된 아이디가 없습니다.';
+      foundId.value = '해당 이메일/전화번호로 등록된 아이디가 없습니다.'
     }
 
   } catch (error) {

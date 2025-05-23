@@ -33,7 +33,7 @@ const fetchBoards = async () => {
     params: {
       lastBIdx: lastBIdx.value,
     },
-  });
+  })
 
   const newPosts = res.data;
   if (newPosts.length < 12) hasMore.value = false;

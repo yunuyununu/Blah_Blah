@@ -1,6 +1,9 @@
 <template>
   <div class="content">
     <div class="container">
+      <v-overlay :model-value="loading" class="d-flex align-center justify-center" persistent>
+        <v-progress-circular indeterminate color="primary" size="64" />
+      </v-overlay>
       <div class="row">
         <div class="col" style="text-align: center;">
           <h2>회원가입</h2>
@@ -17,7 +20,7 @@
         <div class="col-6" style="gap: 5px;">
           <input type="text"  v-model="userId" ref="userIdInput" placeholder="영문,숫자 공백없이 6~12자리"
            :class="['custom-input', { 'input-error': errors.userId  }]"/>&nbsp;&nbsp;
-          <button type="button" class="btn btn-dark" @click="checkUserId">아이디중복확인</button>
+          <button type="button" class="btn btn-outline-dark" @click="checkUserId">아이디중복확인</button>
           <p v-if="errors.userId" class="error-text">{{ errors.userId }}</p>
           <div v-if="idCheckMessage" style="margin-top: 5px; color: green;">{{ idCheckMessage }}</div>
         </div>
@@ -86,11 +89,10 @@
           </div>
           <div class="col-6">
             <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com"
-            :class="['custom-input', { 'input-error': errors.email  }]"/>
+            :class="['custom-input', { 'input-error': errors.email  }]" :disabled="verifySuccess"/>
             &nbsp;&nbsp;
-            <button type="button" class="btn btn-dark" @click="sendAuthCode">인증번호 전송</button>
+            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="verifySuccess">인증번호 전송</button>
             <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
-
           </div>
           <div class="col-2"></div>
         </div>
@@ -102,8 +104,8 @@
           </div>
           <div class="col-6">
             <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리"
-            :class="['custom-input', { 'input-error': errors.authcode  }]"/>&nbsp;&nbsp;
-            <button type="button" class="btn btn-dark" @click="authcodeVerify">인증번호확인</button>&nbsp;&nbsp;
+            :class="['custom-input', { 'input-error': errors.authcode  }]" :disabled="verifySuccess"/>&nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-dark" @click="authcodeVerify" :disabled="verifySuccess">인증번호확인</button>&nbsp;&nbsp;
             <!-- <button type="button" class="btn btn-dark">재전송</button> -->
             <p v-if="errors.authcode" class="error-text">{{ errors.authcode }}</p>
             <!-- 타이머 -->
@@ -128,7 +130,7 @@
             <label>회사인증파일</label>
           </div>
           <div class="col-6">
-            <input type="file" ref="userFileInput" @change="handleFileChange"/>
+            <input type="file" ref="userFileInput" @change="handleFileChange" accept=".jpg,.jpeg,.png,.pdf"/>
             <p style="margin-top: 5px; color: red;">{{ errors.userFile }}</p>
           </div>
           <div class="col-2">
@@ -138,7 +140,7 @@
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
-            <button type="button" class="btn btn-dark" @click="submit">회원 가입</button>
+            <button type="button" class="btn btn-outline-dark" @click="submit">회원 가입</button>
             <br>
             <br>
           </div>
@@ -149,7 +151,11 @@
   
   <script setup>
   import { ref, watch } from 'vue'
+  import { useRouter } from 'vue-router'
   import axios from 'axios'
+
+const router = useRouter()
+
 
 const userId = ref('')
 const userPw = ref('')
@@ -182,6 +188,7 @@ const countdown = ref(180) // 3분
 const timer = ref(null)
 const timerVisible = ref(false)
 const isEmailChecked = ref(false)
+const loading = ref(false)
 
 const errors = ref({
       userId : '',
@@ -212,7 +219,7 @@ const checkUserId = async () => {
     isValid = false
     return
   } else if(!idPattern.test(userId.value)) {
-    errors.value.userId = '영문,숫자 공백없이 6~12자리'
+    errors.value.userId = '영문,숫자 공백없이 6~12자리를 입력하세요.'
     if (isValid) userIdInput.value.focus()
     isValid = false
     return
@@ -282,21 +289,19 @@ const sendAuthCode = async () => {
     }
 
     try {
+      loading.value = true
       const response = await axios.post('http://localhost:80/join/emailsend', {
         email: email.value
       })
       console.log('응답:', response.data)
       if (response.data === 'success') {
+        loading.value = false
+        startTimer() // 인증번호 검증 시간 측정
         alert('인증번호가 이메일로 전송되었습니다.')
-        // 인증번호 검증 시간 측정
-        startTimer()
-      } else {
-        errors.value.email = '이미 등록된 이메일입니다.'
-        emailInput.value.focus()
-        return
-      }
+      } 
     } catch (error) {
       console.error('이메일 전송 실패:', error)
+      loading.value = false
       alert('이메일 전송에 실패했습니다.')
     }
 
@@ -379,7 +384,7 @@ const submit = () => {
     if (isValid) userIdInput.value.focus()
     return
   } else if (!idPattern.test(userId.value)) {
-    errors.value.userId = '영문,숫자 공백없이 6~12자리'
+    errors.value.userId = '영문,숫자 공백없이 6~12자리를 입력하세요'
     if (isValid) userIdInput.value.focus()
     isValid = false
     return
@@ -401,7 +406,7 @@ const submit = () => {
     if (isValid) userPwInput.value.focus()
     return
   }else if(!pwPattern.test(userPw.value)) {
-    errors.value.userPw = '8~20자 문자,숫자,특수문자 조합'
+    errors.value.userPw = '8~20자 문자,숫자,특수문자 조합으로 입력해 주세요.'
     if (isValid) userPwInput.value.focus()
     isValid = false
     return
@@ -409,7 +414,7 @@ const submit = () => {
     errors.value.userPw = ''
   }
   if (userPw.value !== pwCheck.value) {
-    errors.value.pwCheck = '비밀번호 불일치'
+    errors.value.pwCheck = '비밀번호가 불일치힙니다.'
     if (isValid) pwCheckInput.value.focus()
     isValid = false
     return
@@ -427,7 +432,7 @@ const submit = () => {
 
   //전화번호 체크
   if (!userTel.value) {
-    errors.value.userTel = '전화번호를 입력하세요'
+    errors.value.userTel = '휴대폰 번호 \'-\'제외하고 입력하세요.'
     if (isValid) userTelInput.value.focus()
     isValid = false
     return
@@ -438,6 +443,14 @@ const submit = () => {
     return
   } else {
     errors.value.userTel = ''
+  }
+
+  //이메일 체크
+  if (!email.value) {
+    errors.value.email = '이메일 주소를 입력하세요.'
+    emailInput.value.focus()
+    isValid = false
+    return
   }
 
   //인증번호 체크
@@ -469,32 +482,45 @@ const submit = () => {
     if (isValid) userFileInput.value.click() // focus 대신 click으로 파일 선택 창 띄우기
     isValid = false
     return
-  } else {
-    errors.value.userFile = ''
   }
 
-  // 회원가입 폼
-  const formData = new FormData()
-  formData.append('userId', userId.value)
-  formData.append('userPw', userPw.value)
-  formData.append('nickname', nickname.value)
-  formData.append('userTel', userTel.value)
-  formData.append('email', email.value)
-  formData.append('userFile', userFile.value)
+  axios.post('http://localhost:80/join/emailCheck', { email: email.value })
+    .then(res => {
+      if (res.data === 1) {
+        errors.value.email = '이미 등록된 이메일입니다.'
+        emailInput.value.focus()
+        errors.value.authcode = ''
+        authcode.value = ''
+        verifyMessage.value = ''
+        isEmailChecked.value = false
+        verifySuccess.value = false
+        return
+      } else { // 이메일 중복 아니면 회원가입 가능
 
-
-  axios.post('http://localhost:80/join/userJoin', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }}).then(response => {
-      alert('회원가입이 완료되었습니다.')
-      console.log("회원가입 성공 =="+response.data)
-      // router.push('/login')
+        const formData = new FormData()
+        formData.append('userId', userId.value)
+        formData.append('userPw', userPw.value)
+        formData.append('nickname', nickname.value)
+        formData.append('userTel', userTel.value)
+        formData.append('email', email.value)
+        formData.append('userFile', userFile.value)
+      
+        axios.post('http://localhost:80/join/userJoin', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }}).then(response => {
+            alert('회원가입이 완료되었습니다.')
+            console.log("회원가입 성공 =="+response.data)
+            router.push('/login')
+          }).catch(error => {
+            alert('회원가입에 실패했습니다. 관리자에게 문의하세요.')
+            console.error(error)
+          })
+      }
     }).catch(error => {
-      alert('회원가입에 실패했습니다. 관리자에게 문의하세요.')
-      console.error(error)
-    })
-
+      alert('이메일 중복 확인 중 오류가 발생했습니다.');
+      console.error(error);
+  });
 }
   
 watch(userId, () => {
@@ -516,11 +542,14 @@ watch(userTel, () => {
 })
 watch(email, () => {
   errors.value.email = ''
-})``
+})
 watch(authcode, () => {
   errors.value.authcode = ''
   verifyMessage.value = ''
   isEmailChecked.value = false
+})
+watch(userFile, () => {
+  errors.value.userFile = ''
 })
   </script>
   

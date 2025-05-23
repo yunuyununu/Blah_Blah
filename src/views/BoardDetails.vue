@@ -16,27 +16,36 @@
     <button class="btn btn-outline-danger" @click="$router.back()"  style="text-align: left;">← 목록으로</button>
     <hr />
 
-       <div class="comment-section">
-      <h3>댓글 {{ comments.length }}</h3>
-      <textarea v-model="newComment" placeholder="댓글을 남겨주세요."></textarea>
-      <br />
-      <div class="comment-action">
-        <button class="btn btn-outline-primary" @click="submitComment">등록</button>
-      </div>
+      <div class="comment-section">
+        <h3>댓글 {{ commentList.length }}</h3>
+        <textarea v-model="newComment" placeholder="댓글을 남겨주세요."></textarea>
+        <div class="comment-action">
+          <button class="btn btn-outline-primary" @click="submitComment">등록</button>
+        </div>
 
-      <div class="comment-list" v-if="comments.length > 0">
-        <div v-for="comment in comments" :key="comment.id" class="comment-item">
-          <div class="comment-header">
-            <strong>{{ comment.nickname }}</strong>
-            <span class="comment-date">{{ formatDate(comment.date) }}</span>
+        <div class="comment-list" v-if="commentList.length > 0">
+          <div v-for="comment in commentList" :key="comment.cm_idx" class="comment-item">
+            <div class="comment-header">
+              <!-- <span class="nickname">{{ maskedNickname(comment.u_nicname || '익명') }}</span> -->
+               <span class="nickname">
+                <span class="nickname-blue">{{ comment.c_nicname }}</span> · <span class="nickname-gray">{{ comment.u_nicname }}</span>
+              </span>
+              <span class="comment-date">{{ formatDate(comment.cm_date) }}</span>
+            </div>
+            <div class="comment-body">{{ comment.cm_content }}</div>
+            <div class="comment-footer">
+              <!-- <span class="action">👍 좋아요</span> -->
+              <span class="action">💬 답글</span>
+            </div>
           </div>
-          <div class="comment-body">{{ comment.content }}</div>
+        </div>
+
+        <div v-else>
+          <p>작성된 댓글이 없습니다.</p>
         </div>
       </div>
 
-      <div v-else>
-      </div>
-    </div>
+
   </div>
 
   <div v-else class="loading">불러오는 중...</div>
@@ -50,16 +59,34 @@ import axios from 'axios';
 const route = useRoute();
 const post = ref(null);
 
+const bidx = route.params.b_idx;
+
+
 const fetchPostDetail = async () => {
   try {
     const res = await axios.get(`http://localhost:80/board/details`, {
-      params: { b_idx: route.params.b_idx },
+      params: { b_idx: bidx },
     });
     post.value = res.data;
   } catch (err) {
     console.error('게시글 로딩 실패:', err);
   }
 };
+
+const commentList = ref([]);
+const fetchPostComment = async () => {
+  try {
+    const res = await axios.get(`http://localhost:80/reply/list`, {
+      params: { cmBIdx: bidx }
+    });
+    commentList.value = res.data;
+    console.log("댓글목록==>", commentList.value)
+  } catch (err) {
+    console.error('댓글 로딩 실패:', err);
+  }
+};
+
+
 
 const formatDate = (datetime) => {
   const date = new Date(datetime);
@@ -68,27 +95,32 @@ const formatDate = (datetime) => {
 
 onMounted(() => {
   fetchPostDetail();
+  fetchPostComment();
 });
 
-// comment
-const comments = ref([
-  // 예시 데이터 (백엔드 연동 전)
-  // { id: 1, nickname: '익명1', content: '좋은 글 감사합니다.', date: new Date() },
-  // { id: 2, nickname: '익명2', content: '공감합니다!', date: new Date() }
-]);
 
 const newComment = ref('');
 
 const submitComment = () => {
   if (!newComment.value.trim()) return;
-  comments.value.push({
-    id: Date.now(),
-    nickname: '익명',
-    content: newComment.value,
-    date: new Date()
+
+  commentList.value.push({
+    cm_idx: Date.now(),
+    u_nicname: '익명', // 실제 로그인 사용자 정보 연동 필요
+    cm_content: newComment.value,
+    cm_date: new Date().toISOString()
   });
+
   newComment.value = '';
 };
+
+
+// 미인증 회원일때 닉네임 마스킹 함수
+// const maskedNickname = (nickname) => {
+//   if (!nickname) return '익명';
+//   return nickname.slice(0, 1) + '*'.repeat(Math.max(1, nickname.length - 1));
+// };
+
 </script>
 
 <style scoped>
@@ -179,24 +211,63 @@ hr {
 
 .comment-item {
   border-top: 1px solid #eee;
-  padding: 12px 0;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
+
 .comment-header {
-  font-size: 14px;
+  font-size: 13px;
   color: #555;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .comment-body {
   font-size: 15px;
-  color: #333;
+  color: #222;
+  margin-left: 4px;
+  white-space: pre-line;
+}
+
+.comment-footer {
+  font-size: 13px;
+  color: #888;
+  display: flex;
+  gap: 16px;
   margin-top: 4px;
 }
+
+.comment-footer .action {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.comment-footer .action:hover {
+  color: #1976d2;
+}
+
 .comment-action {
   margin-top: 8px;
   display: flex;
   justify-content: flex-end;
+}
+
+.nickname {
+  font-weight: bold;
+  color: #333;
+}
+
+.nickname-blue {
+  color: #66a4e2; /* 파란색 */
+  font-weight: bold;
+}
+
+.nickname-gray {
+  color: #919191; /* 파란색 */
+  font-weight: bold;
 }
 </style>

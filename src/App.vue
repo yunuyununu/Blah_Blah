@@ -15,29 +15,39 @@ onMounted(() => {
 
 <template>
   <div class="layout">
-    <PageHeader/>
-    <br>
+    <PageHeader class="fixed-header"/>
     <div class="content">
       <div class="container">
         <router-view></router-view>
       </div>
     </div>
-    <br>
     <PageFooter/>
   </div>
 </template>
 
 <style>
-/* layout 전체가 100vh를 차지 */
 .layout {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
-/* content 영역이 자동으로 남은 공간 차지 */
+
+/* 헤더 고정 */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000; /* 필요에 따라 조절 */
+}
+
+/* 헤더 높이 만큼 컨텐츠 위쪽 여백 추가 */
+/* 예: 헤더 높이가 60px이라면 */
 .content {
   flex: 1;
+  margin-top: 60px; /* 헤더 높이와 맞추세요 */
 }
+
 a.router-link-active,
 a.router-link-exact-active,
 a {
