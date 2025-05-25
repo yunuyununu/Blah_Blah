@@ -61,7 +61,7 @@ const goBoardDetails = async (b_idx) => {
   } catch (err) {
     console.error('조회수 증가 실패:', err);
   }
-  router.push({ name: 'boarddtails', params: { b_idx } });
+  router.push({ name: 'boarddetails', params: { b_idx } });
 };
 </script>
 

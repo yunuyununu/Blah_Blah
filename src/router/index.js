@@ -62,6 +62,11 @@ const routes = [
           name: 'companychange',
           component: () => import('@/views/CompanyChange'),
         },
+        {
+          path: '/companydetails/:c_idx',
+          name: 'companydetails',
+          component: () => import('@/views/CompanyDetails')
+        },
       ],
   },
   {
@@ -79,8 +84,8 @@ const routes = [
           component: () => import('@/views/BoardRegistration'),
         },
         {
-          path: '/boarddtails/:b_idx',
-          name: 'boarddtails',
+          path: '/boarddetails/:b_idx',
+          name: 'boarddetails',
           component: () => import('@/views/BoardDetails')
         },
       ],
