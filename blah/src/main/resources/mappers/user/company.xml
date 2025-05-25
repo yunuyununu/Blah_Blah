@@ -15,7 +15,26 @@
         	   C_BUSINESS,	<!--사업자등록번호-->
         	   C_REGISTER	<!--등록일자-->
         FROM COMPANY
-        
+        ORDER BY RAND()
+        LIMIT #{param1} OFFSET #{param2}
     </select>
-
+	
+	<select id="companyDetails" resultType="map">
+		SELECT C.C_IDX AS C_IDX,			
+			   C.C_NAME AS C_NAME,		
+			   C.C_NICNAME AS C_NICNAME,		
+			   C.C_LOGO AS C_LOGO,	
+			   C.C_INDUSTRY AS C_INDUSTRY,		
+			   C.C_EMAIL AS C_EMAIL,		
+			   C.C_EST AS C_EST,	
+			   C.C_INTRO AS C_INTRO,		
+			   C.C_NUMBER AS C_NUMBER,	
+			   C.C_BUSINESS AS C_BUSINESS,	
+			   C.C_REGISTER AS C_REGISTER,
+               C.C_UPDATE AS C_UPDATE,
+               C.C_STATUS AS C_STATUS,
+               C.C_CR_IDX AS C_CR_IDX
+		FROM COMPANY C
+		WHERE C.C_IDX = #{c_idx}
+	</select>
 </mapper>

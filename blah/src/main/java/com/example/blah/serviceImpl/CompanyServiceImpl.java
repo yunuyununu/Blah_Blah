@@ -1,6 +1,7 @@
 package com.example.blah.serviceImpl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,12 @@ public class CompanyServiceImpl implements CompanyService {
 	 private CompanyMapper companyMapper;
 	
 	@Override
-	public List<CompanyDTO> list() {
-		return companyMapper.list();
+	public List<CompanyDTO> list(int limit, int offset) {
+		return companyMapper.list(limit, offset);
+	}
+	
+	@Override
+	public Map<String, Object> details(int c_idx) {
+		return companyMapper.companyDetails(c_idx);
 	}
 }
