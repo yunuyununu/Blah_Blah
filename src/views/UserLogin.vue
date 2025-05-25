@@ -168,7 +168,7 @@ const submit = async () => {
     const response = await axios.post('http://localhost:80/login/userlogin', {
        userId : userId.value,
        userPw : userPw.value
-    })
+    }, { withCredentials: true }) // 세션유지
     if (response.data === 'success') {
       userStore.setLoginSuccess()
      alert('로그인 성공!')

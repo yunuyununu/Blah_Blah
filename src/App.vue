@@ -4,17 +4,17 @@ import PageFooter from './components/PageFooter.vue';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { useUserStore } from '@/store/userStore'
-import { onMounted } from 'vue'
+// import { onMounted } from 'vue'
 
 const userStore = useUserStore()
 
-onMounted(() => {
-  userStore.checkSession()
-})
+// onMounted(() => {
+//   userStore.checkSession()
+// })
 </script>
 
 <template>
-  <div class="layout">
+  <div class="layout" v-if="userStore.isLogin !== null">
     <PageHeader class="fixed-header"/>
     <div class="content">
       <div class="container">

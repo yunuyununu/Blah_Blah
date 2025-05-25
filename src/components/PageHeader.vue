@@ -12,12 +12,12 @@
           <ul
             class="nav justify-content-end"
             style="gap: 24px;"
-            v-if="userStore.isLogin !== null"
+            v-if="isLogin !== null"
           >
             <li class="nav-item">
               <RouterLink to="/">홈</RouterLink>
             </li>
-            <li class="nav-item" v-if="userStore.isLogin === true">
+            <li class="nav-item" v-if="isLogin === true">
               <RouterLink to="/mypage/myinformation">마이페이지</RouterLink>
             </li>
             <li class="nav-item">
@@ -28,14 +28,14 @@
             </li>
             <li class="nav-item">
               <button
-                v-if="userStore.isLogin === true"
+                v-if="isLogin === true"
                 class="btn btn-outline-secondary"
                 @click="logout"
               >
                 로그아웃
               </button>
               <button
-                v-if="userStore.isLogin === false"
+                v-if="isLogin === false"
                 class="btn btn-danger"
                 @click="goLogin"
               >
@@ -52,21 +52,18 @@
 <script setup>
 import { useUserStore } from '@/store/userStore'
 import { useRouter } from 'vue-router'
-import { onMounted } from 'vue'
+import { computed } from 'vue'
 
-const router = useRouter(); //기능
+const router = useRouter()
 const userStore = useUserStore()
 
-const goLogin = () => router.push('/login')
+const isLogin = computed(() => userStore.isLogin)
 
+const goLogin = () => router.push('/login')
 const logout = async () => {
   await userStore.logout()
   router.push('/login')
 }
-
-onMounted(() => {
-  userStore.checkSession()
-})
 </script>
 
 <style scoped>

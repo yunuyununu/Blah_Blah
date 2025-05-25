@@ -23,10 +23,10 @@
           <button class="btn btn-outline-primary" @click="submitComment">등록</button>
         </div>
 
-        <div class="comment-list" v-if="commentList.length > 0">
+        <!-- <div class="comment-list" v-if="commentList.length > 0">
           <div v-for="comment in commentList" :key="comment.cm_idx" class="comment-item">
             <div class="comment-header">
-              <!-- <span class="nickname">{{ maskedNickname(comment.u_nicname || '익명') }}</span> -->
+              <span class="nickname">{{ maskedNickname(comment.u_nicname || '익명') }}</span>
                <span class="nickname">
                 <span class="nickname-blue">{{ comment.c_nicname }}</span> · <span class="nickname-gray">{{ comment.u_nicname }}</span>
               </span>
@@ -34,33 +34,71 @@
             </div>
             <div class="comment-body">{{ comment.cm_content }}</div>
             <div class="comment-footer">
-              <!-- <span class="action">👍 좋아요</span> -->
+              <span class="action">👍 좋아요</span>
               <span class="action">💬 답글</span>
             </div>
           </div>
+        </div> -->
+         <div class="comment-list" v-if="threadedComments.length > 0">
+          <CommentItem 
+            v-for="comment in threadedComments"
+            :key="comment.cm_idx"
+            :comment="comment"
+            :reply-to-list="replyToList"
+            :reply-content-map="replyContentMap"
+            @toggle-reply="toggleReply"
+            @submit-reply="submitReply"
+            @update-reply-content="updateReplyContent"
+          />
         </div>
 
         <div v-else>
           <p>작성된 댓글이 없습니다.</p>
         </div>
       </div>
-
-
   </div>
-
   <div v-else class="loading">불러오는 중...</div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import CommentItem from '@/views/CommentItem.vue';
+
+import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
 const route = useRoute();
 const post = ref(null);
-
 const bidx = route.params.b_idx;
 
+const commentList = ref([]);
+const newComment = ref('');
+// const replyTo = ref(null);
+const replyToList = ref(new Set());
+const replyContentMap = ref({});
+
+// 답글 토글: 같은 댓글이면 닫고, 아니면 열기
+// const toggleReply = (cm_idx) => {
+//   if (replyTo.value === cm_idx) {
+//     replyTo.value = null;
+//   } else {
+//     replyTo.value = cm_idx;
+//   }
+// };
+const toggleReply = (cm_idx) => {
+  if (replyToList.value.has(cm_idx)) {
+    replyToList.value.delete(cm_idx);
+  } else {
+    replyToList.value.add(cm_idx);
+}
+  // 반응성 위해 새 Set 할당
+  replyToList.value = new Set(replyToList.value);
+};
+
+// 답글 입력 내용 업데이트
+const updateReplyContent = (cm_idx, value) => {
+  replyContentMap.value = { ...replyContentMap.value, [cm_idx]: value };
+};
 
 const fetchPostDetail = async () => {
   try {
@@ -73,24 +111,15 @@ const fetchPostDetail = async () => {
   }
 };
 
-const commentList = ref([]);
 const fetchPostComment = async () => {
   try {
     const res = await axios.get(`http://localhost:80/reply/list`, {
       params: { cmBIdx: bidx }
     });
     commentList.value = res.data;
-    console.log("댓글목록==>", commentList.value)
   } catch (err) {
     console.error('댓글 로딩 실패:', err);
   }
-};
-
-
-
-const formatDate = (datetime) => {
-  const date = new Date(datetime);
-  return date.toLocaleString();
 };
 
 onMounted(() => {
@@ -98,22 +127,76 @@ onMounted(() => {
   fetchPostComment();
 });
 
-
-const newComment = ref('');
-
-const submitComment = () => {
-  if (!newComment.value.trim()) return;
-
-  commentList.value.push({
-    cm_idx: Date.now(),
-    u_nicname: '익명', // 실제 로그인 사용자 정보 연동 필요
-    cm_content: newComment.value,
-    cm_date: new Date().toISOString()
-  });
-
-  newComment.value = '';
+const formatDate = (datetime) => {
+  const date = new Date(datetime);
+  return date.toLocaleString();
 };
 
+const threadedComments = computed(() => {
+  const map = {};
+  const roots = [];
+  commentList.value.forEach(comment => {
+    comment.replies = [];
+    map[comment.cm_idx] = comment;
+  });
+  commentList.value.forEach(comment => {
+    if (comment.cm_parent_idx) {
+      const parent = map[comment.cm_parent_idx];
+      if (parent) parent.replies.push(comment);
+    } else {
+      roots.push(comment);
+    }
+  });
+  return roots;
+});
+
+const submitComment = async() => {
+  if (!newComment.value.trim()) return;
+
+  try {
+    const response = await axios.post('http://localhost:80/reply/commentInsert', {
+      cm_b_idx: bidx,
+      cm_content: newComment.value,
+    })
+    if(response.data === "success"){
+      newComment.value = '';
+      fetchPostComment();
+    } else {
+      alert('댓글 등록에 실패했습니다.')
+    }
+  } catch (err) {
+    console.error('댓글 등록 실패:', err);
+  }
+};
+
+// 답글 등록
+const submitReply = async (parentIdx) => {
+  const content = replyContentMap.value[parentIdx];
+  if (!content || !content.trim()) return;
+  
+  try {
+    const response = await axios.post('http://localhost:80/reply/replyInsert', {
+      cm_b_idx: bidx,
+      cm_content: content,
+      cm_parent_idx: parentIdx,
+    })
+    if(response.data === "success"){
+       replyContentMap.value = { ...replyContentMap.value, [parentIdx]: '' };
+       // ✅ 현재 열려 있는 답글 상태 저장
+      const currentReplyToList = new Set(replyToList.value);
+        // replyTo.value = null;
+        // 특정 답글창만 닫기
+        replyToList.value.delete(parentIdx);
+        fetchPostComment();
+        replyToList.value = new Set(currentReplyToList);
+    } else {
+      alert('대댓글 등록에 실패했습니다.')
+    }
+  } catch (err) {
+    console.error('대댓글 등록 실패:', err);
+  }
+ 
+};
 
 // 미인증 회원일때 닉네임 마스킹 함수
 // const maskedNickname = (nickname) => {
@@ -267,7 +350,7 @@ hr {
 }
 
 .nickname-gray {
-  color: #919191; /* 파란색 */
+  color: #919191;
   font-weight: bold;
 }
 </style>
