@@ -27,6 +27,7 @@ import com.example.blah.serviceImpl.CompanyServiceImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("board/*")
@@ -43,9 +44,10 @@ public class BoardController {
 	
 	// 게시판 목록
 	@GetMapping("boards")
-	public List<BoardDTO> getBoardList(@RequestParam(name = "lastBIdx", required = false) Long lastBIdx) {
+	public List<BoardDTO> getBoardList(@RequestParam(name = "lastBIdx", required = false) Long lastBIdx,HttpSession session) {
 		System.out.println("lastBIdx=>"+lastBIdx);
 		System.out.println("게시판 목록=="+service.getBoard(lastBIdx));
+		System.out.println("게시판에서 세션 확인=>"+session.getAttribute("UserIdx"));
 		return service.getBoard(lastBIdx);
 	}
 	

@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,7 +58,7 @@ public class JoinController {
 	}
 	
 	@PostMapping("emailCheck")
-	public int emailCheck(@RequestBody Map<String, String> request) throws MessagingException {
+	public int emailCheck(@RequestBody Map<String, String> request) {
 		
 		String sendEmail = request.get("email");
 		return service.emailCheck(sendEmail);

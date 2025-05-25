@@ -40,7 +40,7 @@ public class LoginController {
 	    LoginDTO login = service.userLogin(userId,userPw);
 
 	    if (login != null) { // 로그인 성공
-	    	session.setAttribute("userId", login.getU_id());
+	    	session.setAttribute("UserIdx", login.getU_idx());
 	    	System.out.println("세션 아이디=="+session);
 	    	return "success";
 	    } else {
@@ -50,13 +50,15 @@ public class LoginController {
 	}
 	
 	// 세션체크
-	@GetMapping("/checkSession")
+	@PostMapping("/checkSession")
 	public ResponseEntity<?> checkSession(HttpSession session) {
-	    Object loginUser = session.getAttribute("userId");
-	    System.out.println("세션 아이디=="+session);
+	    Object loginUser = session.getAttribute("UserIdx");
+	    System.out.println("세션 상태 확인 =="+session);
 	    if (loginUser != null) {
+	    	System.out.println("세션 있을때!!!==>" + loginUser);
 	        return ResponseEntity.ok(true);
 	    } else {
+	    	System.out.println("세션 없을때!!!==>"+loginUser);
 	        return ResponseEntity.ok(false);
 	    }
 	} 
