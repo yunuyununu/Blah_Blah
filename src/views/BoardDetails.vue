@@ -62,6 +62,9 @@
 
 <script setup>
 import CommentItem from '@/views/CommentItem.vue';
+import { useUserStore } from '@/store/userStore'
+
+const userStore = useUserStore()
 
 import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
@@ -78,13 +81,6 @@ const replyToList = ref(new Set());
 const replyContentMap = ref({});
 
 // 답글 토글: 같은 댓글이면 닫고, 아니면 열기
-// const toggleReply = (cm_idx) => {
-//   if (replyTo.value === cm_idx) {
-//     replyTo.value = null;
-//   } else {
-//     replyTo.value = cm_idx;
-//   }
-// };
 const toggleReply = (cm_idx) => {
   if (replyToList.value.has(cm_idx)) {
     replyToList.value.delete(cm_idx);
@@ -152,20 +148,24 @@ const threadedComments = computed(() => {
 
 const submitComment = async() => {
   if (!newComment.value.trim()) return;
-
-  try {
-    const response = await axios.post('http://localhost:80/reply/commentInsert', {
-      cm_b_idx: bidx,
-      cm_content: newComment.value,
-    })
-    if(response.data === "success"){
-      newComment.value = '';
-      fetchPostComment();
-    } else {
-      alert('댓글 등록에 실패했습니다.')
+  if(userStore.isLogin !== false){
+    try {
+      const response = await axios.post('http://localhost:80/reply/commentInsert', {
+        cm_b_idx: bidx,
+        cm_content: newComment.value,
+      })
+      if(response.data === "success"){
+        newComment.value = '';
+        fetchPostComment();
+      } else {
+        alert('댓글 등록에 실패했습니다.')
+      }
+    } catch (err) {
+      console.error('댓글 등록 실패:', err);
     }
-  } catch (err) {
-    console.error('댓글 등록 실패:', err);
+  }else{
+    alert('로그인 후 이용해주세요.')
+    return
   }
 };
 
@@ -173,29 +173,32 @@ const submitComment = async() => {
 const submitReply = async (parentIdx) => {
   const content = replyContentMap.value[parentIdx];
   if (!content || !content.trim()) return;
-  
-  try {
-    const response = await axios.post('http://localhost:80/reply/replyInsert', {
-      cm_b_idx: bidx,
-      cm_content: content,
-      cm_parent_idx: parentIdx,
-    })
-    if(response.data === "success"){
-       replyContentMap.value = { ...replyContentMap.value, [parentIdx]: '' };
-       // ✅ 현재 열려 있는 답글 상태 저장
-      const currentReplyToList = new Set(replyToList.value);
-        // replyTo.value = null;
-        // 특정 답글창만 닫기
-        replyToList.value.delete(parentIdx);
-        fetchPostComment();
-        replyToList.value = new Set(currentReplyToList);
-    } else {
-      alert('대댓글 등록에 실패했습니다.')
+  if(userStore.isLogin !== false){
+    try {
+      const response = await axios.post('http://localhost:80/reply/replyInsert', {
+        cm_b_idx: bidx,
+        cm_content: content,
+        cm_parent_idx: parentIdx,
+      })
+      if(response.data === "success"){
+         replyContentMap.value = { ...replyContentMap.value, [parentIdx]: '' };
+         // ✅ 현재 열려 있는 답글 상태 저장
+        const currentReplyToList = new Set(replyToList.value);
+          // replyTo.value = null;
+          // 특정 답글창만 닫기
+          replyToList.value.delete(parentIdx);
+          fetchPostComment();
+          replyToList.value = new Set(currentReplyToList);
+      } else {
+        alert('대댓글 등록에 실패했습니다.')
+      }
+    } catch (err) {
+      console.error('대댓글 등록 실패:', err);
     }
-  } catch (err) {
-    console.error('대댓글 등록 실패:', err);
+  }else{
+    alert('로그인 후 이용해주세요.')
+    return
   }
- 
 };
 
 // 미인증 회원일때 닉네임 마스킹 함수

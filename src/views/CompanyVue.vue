@@ -6,7 +6,7 @@
           <div class="left"><h2>회사</h2></div>
           <div class="right">
             <RouterLink to="/company/companylist">회사 목록</RouterLink>&nbsp;&nbsp;
-            <RouterLink to="/company/companychange">회사 신청</RouterLink>
+            <RouterLink to="/company/companyInsert">회사 신청</RouterLink>
           </div>
         </div>
       </div>

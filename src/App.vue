@@ -4,13 +4,9 @@ import PageFooter from './components/PageFooter.vue';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { useUserStore } from '@/store/userStore'
-// import { onMounted } from 'vue'
 
 const userStore = useUserStore()
 
-// onMounted(() => {
-//   userStore.checkSession()
-// })
 </script>
 
 <template>

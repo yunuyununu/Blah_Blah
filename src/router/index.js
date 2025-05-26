@@ -58,9 +58,9 @@ const routes = [
           component: () => import('@/views/CompanyList'),
         },
         {
-          path: 'companychange',
-          name: 'companychange',
-          component: () => import('@/views/CompanyChange'),
+          path: 'companyInsert',
+          name: 'companyInsert',
+          component: () => import('@/views/CompanyInsert'),
         },
         {
           path: '/companydetails/:c_idx',
