@@ -20,13 +20,11 @@ public class FileServiceImpl implements FileService {
 	@Override
 	@Transactional
 	public void saveFiles(int i_b_idx,List<FileDTO> files) {
-		if (CollectionUtils.isEmpty(files)) {
-	        return;
-	    }
 	    for (FileDTO file : files) {
 	        file.setIbidx(i_b_idx);
 	    }
 	    fileMapper.saveAll(files);
 	}
+	
 	
 }

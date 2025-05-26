@@ -16,18 +16,43 @@
 	</sql>
 	
 	<!--게시글 첨부파일 저장-->
-	<insert id="imageSave" parameterType="list">
+	<insert id="saveAll" parameterType="list">
 		INSERT INTO image_file (
             <include refid="fileColumns" />
         ) VALUES
         <foreach item="file" collection="list" separator=",">
         (
-              #{file.i_idx}
-            , #{file.i_b_idx}
+              #{file.i_b_idx}
             , #{file.i_image}
             , CURRENT_TIMESTAMP
         )
         </foreach>
 	</insert>
 	
+	<!--temp에 임시 이미지파일 저장-->
+	<insert id="insertTempImage">
+		INSERT INTO IMAGE_TEMP (T_U_IDX, T_IMAGE, T_DATE)
+		VALUES (#{t_u_idx}, #{t_image}, #{t_date})
+	</insert>
+	
+	<!--temp에 이미지파일 확인상태로-->
+	<update id="confirmImages">
+		UPDATE IMAGE_TEMP
+		SET STATUS = 'CONFIRMED'
+		WHERE T_IDX IN
+		<foreach collection="ids" item="ID" open="(" separator="," close=")">
+		    #{id}
+		  </foreach>
+	</update>
+	
+	<select id="selectOldTempImages" resultType="com.example.blah.domain.FiletempDTO">
+		SELECT T_IDX, T_U_IDX, T_IMAGE, T_DATE, T_STATUS
+		FROM IMAGE_TEMP
+		WHERE STATUS = 'TEMP' AND T_DATE &lt; CURRENT_TIMESTAMP - INTERVAL #{minute} MINUTE
+	</select>
+	
+	<delete id="deleteTempImage">
+		DELETE FROM IMAGE_TEMP
+		WHERE T_IDX = #{t_idx}
+	</delete>
 </mapper>

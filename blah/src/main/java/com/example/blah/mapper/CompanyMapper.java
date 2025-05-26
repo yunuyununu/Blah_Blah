@@ -12,4 +12,16 @@ public interface CompanyMapper {
 	
 	// 게시물 상세
 	Map<String, Object> companyDetails(int c_idx);
+	
+	// 회사 리뷰 목록
+	List<CompanyDTO> reviewList(Map<String, Object> map);
+	
+	// 회사 리뷰 총 개수
+	int reviewCount(int r_c_idx);
+	
+	// 회사 평균 별점
+	Double companyStar(int r_c_idx);
+	
+	// 회사 신청
+	void companyInsert(Map<String, Object> map);
 }

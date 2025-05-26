@@ -20,21 +20,60 @@
     </select>
 	
 	<select id="companyDetails" resultType="map">
-		SELECT C.C_IDX AS C_IDX,			
-			   C.C_NAME AS C_NAME,		
-			   C.C_NICNAME AS C_NICNAME,		
-			   C.C_LOGO AS C_LOGO,	
-			   C.C_INDUSTRY AS C_INDUSTRY,		
-			   C.C_EMAIL AS C_EMAIL,		
-			   C.C_EST AS C_EST,	
-			   C.C_INTRO AS C_INTRO,		
-			   C.C_NUMBER AS C_NUMBER,	
-			   C.C_BUSINESS AS C_BUSINESS,	
-			   C.C_REGISTER AS C_REGISTER,
-               C.C_UPDATE AS C_UPDATE,
-               C.C_STATUS AS C_STATUS,
-               C.C_CR_IDX AS C_CR_IDX
-		FROM COMPANY C
-		WHERE C.C_IDX = #{c_idx}
+		SELECT COP.C_IDX AS C_IDX,			<!--회사번호-->
+			   COP.C_NAME AS C_NAME,			<!--회사명-->
+			   COP.C_NICNAME AS C_NICNAME,	<!--회사닉네임-->	
+			   COP.C_LOGO AS C_LOGO,			<!--회사대표사진-->
+			   COP.C_INDUSTRY AS C_INDUSTRY,	<!--회사업계-->
+			   COP.C_EST AS C_EST,			<!--회사 설립일자-->
+			   COP.C_INTRO AS C_INTRO,		<!--회사소개-->
+			   COP.C_NUMBER AS C_NUMBER,		<!--회사인원-->
+			   COP.C_BUSINESS AS C_BUSINESS,	<!--사업자등록번호-->
+			   COP.C_REGISTER AS C_REGISTER,	<!--등록일자-->
+               COP.C_UPDATE AS C_UPDATE,		<!--수정일자-->
+               COP.C_STATUS AS C_STATUS,		<!--회사상태-->
+               COP.C_CR_IDX AS C_CR_IDX		<!--회사신청번호-->
+		FROM COMPANY COP
+		WHERE COP.C_IDX = #{c_idx}
 	</select>
+	
+	<select id="reviewList" resultType="com.example.blah.domain.CompanyDTO">
+		SELECT  REW.R_IDX AS R_IDX,			<!--리뷰번호-->
+				REW.R_C_IDX AS R_C_IDX,		<!--리뷰회사번호-->
+		        REW.R_U_IDX AS R_U_IDX,		<!--리뷰회원번호-->
+		        REW.R_STAR AS R_STAR,		<!--회사별점-->
+		        REW.R_TITLE AS R_TITLE,		<!--리뷰제목-->
+		        REW.R_CONTENT AS R_CONTENT,	<!--리뷰내용-->
+		        REW.R_DATE AS R_DATE,		<!--리뷰작성일자-->
+		        REW.R_WORK AS R_WORK,		<!--현직원/전직원-->
+		        USR.U_NICNAME AS U_NICNAME,	<!--리뷰작성자-->
+        		COP.C_NICNAME AS C_NICNAME	<!--회사닉네임-->
+		FROM REVIEW AS REW 	
+			INNER JOIN USER AS USR		
+					ON REW.R_U_IDX = USR.U_IDX
+			INNER JOIN COMPANY AS COP		
+					ON COP.C_IDX = USR.U_C_IDX
+		WHERE R_C_IDX = #{r_c_idx}
+		LIMIT #{limit} OFFSET #{offset}
+	</select>
+	
+	<!--총 리뷰 개수-->
+	<select id="reviewCount" resultType="int">
+		SELECT IFNULL(COUNT(1), 0)
+		FROM REVIEW
+		WHERE R_C_IDX = #{r_c_idx}
+	</select>
+	
+	<!--회사 평균 별점-->
+	<select id="companyStar" resultType="double">
+		SELECT IFNULL(ROUND(SUM(R_STAR)/COUNT(R_STAR),1),0) as STAR
+		FROM REVIEW
+		WHERE R_C_IDX = #{r_c_idx}
+	</select>
+	
+	<!--회사 신청-->
+	<insert id="companyInsert">
+		INSERT INTO COMPANY_REQUEST (CR_U_IDX,CR_NAME,CR_INTRO,CR_BUSINESS,CR_LOGO,CR_EST)
+		VALUES (#{cr_u_idx}, #{cr_name}, #{cr_intro}, #{cr_business},#{cr_logo},#{cr_est})
+	</insert>
 </mapper>

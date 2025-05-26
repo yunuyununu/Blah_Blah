@@ -126,7 +126,7 @@ public class BoardController {
 	
 	// 신규 게시글 생성
     @PostMapping("saveBoard")
-    public String savePost(@RequestParam(name="userId", defaultValue="") int b_u_idx, 
+    public String saveBoard(@RequestParam(name="userId", defaultValue="") int b_u_idx, 
 			@RequestParam(name="title", defaultValue="") String b_title,
 			@RequestParam(name="content", defaultValue="") String b_content,
 			@RequestParam(name="files", defaultValue="") List<MultipartFile> files) {
@@ -146,7 +146,16 @@ public class BoardController {
     		
     		List<FileDTO> filelist = new ArrayList<>();
     		
-    		if(files != null) {
+//    			for(MultipartFile multipartFile : files) {
+//    				if(files != null) {
+//    					continue;
+//    				}
+//    				files.add(multipartFile)
+//    			}
+    			
+    			
+    			
+    			
     			// 파일명 처리
     			for(int i=0;i<((CharSequence) files).length();i++) {
     				String originalFilename = files.get(i).getOriginalFilename();
@@ -161,7 +170,7 @@ public class BoardController {
     				//filelist.addAll(files.get(i).getName());
     			}
     			
-    		}
+    		
     		
     		fileservice.saveFiles(b_u_idx, filelist);
     		result ="success";

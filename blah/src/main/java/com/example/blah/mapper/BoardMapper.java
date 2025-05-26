@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.blah.domain.BoardDTO;
+import com.example.blah.domain.FiletempDTO;
 
 public interface BoardMapper {
 	// 처음 게시글
