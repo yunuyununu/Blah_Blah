@@ -5,8 +5,71 @@
 
 <mapper namespace="com.example.blah.mapper.MypageMapper">
 	
-	<select id="">
-		
+	<!--회원 마이페이지-->
+	<select id="mypage" resultType="map">
+		SELECT USR.U_IDX,			<!--회원번호-->
+				USR.U_ID,			<!--회원아이디-->
+		        USR.U_C_IDX,		<!--회원회사-->
+		        USR.U_PASSWORD,		<!--비밀번호-->
+		        USR.U_NICNAME,		<!--회원닉네임-->
+		        USR.U_EMAIL,		<!--회원이메일-->
+		        USR.U_PHONE,		<!--회원전화번호-->
+		        USR.U_FILE,			<!--회사인증파일-->
+		        DATE_FORMAT(USR.U_JOINDATE,	'%Y-%m-%d') AS U_JOINDATE,	<!--가입일자-->
+		        USR.U_WITHDRAW,		<!--탈퇴일자-->
+		        USR.U_REVIEW,		<!--리뷰작성여부-->
+		        USR.U_STATUS,		<!--회원상태-->
+		        COP.C_NAME			<!--회원회사이름-->
+		FROM USER AS USR
+			LEFT JOIN COMPANY AS COP		
+	    		ON COP.C_IDX = USR.U_C_IDX
+		WHERE U_IDX = #{U_IDX}
 	</select>
-
+	
+	<!--회사 변경-->
+	<update id="companyChange">
+		UPDATE USER
+		SET U_C_IDX = NULL, U_FILE = #{u_file}, U_STATUS = 'Checking'
+		WHERE U_IDX = #{u_idx}
+	</update>
+	
+	<!--휴대전화번호 변경-->
+	<update id="phoneUpdate">
+		UPDATE USER
+		SET U_PHONE = #{u_phone}
+		WHERE U_IDX = #{u_idx}
+	</update>
+	
+	<!--닉네임 변경-->
+	<update id="nicnameUpdate">
+		UPDATE USER
+		SET U_NICNAME = #{u_nicname}
+		WHERE U_IDX = #{u_idx}
+	</update>
+	
+	<!--회원 탈퇴-->
+	<update id="userWithdraw">
+		UPDATE USER
+		SET U_WITHDRAW = 'Y'
+		WHERE U_IDX = #{u_idx}
+	</update>
+	
+	<select id="myreview" resultType="com.example.blah.domain.CompanyDTO">
+		SELECT  REW.R_IDX AS R_IDX,			<!--리뷰번호-->
+				REW.R_C_IDX AS R_C_IDX,		<!--리뷰회사번호-->
+		        REW.R_U_IDX AS R_U_IDX,		<!--리뷰회원번호-->
+		        REW.R_STAR AS R_STAR,		<!--회사별점-->
+		        REW.R_TITLE AS R_TITLE,		<!--리뷰제목-->
+		        REW.R_CONTENT AS R_CONTENT,	<!--리뷰내용-->
+		        REW.R_DATE AS R_DATE,		<!--리뷰작성일자-->
+		        REW.R_WORK AS R_WORK,		<!--현직원/전직원-->
+		        USR.U_NICNAME AS U_NICNAME,	<!--리뷰작성자-->
+        		COP.C_NICNAME AS C_NICNAME	<!--회사닉네임-->
+		FROM REVIEW AS REW 	
+			INNER JOIN USER AS USR		
+					ON REW.R_U_IDX = USR.U_IDX
+			LEFT JOIN COMPANY AS COP		
+					ON COP.C_IDX = USR.U_C_IDX
+		WHERE USR.U_IDX = #{u_idx}
+	</select>
 </mapper>

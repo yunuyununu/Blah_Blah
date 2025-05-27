@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.CommentDTO;
-import com.example.blah.service.BoardService;
 import com.example.blah.service.CommentService;
 
 import jakarta.servlet.http.HttpSession;

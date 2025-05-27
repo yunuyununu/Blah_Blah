@@ -1,20 +1,13 @@
 package com.example.blah.serviceImpl;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.example.blah.domain.BoardDTO;
-import com.example.blah.domain.FiletempDTO;
-import com.example.blah.mapper.BoardMapper;
-import com.example.blah.mapper.FileMapper;
+import com.example.blah.domain.CompanyDTO;
 import com.example.blah.mapper.MypageMapper;
-import com.example.blah.service.BoardService;
 import com.example.blah.service.MypageService;
 
 @Service
@@ -24,9 +17,37 @@ public class MypageServiceImpl implements MypageService {
 	MypageMapper mypageMapper;
 
 	@Override
-	public List<BoardDTO> getBoard(Long lastBIdx) {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, Object> mypage(int u_idx) {
+		return mypageMapper.mypage(u_idx);
 	}
 	
+	// 회원 회사 변경
+	@Override
+	public void companyChange(Map<String, Object> map) {
+		mypageMapper.companyChange(map);
+	}
+	
+	// 휴대전화번호 변경
+	@Override
+	public void phoneUpdate(Map<String, Object> map) {
+		mypageMapper.phoneUpdate(map);
+	}
+	
+	// 닉네임 변경
+	@Override
+	public void nicnameUpdate(Map<String, Object> map) {
+		mypageMapper.nicnameUpdate(map);
+	}
+	
+	// 회원 탈퇴
+	@Override
+	public void userWithdraw(int u_idx) {
+		mypageMapper.userWithdraw(u_idx);
+	}
+	
+	// 내 리뷰 목록
+	@Override
+	public List<CompanyDTO> myreview(Map<String, Object> map) {
+		return mypageMapper.myreview(map);
+	}
 }

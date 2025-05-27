@@ -16,5 +16,5 @@ public class LoginDTO {
     private String u_nicname;
     private String u_email;
     private String u_phone;
-    
+    private String u_withdraw;
 }

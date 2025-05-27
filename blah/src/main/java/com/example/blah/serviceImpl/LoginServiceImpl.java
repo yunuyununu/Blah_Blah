@@ -31,6 +31,13 @@ public class LoginServiceImpl implements LoginService {
 		return null;
 	}
 	
+	// 회원 탈퇴 여부
+	@Override
+	public String userWithdrawYN(String U_ID) {
+		String withdraw = loginMapper.userWithdrawYN(U_ID);
+		return withdraw;
+	}
+	
 	// 아이디 찾기
 	@Override
 	public LoginDTO searchId(Map<String, String> map) {

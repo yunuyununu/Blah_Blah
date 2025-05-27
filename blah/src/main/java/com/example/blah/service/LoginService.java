@@ -9,6 +9,9 @@ public interface LoginService {
 	// 회원로그인
 	LoginDTO userLogin(String U_ID, String U_PASSWORD);
 	
+	// 회원 탈퇴 여부
+	String userWithdrawYN(String U_ID);
+	
 	// 아이디 찾기
 	LoginDTO searchId(Map<String, String> map);
 	

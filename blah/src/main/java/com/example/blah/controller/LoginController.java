@@ -30,21 +30,27 @@ public class LoginController {
 	// 회원 로그인
 	@PostMapping("/userlogin")
 	public String userLogin(@RequestBody Map<String, String> request, HttpSession session) {
+		String result = "";
+		
 		String userId = request.get("userId");
 		String userPw = request.get("userPw");
 		System.out.println("사용자 아이디 : " + userId);
 		System.out.println("사용자 비밀번호 : " + userPw);
 
 	    LoginDTO login = service.userLogin(userId,userPw);
-
-	    if (login != null) { // 로그인 성공
+	    String withdraw = service.userWithdrawYN(userId);
+	    System.out.println("로그인 정보 ==> " + login);
+	    System.out.println("탈퇴여부 확인=====>"+withdraw);
+	    if (login != null && withdraw.equals("N")) { // 로그인 성공
 	    	session.setAttribute("UserIdx", login.getU_idx());
 	    	System.out.println("세션 아이디=="+session);
-	    	return "success";
-	    } else {
-	    	return "fail";
+	    	result = "success";
+	    } else if(login != null && withdraw.equals("Y")) {
+	    	result = "withdraw";
+		} else {
+			result = "fail";
 	    }
-	    
+	    return result;
 	}
 	
 	// 세션체크
@@ -106,7 +112,7 @@ public class LoginController {
 	@PostMapping("/pwReset")
 	public String searchPw(@RequestParam(name="idx", defaultValue="") int idx,
 			@RequestParam(name="userPw", defaultValue="") String userPw,
-			@RequestParam(name="userId", defaultValue="") String userId) {
+			@RequestParam(name="userId", defaultValue="") String userId,HttpSession session) {
 		try {
 			// 비밀번호 암호화
 	        String encodedPw = pwdEncoder.encode(userPw);
@@ -117,12 +123,9 @@ public class LoginController {
 	        dto.setU_id(userId);
 	        dto.setU_password(encodedPw);
 	        
-	        System.out.println("사용자 idx : " + idx);
-	        System.out.println("사용자 userId : " + userId);
-	        System.out.println("사용자 encodedPw : " + encodedPw);
-
 		    String result = service.pwReset(dto);
 		    System.out.println("결과값 result : " + result);
+		    session.invalidate(); 
 		    
 		    return result;
 		} catch (Exception e) {
