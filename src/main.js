@@ -18,6 +18,11 @@ const vuetify = createVuetify({
   directives,
 })
 
+// Toast 알림
+import Toast, { POSITION } from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
+
+
 // 앱 생성
 const app = createApp(App)
 const pinia = createPinia()
@@ -31,5 +36,11 @@ const userStore = useUserStore()
 
 // 세션 체크 후 앱 마운트
 userStore.checkSession().finally(() => {
-  app.use(vuetify).use(router).mount('#app')
+  app.use(vuetify)
+    .use(Toast, {
+      position: POSITION.TOP_CENTER,
+      timeout: 3000
+    })
+    .use(router)
+    .mount('#app')
 })

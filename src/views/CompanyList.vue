@@ -4,6 +4,9 @@
       <div class="search-box">
         <input type="text" placeholder="회사명을 입력하세요" v-model="searchKeyword" />
       </div>
+      <div class="no-result-text">
+        찾으시는 회사가 없나요? <RouterLink to="/company/companyInsert" class="underline-link">궁금한 회사를 직접 신청해주세요!</RouterLink>
+      </div>
 
       <div class="company-grid">
         <div
@@ -139,5 +142,10 @@ onMounted(() => {
   justify-content: center;
   margin-top: 20px;
   gap: 12px;
+}
+.underline-link {
+  text-decoration: underline;
+  color: #007bff; /* 원하는 링크 색상 */
+  cursor: pointer;
 }
 </style>

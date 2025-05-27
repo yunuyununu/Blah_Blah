@@ -107,21 +107,23 @@ const resetPassword = async () => {
 
   const formData = new FormData()
   formData.append('idx', idx)
-  formData.append('id', id)
-  formData.append('newPassword', newPassword.value)
+  formData.append('userId', id)
+  formData.append('userPw', newPassword.value)
 
   try {
     const response = await axios.post('http://localhost:80/login/pwReset', formData)
 
     console.log("idx==", idx)
     console.log("id==", id)
-    console.log("newPassword==", newPassword.value)
+    console.log("userPw==", newPassword.value)
 
     console.log("response==", response.data)
 
     if (response.data === "success") {
-      alert('비밀번호가 성공적으로 변경되었습니다.')
-      router.push('/login')
+      alert('비밀번호가 변경되었습니다. 다시 로그인해 주세요.')
+      router.push('/login').then(() => {
+        window.location.reload()
+      })
     } else {
       alert('비밀번호 변경에 실패했습니다.')
     }

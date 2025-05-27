@@ -4,135 +4,262 @@
       <div class="form-grid">
         <div class="form-group">
           <label>아이디</label>
-          <input type="text" readonly />
+          <input type="text" v-model="userInfo.U_ID" readonly />
         </div>
 
         <div class="form-group">
           <label>비밀번호</label>
-          <button type="button" class="change-password-btn" @click="openModal">비밀번호 변경</button>
+          <button type="button" class="change-password-btn" @click="goPwChange">비밀번호 변경</button>
         </div>
 
         <div class="form-group">
-          <label>이름</label>
-          <input type="text" />
+          <label>닉네임</label>
+          <div v-if="!isEditingNickname" class="edit-view">
+            <input type="text" v-model="userInfo.U_NICNAME" readonly />
+            <button class="change-password-btn" @click="startNicknameEdit">수정</button>
+          </div>
+          <div v-else class="edit-view">
+            <input
+              type="text"
+              v-model="newNickname"
+              ref="nicknameInput"
+              placeholder="변경할 닉네임을 입력해주세요"
+              :class="['custom-input', { 'input-error': errors.newNickname  }]"
+            />
+            <button class="change-password-btn" @click="updateNickname">수정완료</button>
+            <button class="change-password-btn" @click="cancelNicknameEdit">취소</button>
+          </div>
+          <p v-if="errors.newNickname" class="error-text">{{ errors.newNickname }}</p>
         </div>
 
         <div class="form-group">
           <label>이메일</label>
-          <input type="email" />
-        </div>
-
-        <div class="form-group">
-          <label>생년월일</label>
-          <input type="text" />
+          <input type="text" v-model="userInfo.U_EMAIL" readonly/>
         </div>
 
         <div class="form-group">
           <label>전화번호</label>
-          <input type="number" />
+            <div v-if="!isEditingPhone" class="edit-view">
+              <input type="text" v-model="userTel" readonly/>
+              <button class="change-password-btn" @click="startPhoneEdit">수정</button>
+            </div>
+          <!-- 전화번호 수정 입력창 -->
+            <div v-else class="edit-view">
+              <input
+                type="text"
+                v-model="newPhone"
+                ref="newPhoneInput"
+                placeholder="변경할 휴대폰번호를 입력해주세요"
+                :class="['custom-input', { 'input-error': errors.newPhone }]"
+              />
+              <button class="change-password-btn" @click="requestPhoneVerification">수정완료</button>
+              <button class="change-password-btn" @click="cancelPhoneEdit">취소</button>
+            </div>
+            <p v-if="errors.newPhone" class="error-text">{{ errors.newPhone }}</p>
         </div>
+        
 
-        <div class="form-group">
+        <div class="form-group" v-if="userInfo.U_STATUS == 'Certified'">
           <label>회원회사</label>
-          <input type="text" />
+          <input type="text" :value="userInfo.C_NAME" readonly />
         </div>
 
-        <div class="form-group company-change">
-          <label>회사인증파일</label>
-          <input type="text"/>
-          <button class="company-change-btn">회사 변경 신청</button>
+        <div class="form-group" v-else>
+          <label>회원회사</label>
+          <input type="text" placeholder="관리자 확인중입니다." readonly />
+        </div>
+
+        <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Uncertified'">
+          <label>회사인증유무</label>
+          <input type="text" :value="'N'" readonly/>
+        </div>
+        <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Certified'">
+          <label>회사인증유무</label>
+          <input type="text" :value="'Y'" readonly/>
+        </div>
+        <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Checking'">
+          <label>회사인증유무</label>
+          <input type="text" placeholder="관리자 확인중입니다." readonly/>
+
         </div>
 
         <div class="form-group">
           <label>회원가입일자</label>
-          <input type="date"/>
+          <input type="text" v-model="userInfo.U_JOINDATE" readonly/>
         </div>
       </div>
 
       <div class="submit-btn-wrapper">
-        <button class="btn btn-dark">회원 정보 수정</button>
+        <button class="btn btn-dark" @click="userWithdraw">회원 탈퇴</button>
       </div>
     </main>
-
-
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal">
-        <h2>비밀번호 변경</h2>
-        <input
-          type="password"
-          placeholder="새 비밀번호"
-          v-model="newPassword"
-          class="modal-input"
-        />
-        <input
-          type="password"
-          placeholder="새 비밀번호 확인"
-          v-model="confirmPassword"
-          class="modal-input"
-        />
-        <div class="modal-buttons">
-          <button class="modal-btn" @click="changePassword">변경</button>
-          <button class="modal-btn cancel" @click="closeModal">취소</button>
-        </div>
-      </div>
-    </div>
   
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref, onMounted,watch  } from 'vue';
+  import { useRouter } from 'vue-router'
+  import axios from 'axios';
 
-  // import api from '@/plugin/axios'
-  // import { onMounted } from 'vue';
+  const router = useRouter()
 
-  // onMounted(() => {
-  // api.get('/mypage/myinformation')
-  //   .then(res => {
-  //     console.log(res.data);
-  //   })
-  //   .catch(err => {
-  //     console.error(err);
-  //   });
-  // });
+  const userInfo = ref({});
+  const userId = ref('');
+  const userTel = ref('');
+  const userEmail = ref('');
 
-// const form = reactive({
-//   id: 'Jane',
-//   name: 'Jane',
-//   birth: '1995-01-01',
-//   company: 'Smitherton',
-//   companyFile: '',
-//   email: 'smitherton@example.com',
-//   phone: '010-1234-5678',
-//   signupDate: '2025-01-01',
-// });
+  const errors = ref({
+      newNickname : '',
+      newPhone : ''
+    })
 
-// 모달 제어
-const showModal = ref(false);
-const newPassword = ref('');
-const confirmPassword = ref('');
+  const fetchMypage = async () => {
+    try {
+      const res = await axios.get('http://localhost:80/mypage/info');
+      userInfo.value = res.data;
+      userId.value = userInfo.value.U_ID;
+      userTel.value = formatPhone(userInfo.value.U_PHONE);
+      userEmail.value = userInfo.value.U_EMAIL;
 
-const openModal = () => {
-  console.log('모달 열기 시도'); // 추가
-  showModal.value = true;
-  console.log('showModal:', showModal.value); // 추가
+    } catch (error) {
+      console.error('마이페이지 정보 조회 실패', error);
+    }
+  };
+
+  onMounted(() => {
+    fetchMypage();
+  });
+
+  const goPwChange = () => {
+    if(confirm('비밀번호를 변경하겠습니까? (이메일 인증 후 비밀번호 재설정)')){
+      router.push({ name: 'searchpw', query: { userId: userId.value, userTel: userTel.value, userEmail: userEmail.value } });
+    } else {
+      return
+    }
+  }
+  const formatPhone = (phone) => {
+  let digits = phone.replace(/\D/g, ''); // 숫자만 추출
+
+  if (digits.length > 11) {
+    digits = digits.slice(0, 11);
+  }
+
+  if (digits.length < 4) {
+    return digits;
+  } else if (digits.length < 8) {
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  } else {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
 };
 
-const closeModal = () => {
-  showModal.value = false;
-  newPassword.value = '';
-  confirmPassword.value = '';
+// 전화번호 변경
+const isEditingPhone = ref(false)
+const newPhone = ref('')
+const newPhoneInput = ref(null)
+
+const requestPhoneVerification = async() => {
+  const phonePattern = /^\d{3}-\d{3,4}-\d{4}$/;
+
+  if (!phonePattern.test(newPhone.value)) {
+    errors.value.newPhone = '유효한 전화번호 형식(000-0000-0000)을 입력해주세요.'
+    newPhoneInput.value.focus()
+    return
+  }
+  try {
+      const response = await axios.post('http://localhost:80/mypage/phoneUpdate', {
+        u_phone: newPhone.value
+      })
+      console.log('전화번호 수정 응답:', response.data)
+      alert('전화번호가 수정되었습니다.')
+      userTel.value = newPhone.value;
+      isEditingPhone.value = false;
+    } catch (error) {
+      console.error('전화번호 수정 실패:', error)
+      alert('전화번호 수정에 실패했습니다.')
+    }
+}
+
+const cancelPhoneEdit = () => {
+  newPhone.value = ''
+  isEditingPhone.value = false
+}
+const startPhoneEdit = () => {
+  newPhone.value = '';
+  isEditingPhone.value = true;
 };
 
-const changePassword = () => {
-  if (newPassword.value !== confirmPassword.value) {
-    alert('비밀번호가 일치하지 않습니다.');
+const isEditingNickname = ref(false);
+const newNickname = ref('');
+const nicknameInput = ref(null)
+
+const updateNickname = async () => {
+
+  const nicknamePattern = /^\S{5,20}$/
+
+  if (!newNickname.value.trim()) {
+    alert('닉네임을 입력해주세요.');
     return;
   }
-  // 여기서 비밀번호 변경 API 호출하면 됨
-  alert('비밀번호가 변경되었습니다.');
-  closeModal();
+
+  //닉네임 체크
+  if (!nicknamePattern.test(newNickname.value)) {
+    errors.value.newNickname = '닉네임은 공백 없이 5~20자여야 합니다.'
+    nicknameInput.value.focus()
+    return
+  }
+
+  try {
+    const response = await axios.post('http://localhost:80/mypage/nicnameUpdate', {
+      u_nicname: newNickname.value
+    });
+    console.log('닉네임 수정 응답:', response.data);
+    alert('닉네임이 수정되었습니다.');
+    userInfo.value.U_NICNAME = newNickname.value;
+    isEditingNickname.value = false;
+  } catch (error) {
+    console.error('닉네임 수정 실패:', error);
+    alert('닉네임 수정에 실패했습니다.');
+  }
 };
-  
+const startNicknameEdit = () => {
+  newNickname.value = '';
+  isEditingNickname.value = true;
+};
+
+const cancelNicknameEdit = () => {
+  newNickname.value = '';
+  isEditingNickname.value = false;
+};
+
+// 회원 탈퇴
+const userWithdraw = async () => {
+  try {
+    const response = await axios.post('http://localhost:80/mypage/userWithdraw');
+    console.log('회원 탈퇴 응답:', response.data);
+    if(confirm('블라블라를 탈퇴하시겠습니까?')){
+        alert('회원 탈퇴가 완료되었습니다.\n 작성하신 게시글 및 댓글 중 개인정보가 포함되지 않은 내용은 삭제되지 않고 유지됩니다.');
+        router.push('/').then(() => {
+          window.location.reload()
+        })
+      } else {
+        return
+      }
+  } catch (error) {
+    console.error('회원 탈퇴 실패:', error);
+    alert('회원 탈퇴에 실패했습니다.');
+  }
+};
+
+watch(newNickname, () => {
+    errors.value.newNickname = ''
+  })
+watch(newPhone, () => {
+  errors.value.newPhone = ''
+})
+watch(newPhone, (val) => {
+  newPhone.value = formatPhone(val);
+});
   </script>
   
   <style scoped>
@@ -216,59 +343,43 @@ input[type="number"] {
   border-radius: 6px;
   cursor: pointer;
 }
-
-/* 기존 스타일은 생략 (필요하면 위에서 참고) */
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
+.form-group input[type="text"] {
   width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
+  box-sizing: border-box;
+}
+
+.edit-view {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 9999;
+  gap: 10px;
 }
 
-.modal {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  width: 300px;
-  text-align: center;
+.edit-view input[type="text"] {
+  flex: 1;
 }
 
-.modal h2 {
-  margin-bottom: 20px;
-}
-
-.modal-input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
-.modal-btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
+.change-password-btn {
+  padding: 6px 12px;
   background-color: black;
   color: white;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
-.modal-btn.cancel {
-  background-color: #ccc;
-  color: black;
+.change-password-btn.gray {
+  background-color: gray;
+}
+
+.input-error {
+  border: 2px solid red !important;
+}
+
+.error-text {
+  color: red;
+  font-size: 12px;
+  margin-top: 3px;
+  margin-bottom: 8px;
 }
   </style>

@@ -6,7 +6,9 @@
           <div class="left"><h2>게시판</h2></div>
           <div class="right">
             <RouterLink to="/board/boardlist" class="text-blue-600 hover:underline">게시글 목록</RouterLink>&nbsp;&nbsp;
-            <RouterLink to="/board/boardregistration" class="text-blue-600 hover:underline">게시글 등록</RouterLink>
+            <RouterLink to="/board/boardregistration" 
+            class="text-blue-600 hover:underline" 
+            v-if="userStore.isLogin == true">게시글 등록</RouterLink>
           </div>
         </div>
       </div>
@@ -18,7 +20,9 @@
   </template>
   
   <script setup>
-  
+  import { useUserStore } from '@/store/userStore'
+
+const userStore = useUserStore()
   </script>
   
   <style scoped>

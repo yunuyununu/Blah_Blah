@@ -4,7 +4,9 @@
       <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
           <div class="navbar-brand-wrapper">
-            <a class="navbar-brand" style="font-weight: 700;">Blah Blah</a>
+            <RouterLink to="/" class="navbar-brand" style="font-weight: 700;">
+              Blah Blah
+            </RouterLink>
             <span class="topic-label">topic</span>
           </div>
 

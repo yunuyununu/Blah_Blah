@@ -1,6 +1,5 @@
 <template>
   <div class="board-container">
-    <!-- <h2>익명 게시판</h2> -->
     <div class="card-grid">
       <div class="card" v-for="item in board" :key="item.b_idx" @click="goBoardDetails(item.b_idx)">
         <div class="card-title">{{ item.b_title }}</div>

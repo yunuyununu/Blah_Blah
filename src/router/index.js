@@ -45,6 +45,11 @@ const routes = [
         path: 'myreview',
         name: 'myreview',
         component: () => import('@/views/MyReview')
+      },
+      {
+        path: 'mycompanychange',
+        name: 'mycompanychange',
+        component: () => import('@/views/MyCompanyChange')
       }
     ]
   },

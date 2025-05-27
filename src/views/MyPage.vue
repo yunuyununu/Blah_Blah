@@ -6,7 +6,8 @@
           <div class="left"><h2>마이페이지</h2></div>
           <div class="right">
             <RouterLink to="/mypage/myinformation">회원정보</RouterLink>&nbsp;&nbsp;
-            <RouterLink to="/mypage/myreview">나의리뷰</RouterLink>
+            <RouterLink to="/mypage/myreview">나의리뷰</RouterLink>&nbsp;&nbsp;
+            <RouterLink to="/mypage/mycompanychange">회사변경신청</RouterLink>
           </div>
         </div>
       </div>
@@ -17,18 +18,7 @@
   </div>
   </template>
   <script setup>
-  // import api from '@/plugin/axios'
-  // import { onMounted } from 'vue';
-
-  // onMounted(() => {
-  // api.get('/mypage')
-  //     .then(res => {
-  //       console.log(res.data);
-  //     })
-  //     .catch(err => {
-  //       console.error(err);
-  //     });
-  //   });
+  
   </script>
   
   <style scoped>

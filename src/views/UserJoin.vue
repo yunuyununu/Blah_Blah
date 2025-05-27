@@ -153,9 +153,10 @@
   import { ref, watch } from 'vue'
   import { useRouter } from 'vue-router'
   import axios from 'axios'
+  import { useToast } from 'vue-toastification'
 
 const router = useRouter()
-
+const toast = useToast()
 
 const userId = ref('')
 const userPw = ref('')
@@ -297,7 +298,7 @@ const sendAuthCode = async () => {
       if (response.data === 'success') {
         loading.value = false
         startTimer() // 인증번호 검증 시간 측정
-        alert('인증번호가 이메일로 전송되었습니다.')
+        toast.success('이메일 전송이 완료되었습니다.')
       } 
     } catch (error) {
       console.error('이메일 전송 실패:', error)

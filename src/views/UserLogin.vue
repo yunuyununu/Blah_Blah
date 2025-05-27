@@ -171,10 +171,13 @@ const submit = async () => {
     }, { withCredentials: true }) // 세션유지
     if (response.data === 'success') {
       userStore.setLoginSuccess()
-     alert('로그인 성공!')
-     console.log('로그인 응답:', response.data)
+      alert('로그인 성공!')
+      console.log('로그인 응답:', response.data)
        router.push('/')
-     } else { // 로그인 정보 불일치
+     } else if(response.data === 'withdraw') {
+      alert('탈퇴한 회원입니다.\n홈페이지를 이용하시려면 회원가입이 필요합니다.')
+      return
+      } else { // 로그인 정보 불일치
        alert('아이디 또는 비밀번호가 일치하지 않습니다. 다시 확인 후 입력해주시기 바랍니다.')
        errors.value.userId = '아이디를 다시 입력하세요.'
        errors.value.userPw = '비밀번호를 다시 입력하세요.'

@@ -17,7 +17,7 @@
             <label>이메일</label>
           </div>
           <div class="col-6">
-            <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com"
+            <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com" :disabled="changeEmail"
             :class="['custom-input', { 'input-error': errors.email  }]"/>
             &nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="sendAuthCode">인증번호 전송</button>
@@ -57,7 +57,7 @@
           <br>
         </div>
         <div class="col-6" style="gap: 5px;">
-          <input type="text"  v-model="userId" ref="userIdInput" placeholder="영문,숫자 공백없이 6~12자리를 입력하세요."
+          <input type="text"  v-model="userId" ref="userIdInput" placeholder="영문,숫자 공백없이 6~12자리를 입력하세요." :disabled="changeId"
            :class="['custom-input', { 'input-error': errors.userId  }]"/>
           <p v-if="errors.userId" class="error-text">{{ errors.userId }}</p>
           <div v-if="idCheckMessage" style="margin-top: 5px; color: green;">{{ idCheckMessage }}</div>
@@ -73,6 +73,7 @@
             ref="userTelInput"
             placeholder="숫자만 입력하세요."
             @input="formatPhoneNumber"
+            :disabled="changeTel"
             :class="['custom-input', { 'input-error': errors.userTel }]"/>
             <p v-if="errors.userTel" class="error-text">{{ errors.userTel }}</p>
           </div>
@@ -95,9 +96,13 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router';
+import { useToast } from 'vue-toastification'
+
 import axios from 'axios'
 
 const router = useRouter()
+const toast = useToast()
 
 const email = ref('')
 const authcode = ref('')
@@ -115,6 +120,17 @@ const verifySuccess = ref(null)
 const countdown = ref(180)
 const timer = ref(null)
 const timerVisible = ref(false)
+
+const route = useRoute();
+const changeId = route.query.userId;
+const changeTel = route.query.userTel;
+const changeEmail = route.query.userEmail;
+
+if(changeId  && changeTel && changeEmail) {
+  userId.value = changeId;
+  userTel.value = changeTel;
+  email.value = changeEmail;
+}
 
 const loading = ref(false)
 
@@ -145,7 +161,7 @@ const sendAuthCode = async () => {
     if (response.data === 'success') {
       loading.value = false
       startTimer()
-      alert('인증코드가 이메일로 전송되었습니다.')
+      toast.success('이메일 전송이 완료되었습니다.')
       timerVisible.value = true
     } else {
       loading.value = false
@@ -177,6 +193,23 @@ const formatTime = () => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
+const formatPhoneNumber = () => {
+  let digits = userTel.value.replace(/\D/g, '') // 숫자만 추출
+
+  // 최대 11자리까지만 허용
+  if (digits.length > 11) {
+    digits = digits.slice(0, 11)
+  }
+
+  if (digits.length < 4) {
+    userTel.value = digits
+  } else if (digits.length < 8) {
+    userTel.value = `${digits.slice(0, 3)}-${digits.slice(3)}`
+  } else {
+    userTel.value = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+  }
+}
+
 const authcodeVerify = async () => {
   errors.value.authcode = ''
   if (!authcode.value) {
@@ -206,23 +239,6 @@ const authcodeVerify = async () => {
   }
 }
 
-const formatPhoneNumber = () => {
-  let digits = userTel.value.replace(/\D/g, '') // 숫자만 추출
-
-  // 최대 11자리까지만 허용
-  if (digits.length > 11) {
-    digits = digits.slice(0, 11)
-  }
-
-  if (digits.length < 4) {
-    userTel.value = digits
-  } else if (digits.length < 8) {
-    userTel.value = `${digits.slice(0, 3)}-${digits.slice(3)}`
-  } else {
-    userTel.value = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
-  }
-}
-
 const resetPassword = async () => {
   errors.value.userId = ''
   errors.value.userTel = ''
@@ -244,8 +260,14 @@ const resetPassword = async () => {
       userId: userId.value,
       userTel: userTel.value
     })
+    
+    console.log("찾기에서 비밀번호재설정 넘어갈때=>",response.data)
     if (response.data) {
-      router.push({ path: '/passwdreset', query: { u_idx: response.data.u_idx, u_id: response.data.u_id } })
+      if(confirm('회원 인증이 완료됐습니다.')){
+        router.push({ path: '/passwdreset', query: { u_idx: response.data.u_idx, u_id: response.data.u_id } })
+      } else {
+        return
+      }
     } else {
       alert('일치하는 회원 정보가 없습니다.')
     }
