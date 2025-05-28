@@ -13,6 +13,16 @@
     <div class="post-content">
       <p v-html="post.B_CONTENT"></p>
     </div>
+    <div class="board-images" v-if="boardImages.length > 0">
+      <img
+        v-for="img in boardImages"
+        :key="img.I_IDX"
+        :src="getImageUrl(img.I_IMAGE)"
+        alt="게시글 이미지"
+        class="board-image"
+      />
+    </div>
+    <br>
     <button class="btn btn-outline-danger" @click="$router.back()"  style="text-align: left;">← 목록으로</button>
     <hr />
 
@@ -74,6 +84,9 @@ const route = useRoute();
 const post = ref(null);
 const bidx = route.params.b_idx;
 
+// 게시글 이미지
+const boardImages = ref([]);
+
 const commentList = ref([]);
 const newComment = ref('');
 // const replyTo = ref(null);
@@ -102,8 +115,24 @@ const fetchPostDetail = async () => {
       params: { b_idx: bidx },
     });
     post.value = res.data;
+
+    // 이미지 리스트 요청
+    const imageRes = await axios.get(`http://localhost:80/board/boardImages`, {
+      params: { b_idx: bidx },
+    });
+    boardImages.value = imageRes.data.filter(img => img !== null);
   } catch (err) {
     console.error('게시글 로딩 실패:', err);
+  }
+};
+
+const getImageUrl = (filename) => {
+  if (filename.startsWith('https')) {
+    return filename;
+  } else if (filename !== "") {
+    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`;
+  } else {
+    return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`;
   }
 };
 
@@ -355,5 +384,20 @@ hr {
 .nickname-gray {
   color: #919191;
   font-weight: bold;
+}
+
+.board-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.board-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 </style>

@@ -4,7 +4,7 @@
       <div class="search-box">
         <input type="text" placeholder="회사명을 입력하세요" v-model="searchKeyword" />
       </div>
-      <div class="no-result-text">
+      <div class="no-result-text" style="text-align: center;">
         찾으시는 회사가 없나요? <RouterLink to="/company/companyInsert" class="underline-link">궁금한 회사를 직접 신청해주세요!</RouterLink>
       </div>
 
@@ -23,8 +23,8 @@
       </div>
 
       <div class="pagination">
-        <button @click="prevPage" :disabled="offset === 0">이전</button>
-        <button @click="nextPage">다음</button>
+        <button v-if="offset > 0" @click="prevPage" :disabled="offset === 0">이전</button>
+        <button v-if="company.length === limit"  @click="nextPage">다음</button>
       </div>
     </div>
   </div>
@@ -47,12 +47,15 @@ const offset = ref(0)
 
 
 const getImageUrl = (filename) => {
-  if(filename != "") {
-    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`
+  if (filename.startsWith('https')) {
+    return filename;
+  } else if (filename !== "") {
+    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`;
   } else {
-    return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`
+    return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`;
   }
-}
+};
+
 
 
 const fetchCompanies = async () => {
@@ -84,9 +87,10 @@ const prevPage = () => {
 }
 
 const filteredCompanies = computed(() => {
-  if (!searchKeyword.value) return company.value
+  const keyword = searchKeyword.value.trim().toLowerCase()
+  if (keyword.length === 0) return company.value
   return company.value.filter(c =>
-    c.c_name.toLowerCase().includes(searchKeyword.value.toLowerCase())
+    c.c_name.toLowerCase().includes(keyword)
   )
 })
 

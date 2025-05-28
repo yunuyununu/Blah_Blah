@@ -69,8 +69,8 @@
     </div>
 
     <div class="pagination">
-        <button @click="prevPage" :disabled="offset === 0 || review.length === 0">이전</button>
-        <button @click="nextPage" :disabled="offset + limit >= totalCount || review.length === 0">다음</button>
+        <button v-if="offset > 0" @click="prevPage">이전</button>
+        <button v-if="offset + limit < totalCount" @click="nextPage">다음</button>
       </div>
   </div>
 </template>
@@ -99,13 +99,16 @@ const fetchCompanyDetail = async () => {
   }
 };
 
+
 const getImageUrl = (filename) => {
-  if(filename != "") {
-    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`
+  if (filename.startsWith('https')) {
+    return filename;
+  } else if (filename !== "") {
+    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`;
   } else {
-    return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`
+    return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`;
   }
-}
+};
 
 const limit = 5
 const offset = ref(0)

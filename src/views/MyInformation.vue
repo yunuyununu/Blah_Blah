@@ -80,9 +80,15 @@
         <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Checking'">
           <label>회사인증유무</label>
           <input type="text" placeholder="관리자 확인중입니다." readonly/>
-
         </div>
-
+        <div class="form-group company-change" v-if="userInfo.U_REVIEW == 'N'">
+          <label>리뷰작성유무</label>
+          <input type="text" :value="'N'" readonly/>
+        </div>
+        <div class="form-group company-change" v-if="userInfo.U_REVIEW == 'Y'">
+          <label>리뷰작성유무</label>
+          <input type="text" :value="'Y'" readonly/>
+        </div>
         <div class="form-group">
           <label>회원가입일자</label>
           <input type="text" v-model="userInfo.U_JOINDATE" readonly/>
@@ -90,7 +96,7 @@
       </div>
 
       <div class="submit-btn-wrapper">
-        <button class="btn btn-dark" @click="userWithdraw">회원 탈퇴</button>
+        <button class="btn btn-danger" @click="userWithdraw">회원 탈퇴</button>
       </div>
     </main>
   

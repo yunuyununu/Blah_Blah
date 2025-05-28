@@ -3,28 +3,18 @@
     <div class="container">
       <div class="row">
         <div class="col">
-          <div class="post-form">
-            <div class="form-group">
-              <label>제목</label>
-              <input type="text" v-model="title" placeholder="제목을 입력하세요" />
-            </div>
+          <form @submit.prevent="submitPost">
+            <input v-model="title" placeholder="제목" required/>
+            <br><br>
+            <textarea v-model="content" placeholder="내용" required></textarea>
 
-            <div class="form-group">
-              <label>내용</label>
-              <textarea v-model="content" placeholder="내용을 입력하세요"></textarea>
+            <input type="file" multiple @change="onImageChange" accept=".jpg,.jpeg,.png,.pdf"/>
+            <div class="image-preview">
+              <img v-for="(img, i) in previewImages" :key="i" :src="img" />
             </div>
-
-            <input type="file" multiple @change="handleFileChange" class="custom-file-input"/>
-            <div v-if="previewUrls.length" class="image-preview">
-              <div v-for="(url, idx) in previewUrls" :key="idx">
-                <img :src="url" alt="preview" width="100" @click="removeImage(idx)" />
-              </div>
-            </div>
-
-            <div style="text-align: center;">
-              <button @click="submitPost" class="btn btn-dark">등록</button>
-            </div>
-          </div>
+            <br>
+            <button class="btn btn-outline-dark" type="submit">게시글 등록</button>
+          </form>
         </div>
       </div>
     </div>
@@ -32,39 +22,48 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 
-const title = ref('');
-const content = ref('');
-const imageFiles = ref([]);
-const previewUrls = ref([]);
+const router = useRouter()
 
-const handleFileChange = (e) => {
-  const files = Array.from(e.target.files);
-  imageFiles.value = files;
+axios.defaults.withCredentials = true;
+const title = ref('')
+const content = ref('')
+const files = ref([])
+const previewImages = ref([])
 
-  // 기존 URL 해제
-  previewUrls.value.forEach((url) => URL.revokeObjectURL(url));
+const onImageChange = (e) => {
+  files.value = Array.from(e.target.files)
+  previewImages.value = files.value.map(file => URL.createObjectURL(file))
+}
 
-  // 새로운 미리보기 생성
-  previewUrls.value = files.map(file => URL.createObjectURL(file));
-};
+const submitPost = async () => {
+  const formData = new FormData()
+  formData.append('b_title', title.value)
+  formData.append('b_content', content.value)
+  files.value.forEach(file => formData.append('images', file))
 
-const removeImage = (index) => {
-  // 미리보기 URL 해제
-  URL.revokeObjectURL(previewUrls.value[index]);
+  try {
+    const res = await axios.post('http://localhost:80/board/boardInsert', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      withCredentials: true
+    })
 
-  // 해당 인덱스의 파일 및 URL 제거
-  imageFiles.value.splice(index, 1);
-  previewUrls.value.splice(index, 1);
-};
-
-const submitPost = () => {
-  // 여기에 폼 제출 로직 추가
-  console.log('제목:', title.value);
-  console.log('내용:', content.value);
-  console.log('이미지 파일:', imageFiles.value);
-};
+    if (res.data === 'success') {
+      alert('게시글 등록 완료')
+      router.push('/board/boardlist')
+    } else {
+      alert('게시글 등록 실패')
+    }
+  } catch (err) {
+    console.error(err)
+    alert('등록 중 오류 발생')
+  }
+}
 </script>
 
 <style scoped>
@@ -80,26 +79,43 @@ const submitPost = () => {
 input[type="text"],
 textarea {
   width: 100%;
+  min-height: 300px;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  resize: vertical;
+}
+
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  gap: 10px;
 }
 
 .image-preview img {
-  margin-top: 10px;
-  margin-right: 10px;
-  max-width: 100px;
-  height: auto;
+  width: 100px;
+  height: 100px;
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
   transition: 0.3s ease;
 }
+
 .image-preview img:hover {
   opacity: 0.7;
 }
 label {
   font-weight: bold;
   margin-bottom: 6px;
+}
+input[type="text"],
+input[type="file"],
+input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 </style>
