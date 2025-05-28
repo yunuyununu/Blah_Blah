@@ -129,7 +129,7 @@ public class JoinController {
 	        GCSRequest gcsRequest = new GCSRequest();
 	        gcsRequest.setName(fileName); // GCS에 저장될 파일명
 	        gcsRequest.setFile(userFile); // 실제 파일
-	        gcsService.uploadObject(gcsRequest); // 업로드 실행
+	        String publicUrl = gcsService.uploadObject(gcsRequest); // 업로드 실행
 	        
 	        // dto에 담아 보내기
 	        JoinDTO dto = new JoinDTO();
@@ -138,7 +138,7 @@ public class JoinController {
 	        dto.setU_nicname(nickname);
 	        dto.setU_tel(userTel.replaceAll("-", ""));
 	        dto.setU_email(email);
-	        dto.setU_file(fileName);
+	        dto.setU_file(publicUrl);
 
 	        String result = service.join(dto);
 	        return result;

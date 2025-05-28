@@ -11,6 +11,6 @@ public class TempImageCleanupScheduler {
 
     @Scheduled(fixedRate = 1000 * 60 * 10) // 10분마다 실행
     public void cleanup() {
-    	boardService.cleanupOldTempImages();
+    	//boardService.cleanupOldTempImages();
     }
 }

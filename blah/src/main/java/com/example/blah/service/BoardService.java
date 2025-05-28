@@ -9,18 +9,18 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.blah.domain.BoardDTO;
 
 public interface BoardService {
+	// 게시물 목록
 	List<BoardDTO> getBoard(Long lastBIdx);
 	
+	// 게시물 상세
 	Map<String, Object> details(int b_idx);
 	
+	// 게시물 상세 - 이미지파일
+	List<Map<String, Object>> boardImages(int b_idx);
+	
+	// 게시물 조회수
 	void incrementHit(int b_idx);
 	
-	void boardInsert(BoardDTO dto);
-	
-	// 이미지 임시저장 업로드
-	void uploadImage(MultipartFile file, int u_idx) throws IOException;
-	
-	void confirmImageUsage(List<Integer> imageIds);
-	
-	void cleanupOldTempImages();
+	// 게시물 등록
+	void boardInsert(int u_idx, String title, String content, List<MultipartFile> images) throws IOException;
 }

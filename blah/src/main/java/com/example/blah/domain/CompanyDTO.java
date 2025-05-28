@@ -20,6 +20,7 @@ public class CompanyDTO {
 	private String c_number;
 	private String c_business;
 	private String c_register;
+	private int r_idx;
 	private int r_c_idx;
 	private int r_u_idx;
 	private int r_star;

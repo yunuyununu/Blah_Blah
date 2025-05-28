@@ -29,7 +29,7 @@
 	<!--회사 변경-->
 	<update id="companyChange">
 		UPDATE USER
-		SET U_C_IDX = NULL, U_FILE = #{u_file}, U_STATUS = 'Checking'
+		SET U_C_IDX = NULL, U_FILE = #{u_file}, U_STATUS = 'Checking', U_REVIEW = 'N'
 		WHERE U_IDX = #{u_idx}
 	</update>
 	
@@ -54,7 +54,8 @@
 		WHERE U_IDX = #{u_idx}
 	</update>
 	
-	<select id="myreview" resultType="com.example.blah.domain.CompanyDTO">
+	<!--나의리뷰리스트-->
+	<select id="myreviewList" resultType="com.example.blah.domain.CompanyDTO">
 		SELECT  REW.R_IDX AS R_IDX,			<!--리뷰번호-->
 				REW.R_C_IDX AS R_C_IDX,		<!--리뷰회사번호-->
 		        REW.R_U_IDX AS R_U_IDX,		<!--리뷰회원번호-->
@@ -64,12 +65,37 @@
 		        REW.R_DATE AS R_DATE,		<!--리뷰작성일자-->
 		        REW.R_WORK AS R_WORK,		<!--현직원/전직원-->
 		        USR.U_NICNAME AS U_NICNAME,	<!--리뷰작성자-->
-        		COP.C_NICNAME AS C_NICNAME	<!--회사닉네임-->
+        		COP.C_NICNAME AS C_NICNAME,	<!--회사닉네임-->
+        		COP.C_NAME AS C_NAME,		<!--회사이름-->
+        		COP.C_LOGO AS C_LOGO		<!--회사로고-->
 		FROM REVIEW AS REW 	
 			INNER JOIN USER AS USR		
 					ON REW.R_U_IDX = USR.U_IDX
 			LEFT JOIN COMPANY AS COP		
-					ON COP.C_IDX = USR.U_C_IDX
+					ON COP.C_IDX = REW.R_C_IDX
 		WHERE USR.U_IDX = #{u_idx}
+		ORDER BY R_DATE DESC
 	</select>
+	
+	<!--리뷰작성유무체크-->
+	<select id="reviewCheck" resultType="map">
+		SELECT U_REVIEW, C_IDX, IFNULL(C_NAME,'회사 확인중') AS C_NAME
+		FROM USER AS USR
+	        LEFT JOIN COMPANY AS COP		
+				ON COP.C_IDX = USR.U_C_IDX
+		WHERE U_IDX = #{u_idx}
+	</select>
+	
+	<!--리뷰 작성-->
+	<insert id="reviewInsert">
+		INSERT INTO REVIEW (R_C_IDX,R_U_IDX,R_STAR,R_TITLE,R_CONTENT,R_WORK)
+		VALUES (#{r_c_idx},#{r_u_idx},#{r_star},#{r_title},#{r_content},#{r_work})
+	</insert>
+	
+	<!--리뷰 수정-->
+	<update id="reviewUpdate">
+		UPDATE REVIEW
+		SET R_STAR = #{r_star}, R_TITLE = #{r_title}, R_CONTENT = #{r_content}
+		WHERE R_IDX = #{r_idx}
+	</update>
 </mapper>

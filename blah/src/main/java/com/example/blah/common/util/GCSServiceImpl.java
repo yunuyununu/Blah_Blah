@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
@@ -19,9 +18,10 @@ public class GCSServiceImpl implements GCSService {
 	@Value("${spring.cloud.gcp.storage.bucket}")
     private String bucketName;
 
-    public void uploadObject(GCSRequest gcsRequest) throws IOException {
+	@Override
+    public String uploadObject(GCSRequest gcsRequest) throws IOException {
 
-        String keyFileName = "blahblah-storage-08872a7fc585.json";
+    	String keyFileName = "blahblah-storage-08872a7fc585.json";
         InputStream keyFile = ResourceUtils.getURL("classpath:" + keyFileName).openStream();
 
         Storage storage = StorageOptions.newBuilder()
@@ -29,10 +29,16 @@ public class GCSServiceImpl implements GCSService {
                 .build()
                 .getService();
 
-        BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, gcsRequest.getFile().getOriginalFilename())
-                .setContentType(gcsRequest.getFile().getContentType()).build();
+        String fileName = gcsRequest.getName(); // uuid 포함된 고유 파일명
 
-        Blob blob = storage.create(blobInfo, gcsRequest.getFile().getInputStream());
+        BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fileName)
+                .setContentType(gcsRequest.getFile().getContentType())
+                .build();
 
+        storage.create(blobInfo, gcsRequest.getFile().getInputStream());
+
+        // GCS Public URL 생성 (버킷이 공개 설정이어야 접근 가능)
+        String publicUrl = "https://storage.googleapis.com/" + bucketName + "/" + fileName;
+        return publicUrl;
     }
 }

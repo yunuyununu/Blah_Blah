@@ -7,12 +7,14 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.blah.common.util.GCSRequest;
+import com.example.blah.common.util.GCSService;
 import com.example.blah.domain.BoardDTO;
-import com.example.blah.domain.FiletempDTO;
+import com.example.blah.domain.FileDTO;
 import com.example.blah.mapper.BoardMapper;
-import com.example.blah.mapper.FileMapper;
 import com.example.blah.service.BoardService;
 
 @Service
@@ -22,8 +24,9 @@ public class BoardServiceImpl implements BoardService {
 	BoardMapper boardMapper;
 	
 	@Autowired
-	FileMapper fileMapper;
-
+	GCSService gcsService;
+	
+	// 게시글 목록
 	@Override
 	public List<BoardDTO> getBoard(Long lastBIdx) {
 	    if (lastBIdx == null) {
@@ -33,64 +36,53 @@ public class BoardServiceImpl implements BoardService {
 	    }
 	}
 	
+	// 게시글 상세
 	@Override
 	public Map<String, Object> details(int b_idx) {
 		return boardMapper.boardDetails(b_idx);
 	}
 	
+	// 게시물 상세 - 이미지파일
+	@Override
+	public List<Map<String, Object>> boardImages(int b_idx) {
+		return boardMapper.boardImages(b_idx);
+	}
+	
+	// 게시글 조회수
 	@Override
 	public void incrementHit(int b_idx) {
 		boardMapper.updateHit(b_idx);
 	}
 	
+	
+	// 게시글 등록
 	@Override
-	public void boardInsert(BoardDTO dto) {
-//		int idx = dto.getB_idx();
-//		
-//		try {
-//			if (CollectionUtils.isEmpty(files)) {
-				boardMapper.boardInsert(dto);
-//			} else {
-//				for (BoardDTO file : files) {
-//					file.setI_idx(idx);
-//				}
-//				boardMapper.boardInsert(dto);
-//				boardMapper.saveAll(files);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			System.out.println("게시글 저장 실패!!!");
-//		}
+	@Transactional
+	public void boardInsert(int u_idx, String b_title, String b_content, List<MultipartFile> images) throws IOException {
+		
+		BoardDTO dto = new BoardDTO(u_idx,b_title, b_content);
+		boardMapper.boardInsert(dto);
+		
+		if (images != null && !images.isEmpty()) {
+		    for (MultipartFile image : images) {
+		        // 파일명 처리
+		        String originalFilename = image.getOriginalFilename();
+		        String uuid = UUID.randomUUID().toString();
+		        String fileName = uuid + "_" + originalFilename;
+
+		        // GCS에 업로드
+		        GCSRequest gcsRequest = new GCSRequest();
+		        gcsRequest.setName(fileName); // GCS에 저장될 파일명
+		        gcsRequest.setFile(image); // 실제 파일
+		        String publicUrl = gcsService.uploadObject(gcsRequest); // 업로드 실행 후 URL 반환
+
+		        // DB 저장
+		        FileDTO imageFile = new FileDTO(dto.getB_idx(), publicUrl);
+		        boardMapper.imageInsert(imageFile);
+		    }
+		}
+		
+
 		
 	}
-	
-	@Override
-	public void uploadImage(MultipartFile file, int u_idx) throws IOException {
-		
-		// 파일명 처리
-		String originalFilename = file.getOriginalFilename();
-		String uuid = UUID.randomUUID().toString();
-		String fileName = uuid + "_" + originalFilename;
-		//Files.copy(file.getInputStream(), fileName);
-		
-		FiletempDTO dto = new FiletempDTO();
-		dto.setT_image(file);
-		dto.setT_u_idx(u_idx);
-		
-		fileMapper.insertTempImage(dto);
-	}
-	
-	@Override
-	public void confirmImageUsage(List<Integer> imageIds) {
-		fileMapper.confirmImages(imageIds);
-	}
-	
-	@Override
-	public void cleanupOldTempImages() {
-		List<FiletempDTO> dto = fileMapper.selectOldTempImages(30);
-		for (FiletempDTO img : dto) {
-            fileMapper.deleteTempImage(img.getT_idx());
-        }
-	}
-	
 }

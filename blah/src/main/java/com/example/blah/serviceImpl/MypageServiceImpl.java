@@ -45,9 +45,26 @@ public class MypageServiceImpl implements MypageService {
 		mypageMapper.userWithdraw(u_idx);
 	}
 	
+	// 리뷰작성유무체크
+	@Override
+	public Map<String, Object> reviewCheck(int u_idx) {
+		return mypageMapper.reviewCheck(u_idx);
+	}
+	
 	// 내 리뷰 목록
 	@Override
-	public List<CompanyDTO> myreview(Map<String, Object> map) {
-		return mypageMapper.myreview(map);
+	public List<CompanyDTO> myreviewList(int u_idx) {
+		return mypageMapper.myreviewList(u_idx);
+	}
+	
+	// 리뷰 작성
+	public void reviewInsert(Map<String, Object> map) {
+		mypageMapper.reviewInsert(map);
+	}
+	
+	// 리뷰 수정
+	@Override
+	public void reviewUpdate(Map<String, Object> map) {
+		mypageMapper.reviewUpdate(map);
 	}
 }

@@ -15,7 +15,8 @@ public class FileDTO {
     private String i_image;
     private String i_date;
     
-    public void setIbidx(int i_b_idx) {
-        this.i_b_idx = i_b_idx;
+    public FileDTO(int bIdx, String imageUrl) {
+        this.i_b_idx = bIdx;
+        this.i_image = imageUrl;
     }
 }

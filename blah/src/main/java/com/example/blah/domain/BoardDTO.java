@@ -1,13 +1,9 @@
 package com.example.blah.domain;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -26,6 +22,13 @@ public class BoardDTO {
     private String u_nicname;
     private long lastBIdx;
     private String c_name;
+    private int i_idx;
+    private int i_b_idx;
+    private String i_image;
     
-    private List<MultipartFile> files = new ArrayList<>();  
+    public BoardDTO(int userId, String title, String content) {
+        this.b_u_idx = userId;
+        this.b_title = title;
+        this.b_content = content;
+    }
 }

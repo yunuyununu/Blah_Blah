@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,11 +17,7 @@ import com.example.blah.common.util.GCSRequest;
 import com.example.blah.common.util.GCSService;
 import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.FileDTO;
-import com.example.blah.domain.JoinDTO;
 import com.example.blah.service.BoardService;
-import com.example.blah.service.FileService;
-import com.example.blah.serviceImpl.BoardServiceImpl;
-import com.example.blah.serviceImpl.CompanyServiceImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,16 +31,17 @@ public class BoardController {
 	BoardService service;
 	
 	@Autowired
-	FileService fileservice;
-	
-	@Autowired
 	GCSService gcsService;
 	
 	// 게시판 목록
 	@GetMapping("boards")
-	public List<BoardDTO> getBoardList(@RequestParam(name = "lastBIdx", required = false) Long lastBIdx) {
+	public List<BoardDTO> getBoardList( HttpSession session,@RequestParam(name = "lastBIdx", required = false) Long lastBIdx) {
 		System.out.println("lastBIdx=>"+lastBIdx);
 		System.out.println("게시판 목록=="+service.getBoard(lastBIdx));
+		
+		Integer userIdx = (Integer) session.getAttribute("UserIdx");
+		System.out.println("게시판 조회 시 세션아이디=>>"+userIdx);
+		
 		return service.getBoard(lastBIdx);
 	}
 	
@@ -55,6 +50,12 @@ public class BoardController {
 	public Map<String, Object> boardDetails(@RequestParam(name = "b_idx") int b_idx) {
 	    return service.details(b_idx);
 	}
+	
+	// 게시글 상세 - 이미지 파일
+	@GetMapping("boardImages")
+	public List<Map<String, Object>> boardImages(@RequestParam(name = "b_idx") int b_idx) {
+		return service.boardImages(b_idx);
+    }
 	
 	// 게시글 조회수 증가
 	@PostMapping("hits")
@@ -87,98 +88,25 @@ public class BoardController {
 	
 	// 게시글 등록
 	@PostMapping("boardInsert")
-	public void join(@RequestParam(name="userId", defaultValue="") int b_u_idx, 
-			@RequestParam(name="title", defaultValue="") String b_title,
-			@RequestParam(name="content", defaultValue="") String b_content,
-			@RequestParam(name="files", defaultValue="") List<BoardDTO> files) {
+	public String join(HttpSession session,@RequestParam(name="b_title") String b_title,
+			@RequestParam(name="b_content") String b_content,
+			@RequestParam(name="images", required = false) List<MultipartFile> images) {
 		
+		String result = "";
 		try {
-	        
-//			if(files != null) {
-//				// 파일명 처리
-//				String originalFilename = userFile.getOriginalFilename();
-//				String uuid = UUID.randomUUID().toString();z
-//				String fileName = uuid + "_" + originalFilename;
-//				
-//				// GCS에 업로드
-//				GCSRequest gcsRequest = new GCSRequest();
-//				gcsRequest.setName(fileName); // GCS에 저장될 파일명
-//				gcsRequest.setFile(userFile); // 실제 파일
-//				gcsService.uploadObject(gcsRequest); // 업로드 실행
-//			}
-	        
-	        // dto에 담아 보내기
-			BoardDTO dto = new BoardDTO();
-	        dto.setB_u_idx(b_u_idx);
-	        dto.setB_title(b_title);
-	        dto.setB_content(b_content);
-	        // 참부파일 추가
-
-	        //ervice.boardInsert(dto);
-	        //return result;
+			Integer userIdx = (Integer) session.getAttribute("UserIdx");
+			System.out.println("게시판 등록 시 세션아이디=>>"+userIdx);
+		    if (userIdx == null) {
+		        return "fail"; // 또는 "unauthorized"
+		    }
+	        service.boardInsert(userIdx,b_title,b_content,images);
+	        result = "success";
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	        //return "fail";
+	        result = "fail";
 	    }
-	
+		return result;
 	}
 	
-	// 신규 게시글 생성
-    @PostMapping("saveBoard")
-    public String saveBoard(@RequestParam(name="userId", defaultValue="") int b_u_idx, 
-			@RequestParam(name="title", defaultValue="") String b_title,
-			@RequestParam(name="content", defaultValue="") String b_content,
-			@RequestParam(name="files", defaultValue="") List<MultipartFile> files) {
-    	
-    	String result ="";
-    	
-    	try {
-    		// dto에 담아 보내기
-    		BoardDTO dto = new BoardDTO();
-    		dto.setB_u_idx(b_u_idx);
-    		dto.setB_title(b_title);
-    		dto.setB_content(b_content);
-    		dto.setFiles(files);
-    		
-    		int id = dto.getB_u_idx();
-    		//service.boardInsert(dto);
-    		
-    		List<FileDTO> filelist = new ArrayList<>();
-    		
-//    			for(MultipartFile multipartFile : files) {
-//    				if(files != null) {
-//    					continue;
-//    				}
-//    				files.add(multipartFile)
-//    			}
-    			
-    			
-    			
-    			
-    			// 파일명 처리
-    			for(int i=0;i<((CharSequence) files).length();i++) {
-    				String originalFilename = files.get(i).getOriginalFilename();
-    				String uuid = UUID.randomUUID().toString();
-    				String fileName = uuid + "_" + originalFilename;
-    				
-    				// GCS에 업로드
-    				GCSRequest gcsRequest = new GCSRequest();
-    				gcsRequest.setName(fileName); // GCS에 저장될 파일명
-    				gcsRequest.setFile(files.get(i)); // 실제 파일
-    				gcsService.uploadObject(gcsRequest); // 업로드 실행
-    				//filelist.addAll(files.get(i).getName());
-    			}
-    			
-    		
-    		
-    		fileservice.saveFiles(b_u_idx, filelist);
-    		result ="success";
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    		result = "fail";
-    	}
-    	
-        return result;
-    }
 }

@@ -22,6 +22,15 @@ public interface MypageMapper {
 	// 회원 탈퇴
 	void userWithdraw(int u_idx);
 	
+	// 리뷰작성유무체크
+	Map<String, Object> reviewCheck(int u_idx);
+	
 	// 내 리뷰 목록
-	List<CompanyDTO> myreview(Map<String, Object> map);
+	List<CompanyDTO> myreviewList(int u_idx);
+	
+	// 리뷰 작성
+	void reviewInsert(Map<String, Object> map);
+	
+	// 리뷰 수정
+	void reviewUpdate(Map<String, Object> map);
 }

@@ -1,6 +1,7 @@
 package com.example.blah.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.blah.common.util.GCSRequest;
 import com.example.blah.common.util.GCSService;
+import com.example.blah.domain.CompanyDTO;
 import com.example.blah.service.MypageService;
 
 import jakarta.servlet.http.HttpSession;
@@ -49,12 +51,12 @@ public class MypageController {
 	        GCSRequest gcsRequest = new GCSRequest();
 	        gcsRequest.setName(fileName); // GCS에 저장될 파일명
 	        gcsRequest.setFile(u_file); // 실제 파일
-	        gcsService.uploadObject(gcsRequest); // 업로드 실행
+	        String publicUrl = gcsService.uploadObject(gcsRequest); // 업로드 실행
 	        System.out.println("구글클라우드 업로드=>>"+gcsRequest);
 	        
 	        Map<String, Object> map = new HashMap<>();
 	        map.put("u_idx", (int)session.getAttribute("UserIdx"));
-			map.put("u_file", fileName);
+			map.put("u_file", publicUrl);
 	        System.out.println("회사 변경 시 보내는 맵=>>"+map);
 			service.companyChange(map);
 		} catch (Exception e) {
@@ -89,4 +91,45 @@ public class MypageController {
 			session.invalidate(); 
 		}
 	}
+	
+	// 리뷰작성유무체크
+	@GetMapping("myreviewCheck")
+	public Map<String, Object> myreviewCheck(HttpSession session) {
+		return service.reviewCheck((int)session.getAttribute("UserIdx"));
+	}
+	
+	// 나의리뷰리스트
+	@GetMapping("myreviewList")
+	public List<CompanyDTO> myreview(HttpSession session) {
+		return service.myreviewList((int)session.getAttribute("UserIdx"));
+	}
+	
+	// 리뷰작성
+	@PostMapping("reviewInsert")
+	public void reviewInsert(@RequestBody Map<String, Object> request, HttpSession session) {
+
+	    Map<String, Object> map = new HashMap<>();
+	    map.put("r_c_idx", request.get("r_c_idx"));
+	    map.put("r_u_idx", session.getAttribute("UserIdx"));
+	    map.put("r_star", request.get("r_star"));
+	    map.put("r_title", request.get("r_title"));
+	    map.put("r_content", request.get("r_content"));
+	    map.put("r_work", request.get("r_work"));
+
+	    service.reviewInsert(map);
+	}
+	
+	// 리뷰수정
+	@PostMapping("reviewUpdate")
+	public void reviewUpdate(@RequestBody Map<String, Object> request) {
+		
+		Map<String, Object> map = new HashMap<>();
+	    map.put("r_idx", request.get("r_idx"));
+	    map.put("r_star", request.get("r_star"));
+	    map.put("r_title", request.get("r_title"));
+	    map.put("r_content", request.get("r_content"));
+
+	    service.reviewInsert(map);
+	}
+	
 }

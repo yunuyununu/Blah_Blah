@@ -7,37 +7,37 @@
 
     <select id="list" resultType="com.example.blah.domain.BoardDTO">
         SELECT 
-        		B.B_IDX AS B_IDX,          <!--게시판 번호-->
-			    U.U_NICNAME AS U_NICNAME,  <!--회원 닉네임-->
-			    B.B_U_IDX AS B_U_IDX,      <!--게시글 작성자-->
-			    B.B_TITLE AS B_TITLE,      <!--게시글 제목-->
-			    B.B_CONTENT AS B_CONTENT,  <!--게시글 내용-->
-			    B.B_HITS AS B_HITS,        <!--게시글 조회수-->
-			    DATE_FORMAT(B.B_DATE, '%y-%m-%d') AS B_DATE  <!--게시글 작성일-->
+    		BRD.B_IDX AS B_IDX,          <!--게시판 번호-->
+		    USR.U_NICNAME AS U_NICNAME,  <!--회원 닉네임-->
+		    BRD.B_U_IDX AS B_U_IDX,      <!--게시글 작성자-->
+		    BRD.B_TITLE AS B_TITLE,      <!--게시글 제목-->
+		    BRD.B_CONTENT AS B_CONTENT,  <!--게시글 내용-->
+		    BRD.B_HITS AS B_HITS,        <!--게시글 조회수-->
+		    DATE_FORMAT(BRD.B_DATE, '%y-%m-%d') AS B_DATE  <!--게시글 작성일-->
         FROM 
-		    BOARD B
+		    BOARD BRD
 		INNER JOIN 
-		    USER U ON B.B_U_IDX = U.U_IDX
+		    USER USR ON BRD.B_U_IDX = USR.U_IDX
     </select>
     
     <!--처음 게시글 12개-->
     <select id="firstList" resultType="com.example.blah.domain.BoardDTO">
 	    SELECT 
-		    B.B_IDX AS B_IDX,        	<!--게시판 번호-->
-		    B.B_U_IDX AS B_U_IDX,       <!--게시글 작성자-->
-		    B.B_TITLE AS B_TITLE,       <!--게시글 제목-->
-		    B.B_CONTENT AS B_CONTENT,   <!--게시글 내용-->
-		    B.B_HITS AS B_HITS,         <!--게시글 조회수-->
-		    B.B_DATE AS B_DATE,         <!--게시글 작성일-->
-		    B.B_MODIFY AS B_MODIFY,     <!--수정일-->
-		    B.B_VOTE AS B_VOTE,         <!--투표존재여부-->
-		    B.B_DELETE AS B_DELETE,     <!--삭제여부-->
-		    U.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
-		    C.C_NAME AS C_NAME          <!--회사명-->
-		FROM BOARD B
-		JOIN USER U ON B.B_U_IDX = U.U_IDX
-		JOIN COMPANY C ON U.U_C_IDX = C.C_IDX
-		ORDER BY B.B_IDX DESC
+		    BRD.B_IDX AS B_IDX,        	<!--게시판 번호-->
+		    BRD.B_U_IDX AS B_U_IDX,       <!--게시글 작성자-->
+		    BRD.B_TITLE AS B_TITLE,       <!--게시글 제목-->
+		    BRD.B_CONTENT AS B_CONTENT,   <!--게시글 내용-->
+		    BRD.B_HITS AS B_HITS,         <!--게시글 조회수-->
+		    BRD.B_DATE AS B_DATE,         <!--게시글 작성일-->
+		    BRD.B_MODIFY AS B_MODIFY,     <!--수정일-->
+		    BRD.B_VOTE AS B_VOTE,         <!--투표존재여부-->
+		    BRD.B_DELETE AS B_DELETE,     <!--삭제여부-->
+		    USR.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
+		    COP.C_NAME AS C_NAME          <!--회사명-->
+		FROM BOARD BRD
+		JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+		JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		ORDER BY BRD.B_IDX DESC
 		LIMIT 12
     </select>
 
@@ -45,43 +45,53 @@
 	<select id="plusList" resultType="com.example.blah.domain.BoardDTO">
 	
 		SELECT 
-		    B.B_IDX AS B_IDX,           <!--게시판 번호-->
-		    B.B_U_IDX AS B_U_IDX,       <!--게시글 작성자-->
-		    B.B_TITLE AS B_TITLE,       <!--게시글 제목-->
-		    B.B_CONTENT AS B_CONTENT,   <!--게시글 내용-->
-		    B.B_HITS AS B_HITS,         <!--게시글 조회수-->
-		    B.B_DATE AS B_DATE,         <!--게시글 작성일-->
-		    B.B_MODIFY AS B_MODIFY,     <!--수정일-->
-		    B.B_VOTE AS B_VOTE,         <!--투표존재여부-->
-		    B.B_DELETE AS B_DELETE,     <!--삭제여부-->
-		    U.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
-		    C.C_NAME AS C_NAME          <!--회사명-->
-		FROM BOARD B
-		JOIN USER U ON B.B_U_IDX = U.U_IDX
-		JOIN COMPANY C ON U.U_C_IDX = C.C_IDX
-		WHERE B.B_DELETE = 'N' 
-		  AND B.B_IDX &lt; #{lastBIdx}
-		ORDER BY B.B_IDX DESC
+		    BRD.B_IDX AS B_IDX,           <!--게시판 번호-->
+		    BRD.B_U_IDX AS B_U_IDX,       <!--게시글 작성자-->
+		    BRD.B_TITLE AS B_TITLE,       <!--게시글 제목-->
+		    BRD.B_CONTENT AS B_CONTENT,   <!--게시글 내용-->
+		    BRD.B_HITS AS B_HITS,         <!--게시글 조회수-->
+		    BRD.B_DATE AS B_DATE,         <!--게시글 작성일-->
+		    BRD.B_MODIFY AS B_MODIFY,     <!--수정일-->
+		    BRD.B_VOTE AS B_VOTE,         <!--투표존재여부-->
+		    BRD.B_DELETE AS B_DELETE,     <!--삭제여부-->
+		    USR.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
+		    COP.C_NAME AS C_NAME          <!--회사명-->
+		FROM BOARD BRD
+		JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+		JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		WHERE BRD.B_DELETE = 'N' 
+		  AND BRD.B_IDX &lt; #{lastBIdx}
+		ORDER BY BRD.B_IDX DESC
 		LIMIT 12
 	</select>
 	
 	<!--게시글 상세-->
 	<select id="boardDetails" resultType="map">
-		SELECT B.B_IDX AS B_IDX,			<!--게시판 번호-->
-			   B.B_U_IDX AS B_U_IDX,		<!--게시글 작성자-->
-			   B.B_TITLE AS B_TITLE,		<!--게시글 제목-->
-			   B.B_CONTENT AS B_CONTENT,	<!--게시글 내용-->
-			   B.B_HITS AS B_HITS,		<!--게시글 조회수-->
-			   B.B_DATE AS B_DATE,		<!--게시글 작성일-->
-			   B.B_MODIFY AS B_MODIFY,	<!--수정일-->
-			   B.B_VOTE AS B_VOTE,		<!--투표존재여부-->
-			   B.B_DELETE AS B_DELETE,	<!--삭제여부-->
-			   U.U_NICNAME AS U_NICNAME,	<!--회원 닉네임-->
-			   C.C_NAME AS C_NAME			<!--회사명-->
-		FROM BOARD B
-		JOIN USER U ON B.B_U_IDX = U.U_IDX
-		JOIN COMPANY C ON U.U_C_IDX = C.C_IDX
-		WHERE B.B_IDX = #{b_idx}
+		SELECT BRD.B_IDX AS B_IDX,			<!--게시판 번호-->
+			   BRD.B_U_IDX AS B_U_IDX,		<!--게시글 작성자-->
+			   BRD.B_TITLE AS B_TITLE,		<!--게시글 제목-->
+			   BRD.B_CONTENT AS B_CONTENT,	<!--게시글 내용-->
+			   BRD.B_HITS AS B_HITS,		<!--게시글 조회수-->
+			   BRD.B_DATE AS B_DATE,		<!--게시글 작성일-->
+			   BRD.B_MODIFY AS B_MODIFY,	<!--수정일-->
+			   BRD.B_VOTE AS B_VOTE,		<!--투표존재여부-->
+			   BRD.B_DELETE AS B_DELETE,	<!--삭제여부-->
+			   USR.U_NICNAME AS U_NICNAME,	<!--회원 닉네임-->
+			   COP.C_NAME AS C_NAME			<!--회사명-->
+		FROM BOARD BRD
+			JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+			JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		WHERE BRD.B_IDX = #{b_idx}
+	</select>
+	
+	<!--게시글 상세 이미지-->
+	<select id="boardImages" resultType="java.util.HashMap">
+		SELECT IMG.I_IDX AS I_IDX,
+				IMG.I_B_IDX AS I_B_IDX,
+				IMG.I_IMAGE AS I_IMAGE
+		FROM BOARD BRD
+			LEFT JOIN IMAGE_FILE IMG ON IMG.I_B_IDX = BRD.B_IDX
+		WHERE BRD.B_IDX = #{b_idx}
 	</select>
 	
 	<!--조회수 증가-->
@@ -91,10 +101,16 @@
 		WHERE B_IDX = #{b_idx}
 	</update>
 	
-	<!--게시글 등록-->
-	<insert id="insertBoard">
-		INSERT INTO BOARD (B_U_IDX,B_TITLE,B_CONTENT) 
-		VALUES (#{b_u_idx}, #{b_title}, #{b_content})
+	<!--게시물 등록-->
+	<insert id="boardInsert" parameterType="com.example.blah.domain.BoardDTO" useGeneratedKeys="true" keyProperty="b_idx">
+		INSERT INTO BOARD (B_U_IDX, B_TITLE, B_CONTENT)
+        VALUES (#{b_u_idx}, #{b_title}, #{b_content})
 	</insert>
 	
+	<!--이미지 첨부-->
+	<insert id="imageInsert">
+        INSERT INTO IMAGE_FILE (I_B_IDX, I_IMAGE)
+        VALUES (#{i_b_idx}, #{i_image})
+    </insert>
+    
 </mapper>
