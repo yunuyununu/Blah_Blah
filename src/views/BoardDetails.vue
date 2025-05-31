@@ -6,8 +6,17 @@
       <br>
       <div class="post-meta">
         <span>{{ post.C_NAME }} · {{ post.U_NICNAME }}</span>
-        <span>👁 {{ post.B_HITS }} · ♥ ♡ {{ post.B_LIKES || 0 }} · {{ formatDate(post.B_DATE) }}</span>
+        <div class="post-meta-right">
+          <span>👁 {{ post.B_HITS }}</span>
+          <button @click="toggleLike" class="like-button">
+            <span class="heart-icon" :class="{ liked: isLiked }">
+            {{ isLiked ? '♥' : '♡' }} {{ likeCount || 0 }}
+            </span>
+          </button>
+          <span>{{ formatDate(post.B_DATE) }}</span>
+        </div>
       </div>
+
     </div>
     <hr />
     <div class="post-content">
@@ -24,6 +33,10 @@
     </div>
     <br>
     <button class="btn btn-outline-danger" @click="$router.back()"  style="text-align: left;">← 목록으로</button>
+        <div v-if="userStore.userIdx === post.B_U_IDX" style="text-align:right">
+          <span class="action">✏️ 수정</span>
+          <span class="action" @click="deleteBoard">🗑️ 삭제</span>
+        </div>
     <hr />
 
       <div class="comment-section">
@@ -32,23 +45,6 @@
         <div class="comment-action">
           <button class="btn btn-outline-primary" @click="submitComment">등록</button>
         </div>
-
-        <!-- <div class="comment-list" v-if="commentList.length > 0">
-          <div v-for="comment in commentList" :key="comment.cm_idx" class="comment-item">
-            <div class="comment-header">
-              <span class="nickname">{{ maskedNickname(comment.u_nicname || '익명') }}</span>
-               <span class="nickname">
-                <span class="nickname-blue">{{ comment.c_nicname }}</span> · <span class="nickname-gray">{{ comment.u_nicname }}</span>
-              </span>
-              <span class="comment-date">{{ formatDate(comment.cm_date) }}</span>
-            </div>
-            <div class="comment-body">{{ comment.cm_content }}</div>
-            <div class="comment-footer">
-              <span class="action">👍 좋아요</span>
-              <span class="action">💬 답글</span>
-            </div>
-          </div>
-        </div> -->
          <div class="comment-list" v-if="threadedComments.length > 0">
           <CommentItem 
             v-for="comment in threadedComments"
@@ -59,6 +55,7 @@
             @toggle-reply="toggleReply"
             @submit-reply="submitReply"
             @update-reply-content="updateReplyContent"
+            @delete-comment="handleDeleteComment"
           />
         </div>
 
@@ -73,8 +70,10 @@
 <script setup>
 import CommentItem from '@/views/CommentItem.vue';
 import { useUserStore } from '@/store/userStore'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
+const router = useRouter()
 
 import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
@@ -109,13 +108,31 @@ const updateReplyContent = (cm_idx, value) => {
   replyContentMap.value = { ...replyContentMap.value, [cm_idx]: value };
 };
 
+// 댓글 삭제
+const handleDeleteComment = async (cm_idx) => {
+  try {
+    const confirmed = window.confirm('정말 이 댓글을 삭제하시겠습니까?');
+    if (!confirmed) return;
+
+    await axios.post(`http://localhost:80/reply/commentDelete`, {
+      cm_idx : cm_idx
+    });
+    alert('댓글이 삭제되었습니다.');
+
+    // 댓글 목록 갱신
+    fetchPostComment(); // 댓글 목록 다시 불러오는 함수
+  } catch (err) {
+    alert('댓글 삭제 중 오류가 발생했습니다.');
+    console.error(err);
+  }
+};
+
 const fetchPostDetail = async () => {
   try {
     const res = await axios.get(`http://localhost:80/board/details`, {
       params: { b_idx: bidx },
     });
     post.value = res.data;
-
     // 이미지 리스트 요청
     const imageRes = await axios.get(`http://localhost:80/board/boardImages`, {
       params: { b_idx: bidx },
@@ -147,9 +164,27 @@ const fetchPostComment = async () => {
   }
 };
 
+const deleteBoard = async () => {
+  try {
+    const confirmed = window.confirm('정말 이 게시물을 삭제하시겠습니까?');
+    if (!confirmed) return;
+    await axios.post(`http://localhost:80/board/boardDelete`, {
+      b_idx: bidx
+    });
+    router.push('/board/boardlist')
+  } catch (err) {
+    console.error('게시글 삭제 실패:', err);
+  }
+};
+
 onMounted(() => {
   fetchPostDetail();
   fetchPostComment();
+  if (userStore.isLogin) {
+    fetchLikeStatus(); // 좋아요 여부 + 수
+  } else {
+    fetchLikeCount(); // 로그인 안 한 경우에도 좋아요 수는 보여줌
+  }
 });
 
 const formatDate = (datetime) => {
@@ -176,7 +211,14 @@ const threadedComments = computed(() => {
 });
 
 const submitComment = async() => {
-  if (!newComment.value.trim()) return;
+  if(userStore.isLogin === false){
+    alert('로그인 후 이용가능합니다.')
+    return
+  }
+  if (!newComment.value.trim()) {
+    alert('댓글을 작성해주세요.')
+    return;
+  }
   if(userStore.isLogin !== false){
     try {
       const response = await axios.post('http://localhost:80/reply/commentInsert', {
@@ -200,8 +242,15 @@ const submitComment = async() => {
 
 // 답글 등록
 const submitReply = async (parentIdx) => {
+  if(userStore.isLogin === false){
+    alert('로그인 후 이용가능합니다.')
+    return
+  }
   const content = replyContentMap.value[parentIdx];
-  if (!content || !content.trim()) return;
+  if (!content || !content.trim()) {
+    alert('댓글을 작성해주세요.')
+    return;
+  }
   if(userStore.isLogin !== false){
     try {
       const response = await axios.post('http://localhost:80/reply/replyInsert', {
@@ -230,11 +279,66 @@ const submitReply = async (parentIdx) => {
   }
 };
 
-// 미인증 회원일때 닉네임 마스킹 함수
-// const maskedNickname = (nickname) => {
-//   if (!nickname) return '익명';
-//   return nickname.slice(0, 1) + '*'.repeat(Math.max(1, nickname.length - 1));
-// };
+// 좋아요 토글버튼
+const likeCount = ref(0);
+const isLiked = ref(false);
+
+// 게시글 좋아요 상태 가져오기
+const fetchLikeStatus = async () => {
+  try {
+    const res = await axios.get('http://localhost:80/board/likeStatus', {
+      params: {
+        b_idx: bidx
+      }
+    });
+    isLiked.value = !!res.data.liked; // 불린값으로 강제
+    likeCount.value = typeof res.data.likeCount === 'number' ? res.data.likeCount : 0;
+  } catch (err) {
+    console.error('좋아요 상태 로딩 실패:', err);
+    isLiked.value = false;
+    likeCount.value = 0; // 실패 시 안전한 초기값
+  }
+};
+
+// 비회원일때 좋아요 갯수
+const fetchLikeCount = async () => {
+  try {
+    const res = await axios.get('http://localhost:80/board/likeCount', {
+      params: { b_idx: bidx }
+    });
+    likeCount.value = typeof res.data.likeCount === 'number' ? res.data.likeCount : 0;
+  } catch (err) {
+    console.error('좋아요 수 로딩 실패:', err);
+    likeCount.value = 0;
+  }
+};
+
+
+// 좋아요 토글
+const toggleLike = async () => {
+  if (!userStore.isLogin) {
+    alert('로그인 후 이용해주세요.');
+    return;
+  }
+
+  const payload = {
+    h_u_idx: userStore.userIdx,
+    b_idx: bidx
+  };
+
+  try {
+    if (isLiked.value) {
+      await axios.post('http://localhost:80/board/likeDelete', payload);
+      likeCount.value = Math.max(0, likeCount.value - 1); // 최소 0
+    } else {
+      await axios.post('http://localhost:80/board/likeInsert', payload);
+      likeCount.value++;
+    }
+    isLiked.value = !isLiked.value;
+  } catch (err) {
+    console.error('좋아요 처리 실패:', err);
+  }
+};
 
 </script>
 
@@ -254,13 +358,19 @@ const submitReply = async (parentIdx) => {
 }
 
 .post-meta {
-  font-size: 14px;
+   font-size: 14px;
   color: #888;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
 }
-
+.post-meta-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
 .post-content {
   font-size: 16px;
   line-height: 1.6;
@@ -399,5 +509,32 @@ hr {
   object-fit: cover;
   border-radius: 6px;
   border: 1px solid #ccc;
+}
+.like-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #888;
+  padding: 0;
+}
+.like-button .liked {
+  color: red;
+}
+.action {
+  cursor: pointer;
+  user-select: none;
+  color: #919191;
+}
+.liked {
+  color: red;
+}
+.heart-icon {
+  cursor: pointer;
+  font-size: 15px;
+  transition: color 0.2s;
+}
+.heart-icon.liked {
+  color: red;
 }
 </style>

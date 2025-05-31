@@ -47,6 +47,9 @@
               <button type="button" class="submit-btn" @click="submit">신청하기</button>
             </div>
           </form>
+          <div class="no-result-text" style="text-align: center;">
+              * 회사 목록 조회 후 없을 경우에만 신청하시기 바랍니다. 
+            </div>
         </div>
       </div>
     </div>
@@ -216,6 +219,9 @@ input[type="file"] {
   font-size: 12px;
   margin-top: 3px;
   margin-bottom: 8px;
+}
+.no-result-text {
+  color: gray;
 }
 </style>
 

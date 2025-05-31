@@ -6,33 +6,42 @@
         <div class="card-content">{{ item.b_content.slice(0, 80) }}...</div>
         <div class="card-info">
           <a>{{ item.c_name }} · {{ item.u_nicname }}</a>
-          <span>♥ ♡</span>
+          <span>♥ {{ item.heart_count }}</span>
           <span>👁 {{ item.b_hits }}</span>
           <span>{{ formatDate(item.b_date) }}</span>
         </div>
       </div>
     </div>
-    <button class="load-more" v-if="hasMore" @click="fetchBoards">더보기</button>
+
+    <!-- 무한스크롤 감지용 div -->
+    <div ref="infiniteScrollTrigger" class="scroll-trigger" v-show="hasMore"></div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router'
+import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
-
-const router = useRouter()
+const formatDate = (datetime) => {
+  return new Date(datetime).toLocaleDateString();
+};
+const router = useRouter();
 
 const board = ref([]);
 const lastBIdx = ref(null);
 const hasMore = ref(true);
+const infiniteScrollTrigger = ref(null);
+let observer;
+
+const savedY = parseInt(sessionStorage.getItem('boardScrollY')) || 0;
+let isRestoringScroll = savedY > 0;
 
 const fetchBoards = async () => {
+  if (!hasMore.value) return;
+
   const res = await axios.get('http://localhost:80/board/boards', {
-    params: {
-      lastBIdx: lastBIdx.value,
-    },
-  })
+    params: { lastBIdx: lastBIdx.value },
+  });
 
   const newPosts = res.data;
   if (newPosts.length < 12) hasMore.value = false;
@@ -41,27 +50,66 @@ const fetchBoards = async () => {
     board.value.push(...newPosts);
     lastBIdx.value = newPosts[newPosts.length - 1].b_idx;
   }
-};
 
-const formatDate = (datetime) => {
-  return new Date(datetime).toLocaleDateString();
+  // 스크롤 복원이 필요한 경우, 충분히 로드될 때까지 반복 호출
+  if (isRestoringScroll) {
+    await nextTick(); // 렌더링 기다림
+    const waitUntilScrollable = async (targetY) => {
+        return new Promise((resolve) => {
+          const interval = setInterval(async () => {
+            if (document.documentElement.scrollHeight >= targetY + window.innerHeight) {
+              clearInterval(interval);
+              resolve();
+            } else {
+              if (hasMore.value) {
+                await fetchBoards(); // 계속 불러오기
+              }
+            }
+          }, 100); // 0.1초마다 체크
+        });
+    };
+    await waitUntilScrollable(savedY);
+    window.scrollTo({ top: savedY, behavior: 'auto' }); // 바로 이동
+    sessionStorage.removeItem('boardScrollY');
+    isRestoringScroll = false;
+  }
 };
-
-onMounted(() => {
-  fetchBoards();
-});
 
 const goBoardDetails = async (b_idx) => {
+  sessionStorage.setItem('boardScrollY', window.scrollY);
   try {
     await axios.post('http://localhost:80/board/hits', null, {
       params: { b_idx },
-      withCredentials: true // 쿠키를 서버로 보내기 위해 필요
+      withCredentials: true
     });
   } catch (err) {
     console.error('조회수 증가 실패:', err);
   }
   router.push({ name: 'boarddetails', params: { b_idx } });
 };
+
+const createObserver = () => {
+  observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && hasMore.value && !isRestoringScroll) {
+      fetchBoards();
+    }
+  });
+
+  if (infiniteScrollTrigger.value) {
+    observer.observe(infiniteScrollTrigger.value);
+  }
+};
+
+onMounted(async () => {
+  await fetchBoards();
+  createObserver();
+});
+
+onBeforeUnmount(() => {
+  if (observer && infiniteScrollTrigger.value) {
+    observer.unobserve(infiniteScrollTrigger.value);
+  }
+});
 </script>
 
 <style scoped>
@@ -118,5 +166,8 @@ h2 {
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+}
+.scroll-trigger {
+  height: 1px;
 }
 </style>

@@ -5,7 +5,7 @@
         <input type="text" placeholder="회사명을 입력하세요" v-model="searchKeyword" />
       </div>
       <div class="no-result-text" style="text-align: center;">
-        찾으시는 회사가 없나요? <RouterLink to="/company/companyInsert" class="underline-link">궁금한 회사를 직접 신청해주세요!</RouterLink>
+        찾으시는 회사가 없나요? <span class="underline-link" @click="goCompanyInsert">궁금한 회사를 직접 신청해주세요!</span>
       </div>
 
       <div class="company-grid">
@@ -97,6 +97,18 @@ const filteredCompanies = computed(() => {
 onMounted(() => {
   fetchCompanies()
 })
+
+import { useUserStore } from '@/store/userStore'
+const userStore = useUserStore()
+
+const goCompanyInsert = () => {
+  if (!userStore.isLogin) {
+    alert('로그인 후 이용해주세요.')
+    return
+  }
+  router.push('/company/companyInsert')
+}
+
 </script>
 
 <style scoped>

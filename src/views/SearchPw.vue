@@ -17,7 +17,7 @@
             <label>이메일</label>
           </div>
           <div class="col-6">
-            <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com" :disabled="changeEmail"
+            <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com" :disabled="changeEmail || emailDisabled"
             :class="['custom-input', { 'input-error': errors.email  }]"/>
             &nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="sendAuthCode">인증번호 전송</button>
@@ -32,7 +32,7 @@
             <label>인증번호</label>
           </div>
           <div class="col-6">
-            <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리"
+            <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리" :disabled="authcodeDisabled"
             :class="['custom-input', { 'input-error': errors.authcode  }]"/>&nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="authcodeVerify">인증번호확인</button>&nbsp;&nbsp;
             <p v-if="errors.authcode" class="error-text">{{ errors.authcode }}</p>
@@ -114,6 +114,9 @@ const authcodeInput = ref(null)
 const userIdInput = ref(null)
 const userTelInput = ref(null)
 
+const emailDisabled = ref(false)
+const authcodeDisabled = ref(false)
+
 const verifyMessage = ref('')
 const verifySuccess = ref(null)
 
@@ -145,15 +148,28 @@ const idCheckMessage = ref('')
 const isCodeVerified = ref(false)
 
 const sendAuthCode = async () => {
+
+  let isValid = true
+
   errors.value.email = ''
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   if (!email.value) {
     errors.value.email = '이메일을 입력하세요.'
     emailInput.value.focus()
+    isValid = false
     return
+  }else if (!emailPattern.test(email.value)) {
+      errors.value.email = '이메일 형식에 맞게 입력하세요.'
+      emailInput.value.focus()
+      isValid = false
+      return
   }
 
   try {
     loading.value = true
+
     const response = await axios.post('http://localhost:80/join/pwEmailsend', {
       email: email.value
     })
@@ -163,6 +179,7 @@ const sendAuthCode = async () => {
       startTimer()
       toast.success('이메일 전송이 완료되었습니다.')
       timerVisible.value = true
+      emailDisabled.value = true
     } else {
       loading.value = false
       errors.value.email = '등록되지 않은 이메일입니다.'
@@ -174,6 +191,7 @@ const sendAuthCode = async () => {
     loading.value = false
     alert('서버 오류')
   }
+  return isValid
 }
 
 const startTimer = () => {
@@ -229,6 +247,7 @@ const authcodeVerify = async () => {
       timerVisible.value = false
       verifySuccess.value = true
       isCodeVerified.value = true
+      authcodeDisabled.value = true
     } else {
       verifyMessage.value = '인증번호가 올바르지 않습니다.'
       verifySuccess.value = false
@@ -302,4 +321,9 @@ input[type="password"] {
 .input-error { border: 2px solid red !important; }
 .error-text { color: red; font-size: 12px; margin-top: 3px; }
 .custom-input::placeholder { font-size: 12px; color: #a3a2a2; font-style: italic; }
+input[disabled] {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
 </style>

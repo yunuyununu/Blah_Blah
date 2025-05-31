@@ -6,7 +6,8 @@
           <div class="left"><h2>회사</h2></div>
           <div class="right">
             <RouterLink to="/company/companylist">회사 목록</RouterLink>&nbsp;&nbsp;
-            <RouterLink to="/company/companyInsert">회사 신청</RouterLink>
+            <RouterLink to="/company/companyInsert"
+            v-if="userStore.isLogin == true">회사 신청</RouterLink>
           </div>
         </div>
       </div>
@@ -18,7 +19,9 @@
   </template>
   
   <script setup>
-  
+  import { useUserStore } from '@/store/userStore'
+
+const userStore = useUserStore()
   </script>
   
   <style scoped>

@@ -82,42 +82,6 @@
   
   const userStore = useUserStore()
 
-// const isIdChecked = ref(false)
-// const isIdAvailable = ref(false)
-// const idCheckMessage = ref('')
-
-// const checkUserId = async () => {
-//   let isValid = true
-      
-//   errors.value = {
-//     userId : '',
-//   }  // 초기화
-
-
-//   try {
-//         const response = await axios.post('http://localhost:80/join/idCheck', {
-//           userId: userId.value 
-//           })
-//           console.log("아이디 중복체크:"+response.data);
-//           if(response.data === 1) { // 중복
-//             isIdAvailable.value = false
-//             isIdChecked.value = true
-//             errors.value.userId = '중복된 아이디입니다.'
-//             idCheckMessage.value = false
-//             console.log('아이디 :'+userId.value)
-//             if (isValid) userIdInput.value.focus()
-//             isValid = false
-//             return
-//           } else {
-//             isIdAvailable.value = true
-//             isIdChecked.value = true
-//             idCheckMessage.value = '사용 가능한 아이디입니다.'
-//           }
-//       } catch (error) {
-//         console.error('중복 체크 에러:', error)
-//       }
-// }
-
 const submit = async () => {
 
   let isValid = true
@@ -128,17 +92,6 @@ const submit = async () => {
     if (isValid) userIdInput.value.focus()
     return
   } 
-  //else if (!isIdChecked.value) {
-//     errors.value.userId = '아이디 중복을 확인하세요.'
-//     if (isValid) userIdInput.value.focus()
-//     isValid = false
-//     return
-//   } else if (idCheckMessage.value === '') {
-//     errors.value.userId = '아이디를 다시 입력하세요.'
-//     if (isValid) userIdInput.value.focus()
-//     isValid = false
-//     return
-//   }
 
   // 비밀번호 체크
   if (!userPw.value) {
@@ -146,35 +99,18 @@ const submit = async () => {
     if (isValid) userPwInput.value.focus()
     return
   }
-  //else if(!pwPattern.test(userPw.value)) {
-//     errors.value.userPw = '8~20자 문자,숫자,특수문자 조합'
-//     if (isValid) userPwInput.value.focus()
-//     isValid = false
-//     return
-//   } else {
-//     errors.value.userPw = ''
-//   }
-//   if (userPw.value !== pwCheck.value) {
-//     errors.value.pwCheck = '비밀번호 불일치'
-//     if (isValid) pwCheckInput.value.focus()
-//     isValid = false
-//     return
-//   } else {
-//     errors.value.pwCheck = ''
-//   }
-
 
   try {
     const response = await axios.post('http://localhost:80/login/userlogin', {
        userId : userId.value,
        userPw : userPw.value
     }, { withCredentials: true }) // 세션유지
-    if (response.data === 'success') {
-      userStore.setLoginSuccess()
+    if (response.data.result === 'success') {
+        userStore.setLoginSuccess(response.data.userIdx);
       alert('로그인 성공!')
       console.log('로그인 응답:', response.data)
        router.push('/')
-     } else if(response.data === 'withdraw') {
+     } else if(response.data.result === 'withdraw') {
       alert('탈퇴한 회원입니다.\n홈페이지를 이용하시려면 회원가입이 필요합니다.')
       return
       } else { // 로그인 정보 불일치

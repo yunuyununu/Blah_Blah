@@ -89,9 +89,9 @@
           </div>
           <div class="col-6">
             <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com"
-            :class="['custom-input', { 'input-error': errors.email  }]" :disabled="verifySuccess"/>
+            :class="['custom-input', { 'input-error': errors.email  }]" :disabled="emailDisabled"/>
             &nbsp;&nbsp;
-            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="verifySuccess">인증번호 전송</button>
+            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="emailBtnDisabled">인증번호 전송</button>
             <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
           </div>
           <div class="col-2"></div>
@@ -104,8 +104,8 @@
           </div>
           <div class="col-6">
             <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리"
-            :class="['custom-input', { 'input-error': errors.authcode  }]" :disabled="verifySuccess"/>&nbsp;&nbsp;
-            <button type="button" class="btn btn-outline-dark" @click="authcodeVerify" :disabled="verifySuccess">인증번호확인</button>&nbsp;&nbsp;
+            :class="['custom-input', { 'input-error': errors.authcode  }]" :disabled="authcodeDisabled"/>&nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-dark" @click="authcodeVerify" :disabled="authcodeBtnDisabled">인증번호확인</button>&nbsp;&nbsp;
             <!-- <button type="button" class="btn btn-dark">재전송</button> -->
             <p v-if="errors.authcode" class="error-text">{{ errors.authcode }}</p>
             <!-- 타이머 -->
@@ -190,6 +190,11 @@ const timer = ref(null)
 const timerVisible = ref(false)
 const isEmailChecked = ref(false)
 const loading = ref(false)
+
+const emailBtnDisabled = ref(false)
+const authcodeBtnDisabled = ref(false)
+const emailDisabled = ref(false)
+const authcodeDisabled = ref(false)
 
 const errors = ref({
       userId : '',
@@ -298,6 +303,8 @@ const sendAuthCode = async () => {
       if (response.data === 'success') {
         loading.value = false
         startTimer() // 인증번호 검증 시간 측정
+        emailDisabled.value = true
+        emailBtnDisabled.value = true
         toast.success('이메일 전송이 완료되었습니다.')
       } 
     } catch (error) {
@@ -352,8 +359,9 @@ const sendAuthCode = async () => {
         verifyMessage.value = '인증번호가 확인되었습니다.'
         //인증번호 검증되면 타이머 숨기기
         timerVisible.value = false
-        verifySuccess.value = true
+        authcodeBtnDisabled.value = true
         isEmailChecked.value = true
+        authcodeDisabled.value = true
         errors.value.authcode = ''
       } else {
         errors.value.authcode = '인증번호가 일치하지 않습니다.'
@@ -495,6 +503,10 @@ const submit = () => {
         verifyMessage.value = ''
         isEmailChecked.value = false
         verifySuccess.value = false
+        emailBtnDisabled.value = false
+        authcodeBtnDisabled.value = false
+        emailDisabled.value = false
+        authcodeDisabled.value = false
         return
       } else { // 이메일 중복 아니면 회원가입 가능
 
@@ -655,5 +667,10 @@ input[type="password"] {
   font-size: 12px;
   margin-top: 3px;
   margin-bottom: 8px;
+}
+input[disabled] {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
 }
   </style>

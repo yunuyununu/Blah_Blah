@@ -15,11 +15,18 @@
     
     <!-- 댓글만 답글 버튼 표시 -->
     <div v-if="!comment.cm_parent_idx" class="comment-footer">
-      <span class="action" @click="$emit('toggle-reply', comment.cm_idx)">💬 답글
-        <span v-if="comment.replies && comment.replies.length > 0" class="reply-count">
-          ({{ comment.replies.length }})
+        <span class="action" @click="$emit('toggle-reply', comment.cm_idx)">
+          💬 답글
+          <span v-if="comment.replies && comment.replies.length > 0" class="reply-count">
+            ({{ comment.replies.length }})
+          </span>
         </span>
-      </span>
+
+        <!-- 수정/삭제 버튼: 댓글/대댓글 모두 표시 -->
+        <div v-if="userStore.userIdx === comment.cm_u_idx" class="comment-actions">
+          <span class="action" @click="$emit('edit-comment', comment.cm_idx)">✏️ 수정</span>
+          <span class="action" @click="$emit('delete-comment', comment.cm_idx)">🗑️ 삭제</span>
+        </div>
     </div>
 
     <!-- 답글 입력창 및 대댓글 리스트 (replyTo일 때만 보여줌) -->
@@ -54,6 +61,9 @@
 
 <script setup>
 import { defineProps } from 'vue';
+import { useUserStore } from '@/store/userStore'
+
+const userStore = useUserStore()
 
 defineProps({
   comment: Object,
@@ -95,14 +105,23 @@ defineProps({
   font-size: 13px;
   color: #888;
   display: flex;
-  gap: 16px;
+  justify-content: space-between; /* 버튼을 오른쪽 끝으로 밀기 위함 */
   margin-top: 4px;
+  align-items: center;
+}
+.comment-actions {
+  display: flex;
+  gap: 12px;
 }
 .reply-form {
   margin-top: 8px;
   display: flex;
   gap: 8px;
   align-items: flex-start;
+  border: 1px solid #ccc; /* 테두리 추가 */
+  border-radius: 6px;
+  padding: 10px;
+  background-color: #fff;
 }
 textarea {
   width: 100%;
