@@ -30,5 +30,9 @@ public class CommentServiceImpl implements CommentService {
 		commentMapper.replyInsert(dto);
 	}
 	
-	
+	// 댓글/대댓글 삭제
+	@Override
+	public void commentDelete(int cm_idx) {
+		commentMapper.commentDelete(cm_idx);
+	}
 }

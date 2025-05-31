@@ -12,4 +12,6 @@ public interface RedisService {
 	String getData(String key);
 
     void deleteData(String key);
+    
+    boolean isFirstView(String boardKey);
 }

@@ -29,8 +29,7 @@ public class LoginController {
 	
 	// 회원 로그인
 	@PostMapping("/userlogin")
-	public String userLogin(@RequestBody Map<String, String> request, HttpSession session) {
-		String result = "";
+	public ResponseEntity<?> userLogin(@RequestBody Map<String, String> request, HttpSession session) {
 		
 		String userId = request.get("userId");
 		String userPw = request.get("userPw");
@@ -44,13 +43,12 @@ public class LoginController {
 	    if (login != null && withdraw.equals("N")) { // 로그인 성공
 	    	session.setAttribute("UserIdx", login.getU_idx());
 	    	System.out.println("세션 아이디=="+session);
-	    	result = "success";
+	    	return ResponseEntity.ok(Map.of("result", "success", "userIdx", session.getAttribute("UserIdx")));
 	    } else if(login != null && withdraw.equals("Y")) {
-	    	result = "withdraw";
+	    	return ResponseEntity.ok(Map.of("result","withdraw"));
 		} else {
-			result = "fail";
+			return ResponseEntity.ok(Map.of("result","fail"));
 	    }
-	    return result;
 	}
 	
 	// 세션체크
@@ -60,10 +58,10 @@ public class LoginController {
 	    System.out.println("세션 상태 확인 =="+session);
 	    if (loginUser != null) {
 	    	System.out.println("세션 있을때!!!==>" + loginUser);
-	        return ResponseEntity.ok(true);
+	        return ResponseEntity.ok(Map.of("isLogin", true, "userIdx", loginUser));
 	    } else {
 	    	System.out.println("세션 없을때!!!==>"+loginUser);
-	        return ResponseEntity.ok(false);
+	        return ResponseEntity.ok(Map.of("isLogin", false));
 	    }
 	} 
 	

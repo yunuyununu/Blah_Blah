@@ -55,6 +55,22 @@ public class BoardServiceImpl implements BoardService {
 	}
 	
 	
+	
+	// 좋아요 중복체크
+	public int likePrevent (Map<String, Object> map) {
+		return boardMapper.likePrevent(map);
+	}
+	
+	// 좋아요
+	public void boardLike(Map<String, Object> map) {
+		boardMapper.boardLike(map);
+	}
+	
+	public void likeDelete(Map<String, Object> map) {
+		boardMapper.likeDelete(map);
+	}
+	
+	
 	// 게시글 등록
 	@Override
 	@Transactional
@@ -81,8 +97,17 @@ public class BoardServiceImpl implements BoardService {
 		        boardMapper.imageInsert(imageFile);
 		    }
 		}
-		
-
-		
+	}
+	
+	// 게시물 삭제 시
+	@Override
+	public void boardDelete(int b_idx) {
+		boardMapper.boardDelete(b_idx);
+	}
+	
+	// 하트 갯수
+	@Override
+	public int heartCount(int b_idx) {
+		return boardMapper.heartCount(b_idx);
 	}
 }

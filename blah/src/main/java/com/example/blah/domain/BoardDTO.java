@@ -25,6 +25,9 @@ public class BoardDTO {
     private int i_idx;
     private int i_b_idx;
     private String i_image;
+    private int h_b_idx;
+    private int h_u_idx;
+    private int heart_count;
     
     public BoardDTO(int userId, String title, String content) {
         this.b_u_idx = userId;

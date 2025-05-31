@@ -24,17 +24,11 @@ public class CommentController {
 	CommentService service;
 	
 	
-	// 게시판 목록
+	// 댓글 목록
 	@GetMapping("list")
 	public List<CommentDTO> getCommentList(@RequestParam(name = "cmBIdx") int cm_b_idx) {
 	    return service.commentList(cm_b_idx);
 	}
-	
-	//게시글 상세
-//	@GetMapping("details")
-//	public Map<String, Object> boardDetails(@RequestParam(name = "b_idx") int b_idx) {
-//	    return service.details(b_idx);
-//	}
 	
 	// 댓글 입력
 	@PostMapping("commentInsert")
@@ -72,4 +66,12 @@ public class CommentController {
 		}
 		return result;
 	}
+	
+	// 댓글/대댓글 삭제
+	@PostMapping("commentDelete")
+	public void commentDelete(@RequestBody Map<String, Integer> request) {
+		service.commentDelete(request.get("cm_idx"));
+	}
+	
+	
 }

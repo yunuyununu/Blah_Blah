@@ -1,26 +1,24 @@
 package com.example.blah.controller;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.blah.common.util.GCSRequest;
 import com.example.blah.common.util.GCSService;
 import com.example.blah.domain.BoardDTO;
-import com.example.blah.domain.FileDTO;
 import com.example.blah.service.BoardService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.example.blah.service.RedisService;
+
 import jakarta.servlet.http.HttpSession;
 
 @RestController
@@ -33,14 +31,14 @@ public class BoardController {
 	@Autowired
 	GCSService gcsService;
 	
+	@Autowired
+	RedisService redisService;
+	
 	// 게시판 목록
 	@GetMapping("boards")
-	public List<BoardDTO> getBoardList( HttpSession session,@RequestParam(name = "lastBIdx", required = false) Long lastBIdx) {
-		System.out.println("lastBIdx=>"+lastBIdx);
-		System.out.println("게시판 목록=="+service.getBoard(lastBIdx));
+	public List<BoardDTO> getBoardList(HttpSession session,@RequestParam(name = "lastBIdx", required = false) Long lastBIdx) {
 		
-		Integer userIdx = (Integer) session.getAttribute("UserIdx");
-		System.out.println("게시판 조회 시 세션아이디=>>"+userIdx);
+		Integer userIdx = (Integer)session.getAttribute("UserIdx");
 		
 		return service.getBoard(lastBIdx);
 	}
@@ -59,31 +57,76 @@ public class BoardController {
 	
 	// 게시글 조회수 증가
 	@PostMapping("hits")
-	public void hits(@RequestParam(name = "b_idx") int b_idx, HttpServletRequest request, HttpServletResponse response) {
-		String cookieName = "board_hit_" + b_idx;
-		Cookie[] cookies = request.getCookies(); // 클라이언트 측 모든 쿠키 가져옴
-		boolean alreadyHit = false;
-		
-		// 쿠키값이 null이 아닌 경우
-		if(cookies != null) {
-			for(Cookie cookie : cookies) { // 모든 쿠키 검사
-				if(cookie.getName().equals(cookieName)) { // 이미 조회한 경우
-					alreadyHit = true;
-					break;
-				}
+	public void hits(@RequestParam(name = "b_idx") int b_idx, HttpSession session) {
+		Object userIdx = session.getAttribute("UserIdx");
+		if (userIdx != null) {
+			String boardKey = "board_hit_" + b_idx +"_"+ userIdx;
+			boolean check = redisService.isFirstView(boardKey);
+			if(check == true) { // 처음 조회하면
+				service.incrementHit(b_idx); // 조회수 1 증가
 			}
 		}
-		
-		// 쿠키값 X -> 새로 생성
-		if(alreadyHit == false) {
-			service.incrementHit(b_idx); // 쿠키값 1 증가
-			
-			Cookie hitCookie = new Cookie(cookieName, "true");
-			hitCookie.setMaxAge(30 * 60); // 30분
-			hitCookie.setPath("/");
-			response.addCookie(hitCookie); // 쿠키값 클라이언트측으로 전달
+	}
+	
+	// 좋아요 상태
+	@GetMapping("likeStatus")
+	@ResponseBody
+	public Map<String, Object> likeStatus(
+	    @RequestParam("b_idx") int h_b_idx, HttpSession session) {
+		Object userIdx = session.getAttribute("UserIdx");
+	    Map<String, Object> map = new HashMap<>();
+	    map.put("h_b_idx", h_b_idx);
+	    map.put("h_u_idx", userIdx);
+	    
+	    int liked = service.likePrevent(map); // 0 or 1
+	    int totalLikes = service.heartCount(h_b_idx); // 게시글 총 좋아요 수
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("liked", liked == 1); // true or false
+	    result.put("likeCount", totalLikes);
+	    return result;
+	}
+	
+	// 비회원일 때 좋아요 갯수
+	@GetMapping("likeCount")
+	@ResponseBody
+	public Map<String, Object> likeCount(@RequestParam("b_idx") int b_idx) {
+	    int totalLikes = service.heartCount(b_idx);
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("likeCount", totalLikes);
+	    return result;
+	}
+	
+	// 좋아요 입력
+	@PostMapping("likeInsert")
+	public void likeInsert(@RequestBody Map<String, Integer> request, HttpSession session) {
+		int h_b_idx = request.get("b_idx");
+		int h_u_idx = (int)session.getAttribute("UserIdx");
+		Map<String, Object> map = new HashMap<>();
+		map.put("h_b_idx", h_b_idx);
+		map.put("h_u_idx", h_u_idx);
+		int likeCount = service.likePrevent(map);
+		System.out.println("등록시 likeCount"+likeCount);
+		System.out.println("좋아요 입력 맵=>"+map);
+		if (likeCount == 0) { // 첫 좋아요
+			service.boardLike(map);
 		}
-		
+	}
+	
+	// 좋아요 취소
+	@PostMapping("likeDelete")
+	public void likeDelete(@RequestBody Map<String, Integer> request, HttpSession session) {
+		int h_b_idx = request.get("b_idx");
+		int h_u_idx = (int)session.getAttribute("UserIdx");
+		Map<String, Object> map = new HashMap<>();
+		map.put("h_b_idx", h_b_idx);
+		map.put("h_u_idx", h_u_idx);
+		int likeCount = service.likePrevent(map);
+		System.out.println("삭제시 likeCount"+likeCount);
+		System.out.println("좋아요 삭제 맵=>"+map);
+		if(likeCount == 1) { // 좋아요 내역 있을때
+			service.likeDelete(map);
+		}
 	}
 	
 	// 게시글 등록
@@ -109,4 +152,10 @@ public class BoardController {
 		return result;
 	}
 	
+	// 게시글 삭제
+	@PostMapping("boardDelete")
+	public void boardDelete(@RequestBody Map<String, Integer> request) {
+		int b_idx = request.get("b_idx");
+		service.boardDelete(b_idx);
+	}
 }

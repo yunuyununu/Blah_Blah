@@ -21,6 +21,21 @@ public interface BoardService {
 	// 게시물 조회수
 	void incrementHit(int b_idx);
 	
+	// 좋아요 중복체크
+	int likePrevent (Map<String, Object> map);
+	
+	// 좋아요 입력
+	void boardLike(Map<String, Object> map);
+	
+	// 좋아요 취소
+	void likeDelete(Map<String, Object> map);
+	
 	// 게시물 등록
 	void boardInsert(int u_idx, String title, String content, List<MultipartFile> images) throws IOException;
+
+	// 게시물 삭제 시
+	void boardDelete(int b_idx);
+	
+	// 하트 갯수
+	int heartCount(int b_idx);
 }

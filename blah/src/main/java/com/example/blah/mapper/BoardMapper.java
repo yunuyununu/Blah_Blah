@@ -22,10 +22,25 @@ public interface BoardMapper {
 	// 조회수 증가
 	void updateHit(int b_idx);
 	
+	// 좋아요 중복체크
+	int likePrevent (Map<String, Object> map);
+	
+	// 좋아요 입력
+	void boardLike(Map<String, Object> map);
+	
+	// 좋아요 취소
+	void likeDelete(Map<String, Object> map);
+	
 	// 게시물 등록
 	void boardInsert(BoardDTO dto);
 	
 	// 게시물 등록 시 이미지 첨부 (다중)
 	void imageInsert(FileDTO image);
+	
+	// 게시물 삭제 시
+	void boardDelete(int b_idx);
+	
+	// 하트 갯수
+	int heartCount(int b_idx);
 	
 }

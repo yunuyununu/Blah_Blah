@@ -13,4 +13,7 @@ public interface CommentMapper {
 	
 	// 대댓글 등록
 	void replyInsert(CommentDTO dto);
+	
+	// 댓글/대댓글 삭제
+	void commentDelete(int cm_idx);
 }

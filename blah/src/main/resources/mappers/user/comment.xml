@@ -9,6 +9,7 @@
     <select id="commentList" resultType="com.example.blah.domain.CommentDTO">
     
 		SELECT COM.CM_IDX AS CM_IDX,			<!--댓글 번호-->
+			   COM.CM_U_IDX AS CM_U_IDX,
 			   COM.CM_B_IDX AS CM_B_IDX,		<!--게시글 번호-->
 			   COM.CM_CONTENT AS CM_CONTENT,		<!--댓글 내용-->
 			   DATE_FORMAT(COM.CM_DATE, '%y/%m/%d %H:%i') AS CM_DATE,	<!--작성 일자-->
@@ -41,5 +42,10 @@
     	INSERT INTO COMMENT (CM_B_IDX,CM_U_IDX,CM_CONTENT,CM_PARENT_IDX)
 		VALUES (#{cm_b_idx}, #{cm_u_idx}, #{cm_content}, #{cm_parent_idx})
     </insert>
-
+	
+	<!--댓글/대댓글 삭제-->	
+	<delete id="commentDelete">
+    	DELETE FROM COMMENT
+		WHERE CM_IDX = #{cm_idx}
+    </delete>
 </mapper>

@@ -62,4 +62,21 @@ public class RedisServiceImpl implements RedisService {
         }
         return false; // 인증 실패
     }
+	 
+	 // key 검증 -> 일치하면 조회수+1
+	 @Override
+	 public boolean isFirstView(String boardKey) {
+		 // redis에 저장된 인증번호를 꺼내기 위해 key 생성
+		 String b_key = VERIFICATION_CODE_KEY_PREFIX + boardKey;
+        // redis에 저장한 키 값 넣고 검증
+        String savedKey = redisTemplate.opsForValue().get(b_key);
+
+        // savedKey가 널이면 (처음 조회하면)
+        if (savedKey == null) {
+        	// redis에 키 값 저장
+        	redisTemplate.opsForValue().set(b_key, boardKey, 30, TimeUnit.MINUTES);
+            return true; // 인증 성공
+        }
+        return false; // 인증 실패
+    }
 }

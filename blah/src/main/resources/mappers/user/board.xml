@@ -4,41 +4,33 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.blah.mapper.BoardMapper">
-
-    <select id="list" resultType="com.example.blah.domain.BoardDTO">
-        SELECT 
-    		BRD.B_IDX AS B_IDX,          <!--게시판 번호-->
-		    USR.U_NICNAME AS U_NICNAME,  <!--회원 닉네임-->
-		    BRD.B_U_IDX AS B_U_IDX,      <!--게시글 작성자-->
-		    BRD.B_TITLE AS B_TITLE,      <!--게시글 제목-->
-		    BRD.B_CONTENT AS B_CONTENT,  <!--게시글 내용-->
-		    BRD.B_HITS AS B_HITS,        <!--게시글 조회수-->
-		    DATE_FORMAT(BRD.B_DATE, '%y-%m-%d') AS B_DATE  <!--게시글 작성일-->
-        FROM 
-		    BOARD BRD
-		INNER JOIN 
-		    USER USR ON BRD.B_U_IDX = USR.U_IDX
-    </select>
     
     <!--처음 게시글 12개-->
     <select id="firstList" resultType="com.example.blah.domain.BoardDTO">
 	    SELECT 
-		    BRD.B_IDX AS B_IDX,        	<!--게시판 번호-->
-		    BRD.B_U_IDX AS B_U_IDX,       <!--게시글 작성자-->
-		    BRD.B_TITLE AS B_TITLE,       <!--게시글 제목-->
-		    BRD.B_CONTENT AS B_CONTENT,   <!--게시글 내용-->
-		    BRD.B_HITS AS B_HITS,         <!--게시글 조회수-->
-		    BRD.B_DATE AS B_DATE,         <!--게시글 작성일-->
-		    BRD.B_MODIFY AS B_MODIFY,     <!--수정일-->
-		    BRD.B_VOTE AS B_VOTE,         <!--투표존재여부-->
-		    BRD.B_DELETE AS B_DELETE,     <!--삭제여부-->
-		    USR.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
-		    COP.C_NAME AS C_NAME          <!--회사명-->
-		FROM BOARD BRD
-		JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-		JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
-		ORDER BY BRD.B_IDX DESC
-		LIMIT 12
+	        BRD.B_IDX AS B_IDX,             <!-- 게시판 번호 -->
+	        BRD.B_U_IDX AS B_U_IDX,         <!-- 게시글 작성자 -->
+	        BRD.B_TITLE AS B_TITLE,         <!-- 게시글 제목 -->
+	        BRD.B_CONTENT AS B_CONTENT,     <!-- 게시글 내용 -->
+	        BRD.B_HITS AS B_HITS,           <!-- 게시글 조회수 -->
+	        BRD.B_DATE AS B_DATE,           <!-- 게시글 작성일 -->
+	        BRD.B_MODIFY AS B_MODIFY,       <!-- 수정일 -->
+	        BRD.B_VOTE AS B_VOTE,           <!-- 투표존재여부 -->
+	        BRD.B_DELETE AS B_DELETE,       <!-- 삭제여부 -->
+	        USR.U_NICNAME AS U_NICNAME,     <!-- 회원 닉네임 -->
+	        COP.C_NAME AS C_NAME,           <!-- 회사명 -->
+	        COUNT(HRT.H_IDX) AS HEART_COUNT <!-- 하트 수 -->
+	    FROM BOARD BRD
+		    JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+		    JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		    LEFT JOIN HEART HRT ON BRD.B_IDX = HRT.H_B_IDX
+	    WHERE BRD.B_DELETE = 'N'
+	    GROUP BY 
+	        BRD.B_IDX, BRD.B_U_IDX, BRD.B_TITLE, BRD.B_CONTENT,
+	        BRD.B_HITS, BRD.B_DATE, BRD.B_MODIFY, BRD.B_VOTE, BRD.B_DELETE,
+	        USR.U_NICNAME, COP.C_NAME
+	    ORDER BY BRD.B_IDX DESC
+	    LIMIT 12
     </select>
 
 	<!--더보기 요청 시-->
@@ -55,32 +47,40 @@
 		    BRD.B_VOTE AS B_VOTE,         <!--투표존재여부-->
 		    BRD.B_DELETE AS B_DELETE,     <!--삭제여부-->
 		    USR.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
-		    COP.C_NAME AS C_NAME          <!--회사명-->
+		    COP.C_NAME AS C_NAME,          <!--회사명-->
+		    COUNT(HRT.H_IDX) AS HEART_COUNT <!-- 하트 수 -->
 		FROM BOARD BRD
-		JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-		JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+			JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+			JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+			LEFT JOIN HEART HRT ON BRD.B_IDX = HRT.H_B_IDX
 		WHERE BRD.B_DELETE = 'N' 
 		  AND BRD.B_IDX &lt; #{lastBIdx}
+	    GROUP BY 
+	       BRD.B_IDX, BRD.B_U_IDX, BRD.B_TITLE, BRD.B_CONTENT,
+	       BRD.B_HITS, BRD.B_DATE, BRD.B_MODIFY, BRD.B_VOTE, BRD.B_DELETE,
+	       USR.U_NICNAME, COP.C_NAME
 		ORDER BY BRD.B_IDX DESC
 		LIMIT 12
 	</select>
 	
 	<!--게시글 상세-->
 	<select id="boardDetails" resultType="map">
-		SELECT BRD.B_IDX AS B_IDX,			<!--게시판 번호-->
-			   BRD.B_U_IDX AS B_U_IDX,		<!--게시글 작성자-->
-			   BRD.B_TITLE AS B_TITLE,		<!--게시글 제목-->
-			   BRD.B_CONTENT AS B_CONTENT,	<!--게시글 내용-->
-			   BRD.B_HITS AS B_HITS,		<!--게시글 조회수-->
-			   BRD.B_DATE AS B_DATE,		<!--게시글 작성일-->
-			   BRD.B_MODIFY AS B_MODIFY,	<!--수정일-->
-			   BRD.B_VOTE AS B_VOTE,		<!--투표존재여부-->
-			   BRD.B_DELETE AS B_DELETE,	<!--삭제여부-->
-			   USR.U_NICNAME AS U_NICNAME,	<!--회원 닉네임-->
-			   COP.C_NAME AS C_NAME			<!--회사명-->
+		SELECT BRD.B_IDX AS B_IDX,				<!--게시판 번호-->
+			   BRD.B_U_IDX AS B_U_IDX,			<!--게시글 작성자-->
+			   BRD.B_TITLE AS B_TITLE,			<!--게시글 제목-->
+			   BRD.B_CONTENT AS B_CONTENT,		<!--게시글 내용-->
+			   BRD.B_HITS AS B_HITS,			<!--게시글 조회수-->
+			   BRD.B_DATE AS B_DATE,			<!--게시글 작성일-->
+			   BRD.B_MODIFY AS B_MODIFY,		<!--수정일-->
+			   BRD.B_VOTE AS B_VOTE,			<!--투표존재여부-->
+			   BRD.B_DELETE AS B_DELETE,		<!--삭제여부-->
+			   USR.U_NICNAME AS U_NICNAME,		<!--회원 닉네임-->
+			   COP.C_NAME AS C_NAME,			<!--회사명-->
+			   COUNT(DISTINCT HRT.H_IDX) AS COUNT	<!--좋아요수-->
 		FROM BOARD BRD
 			JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
 			JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+			LEFT JOIN HEART HRT ON HRT.H_B_IDX = BRD.B_IDX
 		WHERE BRD.B_IDX = #{b_idx}
 	</select>
 	
@@ -101,6 +101,25 @@
 		WHERE B_IDX = #{b_idx}
 	</update>
 	
+	<!--좋아요 중복체크-->
+	<select id="likePrevent" resultType="int" parameterType="map">
+		SELECT COUNT(1) 
+		FROM HEART 
+		WHERE H_U_IDX = #{h_u_idx} AND H_B_IDX = #{h_b_idx}
+	</select>
+	
+	<!--좋아요 입력-->
+	<insert id="boardLike" parameterType="map">
+		INSERT INTO HEART (H_B_IDX, H_U_IDX)
+        VALUES (#{h_b_idx}, #{h_u_idx})
+	</insert>
+	
+	<!--좋아요 취소-->
+	<delete id="likeDelete" parameterType="map">
+		DELETE FROM HEART
+		WHERE H_U_IDX = #{h_u_idx} AND H_B_IDX = #{h_b_idx}
+	</delete>
+	
 	<!--게시물 등록-->
 	<insert id="boardInsert" parameterType="com.example.blah.domain.BoardDTO" useGeneratedKeys="true" keyProperty="b_idx">
 		INSERT INTO BOARD (B_U_IDX, B_TITLE, B_CONTENT)
@@ -113,4 +132,18 @@
         VALUES (#{i_b_idx}, #{i_image})
     </insert>
     
+    <!--게시물 삭제-->
+    <delete id="boardDelete">
+    	UPDATE BOARD
+		SET B_DELETE = 'Y'
+		WHERE B_IDX=#{b_idx}
+    </delete>
+    
+    <!--하트 갯수-->
+    <select id="heartCount" resultType="int">
+    	SELECT COUNT(1) AS COUNT
+		FROM HEART HRT
+		JOIN BOARD BRD ON BRD.B_IDX = HRT.H_B_IDX
+		WHERE B_IDX = #{b_idx}
+    </select>
 </mapper>
