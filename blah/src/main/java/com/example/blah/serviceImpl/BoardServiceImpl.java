@@ -12,9 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.blah.common.util.GCSRequest;
 import com.example.blah.common.util.GCSService;
+import com.example.blah.domain.AlarmDTO;
 import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.FileDTO;
 import com.example.blah.mapper.BoardMapper;
+import com.example.blah.service.AlarmService;
 import com.example.blah.service.BoardService;
 
 @Service
@@ -25,6 +27,9 @@ public class BoardServiceImpl implements BoardService {
 	
 	@Autowired
 	GCSService gcsService;
+	
+	@Autowired
+	AlarmService alarmservice;
 	
 	// 게시글 목록
 	@Override
@@ -54,22 +59,38 @@ public class BoardServiceImpl implements BoardService {
 		boardMapper.updateHit(b_idx);
 	}
 	
-	
-	
 	// 좋아요 중복체크
 	public int likePrevent (Map<String, Object> map) {
 		return boardMapper.likePrevent(map);
 	}
 	
-	// 좋아요
+	// 좋아요 입력
 	public void boardLike(Map<String, Object> map) {
 		boardMapper.boardLike(map);
+		
+		int b_idx = (int) map.get("h_b_idx");
+		int h_u_idx = (int) map.get("h_u_idx");
+		int b_u_idx = (int) map.get("b_u_idx");
+		String b_title = (String) map.get("b_title");
+		
+		if(h_u_idx != b_u_idx) {
+			AlarmDTO dto = new AlarmDTO();
+			dto.setA_b_idx(b_idx);
+			dto.setA_u_idx(b_u_idx);
+			dto.setA_type("Like");
+			dto.setA_url("/board/boarddetails/"+b_idx);
+			boardMapper.alarmInsert(dto);
+
+			String message = "게시글 \""+b_title + "\"에 좋아요가 추가되었습니다.";
+			alarmservice.sendLikeNotification(b_u_idx, message);
+			System.out.println("여기 확인해->"+message+"/게시판작성자="+b_u_idx);
+		}
 	}
 	
+	// 좋아요 취소
 	public void likeDelete(Map<String, Object> map) {
 		boardMapper.likeDelete(map);
 	}
-	
 	
 	// 게시글 등록
 	@Override

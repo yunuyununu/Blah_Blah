@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.blah.common.util.GCSService;
 import com.example.blah.domain.BoardDTO;
+import com.example.blah.service.AlarmService;
 import com.example.blah.service.BoardService;
 import com.example.blah.service.RedisService;
 
@@ -33,6 +34,9 @@ public class BoardController {
 	
 	@Autowired
 	RedisService redisService;
+	
+	@Autowired
+	AlarmService alarmservice;
 	
 	// 게시판 목록
 	@GetMapping("boards")
@@ -99,12 +103,16 @@ public class BoardController {
 	
 	// 좋아요 입력
 	@PostMapping("likeInsert")
-	public void likeInsert(@RequestBody Map<String, Integer> request, HttpSession session) {
-		int h_b_idx = request.get("b_idx");
-		int h_u_idx = (int)session.getAttribute("UserIdx");
+	public void likeInsert(@RequestBody Map<String, Object> request, HttpSession session) {
+		Integer h_b_idx = Integer.parseInt((String) request.get("b_idx"));
+		Integer  h_u_idx = (Integer)session.getAttribute("UserIdx");
+		Integer  b_u_idx = (Integer)request.get("b_u_idx");
+		String b_title = String.valueOf(request.get("b_title"));
 		Map<String, Object> map = new HashMap<>();
 		map.put("h_b_idx", h_b_idx);
 		map.put("h_u_idx", h_u_idx);
+		map.put("b_u_idx", b_u_idx);
+		map.put("b_title", b_title);
 		int likeCount = service.likePrevent(map);
 		System.out.println("등록시 likeCount"+likeCount);
 		System.out.println("좋아요 입력 맵=>"+map);

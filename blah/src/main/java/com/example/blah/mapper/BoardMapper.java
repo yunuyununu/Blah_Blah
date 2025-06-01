@@ -3,6 +3,7 @@ package com.example.blah.mapper;
 import java.util.List;
 import java.util.Map;
 
+import com.example.blah.domain.AlarmDTO;
 import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.FileDTO;
 
@@ -30,6 +31,9 @@ public interface BoardMapper {
 	
 	// 좋아요 취소
 	void likeDelete(Map<String, Object> map);
+	
+	// 알람
+	void alarmInsert(AlarmDTO dto);
 	
 	// 게시물 등록
 	void boardInsert(BoardDTO dto);

@@ -114,6 +114,12 @@
         VALUES (#{h_b_idx}, #{h_u_idx})
 	</insert>
 	
+	<!--알람 전송-->
+	<insert id="alarmInsert" parameterType="com.example.blah.domain.AlarmDTO">
+		INSERT INTO ALARM (A_B_IDX, A_U_IDX, A_TYPE, A_URL)
+    	VALUES (#{a_b_idx}, #{a_u_idx}, #{a_type}, #{a_url})
+	</insert>
+	
 	<!--좋아요 취소-->
 	<delete id="likeDelete" parameterType="map">
 		DELETE FROM HEART
