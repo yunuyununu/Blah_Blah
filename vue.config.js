@@ -13,7 +13,7 @@ module.exports = defineConfig({
       '/': {
         target: 'http://localhost', // Spring Boot Server
         changeOrigin: true,
-        ws: false
+        //ws: false
       }
     }
 	}

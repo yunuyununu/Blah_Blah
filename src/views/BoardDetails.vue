@@ -70,8 +70,12 @@
 <script setup>
 import CommentItem from '@/views/CommentItem.vue';
 import { useUserStore } from '@/store/userStore'
+import { useAlarmStore } from '@/store/alarmStore'
+import { getStompClient } from '@/plugin/websocket';
 import { useRouter } from 'vue-router'
 
+
+const alarmStore = useAlarmStore()
 const userStore = useUserStore()
 const router = useRouter()
 
@@ -82,6 +86,8 @@ import axios from 'axios';
 const route = useRoute();
 const post = ref(null);
 const bidx = route.params.b_idx;
+const buidx = ref(null);
+const btitle = ref(null);
 
 // 게시글 이미지
 const boardImages = ref([]);
@@ -133,6 +139,8 @@ const fetchPostDetail = async () => {
       params: { b_idx: bidx },
     });
     post.value = res.data;
+    buidx.value = res.data.B_U_IDX;
+    btitle.value = res.data.B_TITLE;
     // 이미지 리스트 요청
     const imageRes = await axios.get(`http://localhost:80/board/boardImages`, {
       params: { b_idx: bidx },
@@ -182,6 +190,11 @@ onMounted(() => {
   fetchPostComment();
   if (userStore.isLogin) {
     fetchLikeStatus(); // 좋아요 여부 + 수
+     // 웹소켓 연결
+    alarmStore.connect(userStore.userIdx, (payload) => {
+      console.log('📢 알림 도착:', payload);
+      // 필요 시 알림 처리 추가
+    });
   } else {
     fetchLikeCount(); // 로그인 안 한 경우에도 좋아요 수는 보여줌
   }
@@ -323,9 +336,11 @@ const toggleLike = async () => {
 
   const payload = {
     h_u_idx: userStore.userIdx,
-    b_idx: bidx
+    b_idx: bidx,
+    b_u_idx: buidx.value,
+    b_title: btitle.value
   };
-
+  console.log("펭로드=>>",payload)
   try {
     if (isLiked.value) {
       await axios.post('http://localhost:80/board/likeDelete', payload);
@@ -333,10 +348,38 @@ const toggleLike = async () => {
     } else {
       await axios.post('http://localhost:80/board/likeInsert', payload);
       likeCount.value++;
+      
+       // 작성자에게 웹소켓 알림 보내기
+      if (userStore.userIdx !== buidx.value) { // 자기 글엔 알림 X
+        sendLikeNotification({
+          senderId: userStore.userIdx,
+          receiverId: buidx.value,
+          b_idx: bidx,
+          b_title: btitle.value,
+        });
+      }
     }
     isLiked.value = !isLiked.value;
   } catch (err) {
     console.error('좋아요 처리 실패:', err);
+  }
+};
+const sendLikeNotification = (alarmPayload) => {
+  const stompClient = getStompClient();
+  if (alarmPayload.receiverId && stompClient?.connected) {
+    stompClient.send(
+      '/app/alarm',
+      {},
+      JSON.stringify({
+        type: 'LIKE',
+        senderId: alarmPayload.senderId,
+        receiverId: alarmPayload.receiverId,
+        b_idx: alarmPayload.b_idx,
+        b_title: alarmPayload.b_title,
+      })
+    );
+  } else {
+    console.warn('웹소켓 연결이 되어 있지 않거나 수신자 없음');
   }
 };
 
