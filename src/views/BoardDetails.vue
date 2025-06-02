@@ -7,7 +7,10 @@
       <div class="post-meta">
         <span>{{ post.C_NAME }} · {{ post.U_NICNAME }}</span>
         <div class="post-meta-right">
-          <span>👁 {{ post.B_HITS }}</span>
+          <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+          <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+          <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+        </svg>&nbsp; {{ post.B_HITS }}</span>
           <button @click="toggleLike" class="like-button">
             <span class="heart-icon" :class="{ liked: isLiked }">
             {{ isLiked ? '♥' : '♡' }} {{ likeCount || 0 }}
@@ -34,7 +37,7 @@
     <br>
     <button class="btn btn-outline-danger" @click="$router.back()"  style="text-align: left;">← 목록으로</button>
         <div v-if="userStore.userIdx === post.B_U_IDX" style="text-align:right">
-          <span class="action">✏️ 수정</span>
+          <span class="action" @click="updateBoard">✏️ 수정</span>
           <span class="action" @click="deleteBoard">🗑️ 삭제</span>
         </div>
     <hr />
@@ -71,7 +74,6 @@
 import CommentItem from '@/views/CommentItem.vue';
 import { useUserStore } from '@/store/userStore'
 import { useAlarmStore } from '@/store/alarmStore'
-import { getStompClient } from '@/plugin/websocket';
 import { useRouter } from 'vue-router'
 
 
@@ -172,6 +174,14 @@ const fetchPostComment = async () => {
   }
 };
 
+const updateBoard = async () => {
+  try {
+
+  } catch(err) {
+    
+  }
+}
+
 const deleteBoard = async () => {
   try {
     const confirmed = window.confirm('정말 이 게시물을 삭제하시겠습니까?');
@@ -185,18 +195,22 @@ const deleteBoard = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   fetchPostDetail();
   fetchPostComment();
+  
   if (userStore.isLogin) {
-    fetchLikeStatus(); // 좋아요 여부 + 수
-     // 웹소켓 연결
-    alarmStore.connect(userStore.userIdx, (payload) => {
-      console.log('📢 알림 도착:', payload);
-      // 필요 시 알림 처리 추가
-    });
+    fetchLikeStatus();
+    
+    // 웹소켓 연결 상태 확인 (단순화)
+    if (!alarmStore.connected) {
+      console.log(' 웹소켓 연결 상태:', {
+        connected: alarmStore.connected,
+        connecting: alarmStore.connecting
+      });
+    }
   } else {
-    fetchLikeCount(); // 로그인 안 한 경우에도 좋아요 수는 보여줌
+    fetchLikeCount();
   }
 });
 
@@ -340,46 +354,22 @@ const toggleLike = async () => {
     b_u_idx: buidx.value,
     b_title: btitle.value
   };
+  const deleteload = {
+    h_u_idx: userStore.userIdx,
+    b_idx: bidx
+  };
   console.log("펭로드=>>",payload)
   try {
     if (isLiked.value) {
-      await axios.post('http://localhost:80/board/likeDelete', payload);
+      await axios.post('http://localhost:80/board/likeDelete', deleteload);
       likeCount.value = Math.max(0, likeCount.value - 1); // 최소 0
     } else {
       await axios.post('http://localhost:80/board/likeInsert', payload);
       likeCount.value++;
-      
-       // 작성자에게 웹소켓 알림 보내기
-      if (userStore.userIdx !== buidx.value) { // 자기 글엔 알림 X
-        sendLikeNotification({
-          senderId: userStore.userIdx,
-          receiverId: buidx.value,
-          b_idx: bidx,
-          b_title: btitle.value,
-        });
-      }
     }
     isLiked.value = !isLiked.value;
   } catch (err) {
     console.error('좋아요 처리 실패:', err);
-  }
-};
-const sendLikeNotification = (alarmPayload) => {
-  const stompClient = getStompClient();
-  if (alarmPayload.receiverId && stompClient?.connected) {
-    stompClient.send(
-      '/app/alarm',
-      {},
-      JSON.stringify({
-        type: 'LIKE',
-        senderId: alarmPayload.senderId,
-        receiverId: alarmPayload.receiverId,
-        b_idx: alarmPayload.b_idx,
-        b_title: alarmPayload.b_title,
-      })
-    );
-  } else {
-    console.warn('웹소켓 연결이 되어 있지 않거나 수신자 없음');
   }
 };
 

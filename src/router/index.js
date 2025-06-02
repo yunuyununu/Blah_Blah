@@ -8,6 +8,13 @@ const routes = [
     component: () => import('@/views/HomeView')
   },
   {
+    path: '/_redirect',
+    name: 'Redirect',
+    component: {
+      template: '<div></div>',
+    }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('@/views/UserLogin')

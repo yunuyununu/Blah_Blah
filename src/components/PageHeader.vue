@@ -52,22 +52,31 @@
     <div v-if="showNotifications" class="notification-panel">
       <div class="notification-header">알림</div>
       <ul class="notification-list">
+        <li v-if="notifications.length === 0" style="text-align: center; padding: 20px; color: #888;">
+          알림이 없습니다.
+        </li>
         <li
           v-for="notification in notifications"
-          :key="notification.id"
+          :key="notification.a_id"
           :class="{ unread: !notification.read }"
         >
-          {{ notification.message }}
-        </li>
+        <a
+          href="#"
+          class="notification-link"
+          @click.prevent="goToNotification(notification.a_url)"
+        >
+          회원님의 글 "{{ notification.b_title }}"에 {{ notification.s_u_name }}님이 좋아요를 눌렀습니다.
+        </a></li>
       </ul>
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted,onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/store/userStore'
 import { useRouter } from 'vue-router'
+import axios from 'axios';
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -79,46 +88,90 @@ const notifications = ref([])
 const showNotifications = ref(false)
 const hasUnread = ref(false)
 
-// 예시: 알림 목록 가져오기 (실제 API 호출로 대체 가능)
-const fetchNotifications = () => {
-  // 예시 데이터. 실제 구현 시 API 호출해서 데이터를 받아오세요.
-  notifications.value = [
-    { id: 1, message: '새 댓글이 등록되었습니다.', read: false },
-    { id: 2, message: '게시글이 업데이트되었습니다.', read: true },
-    { id: 3, message: '새 댓글이 등록되었습니다.', read: true },
-    { id: 4, message: '게시글이 업데이트되었습니다.', read: true },
-    { id: 5, message: '새 댓글이 등록되었습니다.', read: true },
-    { id: 6, message: '게시글이 업데이트되었습니다.', read: true },
-    { id: 7, message: '새 댓글이 등록되었습니다.', read: true },
-    { id: 8, message: '새 댓글이 등록되었습니다.', read: true },
-    { id: 9, message: '새 댓글이 등록되었습니다.', read: true },
-    { id: 10, message: '새 댓글이 등록되었습니다.', read: true }
-  ]
-  // 읽지 않은 알림이 있으면 표시
-  hasUnread.value = notifications.value.some(n => !n.read)
+let socket = null
+
+// 알림 목록 
+const fetchNotifications = async () => {
+  try {
+    const res = await axios.get(`http://localhost:80/alarm/list`) // 로그인된 유저의 알림 목록 요청
+    notifications.value = res.data
+    console.log("알림리스트==>>>>",notifications.value)
+    hasUnread.value = notifications.value.some(n => !n.read)
+  } catch (e) {
+    console.error('알림 불러오기 실패', e)
+  }
 }
 
-// 알림 패널 토글 함수
-const toggleNotificationPanel = () => {
+// 📌 실시간 알림 수신용 웹소켓 연결
+const connectWebSocket = () => {
+  const userId = userStore.user?.id // 로그인된 사용자 ID (store에 저장된 값 사용)
+  if (!userId) return
+
+  socket = new WebSocket(`ws://localhost:80/ws/alarm/${userId}`)
+
+  socket.onmessage = (event) => {
+    const newAlarm = JSON.parse(event.data)
+    notifications.value.unshift(newAlarm)
+    hasUnread.value = true
+  }
+
+  socket.onclose = () => {
+    console.log('알림 소켓 연결 종료됨')
+    // 자동 재연결 필요시 setTimeout(() => connectWebSocket(), 3000)
+  }
+}
+
+// 📌 알림 패널 열면 읽음 처리 API 호출
+const toggleNotificationPanel = async () => {
   showNotifications.value = !showNotifications.value
-  // 패널을 열면 모든 알림을 읽음 처리
+
   if (showNotifications.value) {
-    notifications.value = notifications.value.map(n => ({ ...n, read: true }))
-    hasUnread.value = false
+    try {
+      await axios.post(`http://localhost:80/alarm/isRead`)
+      notifications.value = notifications.value.map(n => ({ ...n, read: true }))
+      hasUnread.value = false
+    } catch (e) {
+      console.error('읽음 처리 실패', e)
+    }
   }
 }
 
 // 페이지가 마운트될 때 알림을 가져옴
 onMounted(() => {
-  fetchNotifications()
+  if(userStore.isLogin === true){
+    fetchNotifications()
+    connectWebSocket()
+  }
   // 필요하다면 주기적으로 알림을 폴링 할 수 있습니다.
   // setInterval(fetchNotifications, 30000)
+})
+
+onBeforeUnmount(() => {
+  if (socket) socket.close()
 })
 
 const goLogin = () => router.push('/login')
 const logout = async () => {
   await userStore.logout()
   router.push('/login')
+}
+
+watch(notifications, (newVal) => {
+  hasUnread.value = newVal.some(n => !n.read)
+}, { deep: true })
+
+const goToNotification = async (url) => {
+  showNotifications.value = false
+
+  if (router.currentRoute.value.path === url) {
+    // 동일한 경로일 경우 강제로 새로고침
+    await router.replace({ path: '/_redirect' }) // 임시 페이지로 이동
+    setTimeout(() => {
+      router.replace({ path: url })
+    }, 10)        // 다시 원래 페이지로 이동
+  } else {
+    router.push({ path: url })
+  }
 }
 </script>
 
@@ -212,5 +265,14 @@ const logout = async () => {
 .notification-list li.unread {
   background-color: #f1f3f5;
   font-weight: bold;
+}
+.notification-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 10px;
+}
+.notification-link:hover {
+  background-color: #e9ecef;
 }
 </style>
