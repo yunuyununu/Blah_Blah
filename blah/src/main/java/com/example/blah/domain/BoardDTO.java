@@ -28,6 +28,8 @@ public class BoardDTO {
     private int h_b_idx;
     private int h_u_idx;
     private int heart_count;
+    private int LIKE_COUNT;
+    private int COMMENT_COUNT;
     
     public BoardDTO(int userId, String title, String content) {
         this.b_u_idx = userId;

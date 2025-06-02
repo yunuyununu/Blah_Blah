@@ -160,10 +160,27 @@ public class BoardController {
 		return result;
 	}
 	
+	// 게시물 수정
+	@PostMapping("boardUpdate")
+	public void boardUpdate(@RequestBody Map<String, Integer> request) {
+		int b_idx = request.get("b_idx");
+		service.boardUpdate(b_idx);
+	}
+	
 	// 게시글 삭제
 	@PostMapping("boardDelete")
 	public void boardDelete(@RequestBody Map<String, Integer> request) {
 		int b_idx = request.get("b_idx");
 		service.boardDelete(b_idx);
+	}
+	
+	@GetMapping("weeklyBest")
+	public List<BoardDTO> weeklyBest() {
+		return service.weeklyBest();
+	}
+	
+	@GetMapping("monthlyBest")
+	public List<BoardDTO> monthlyBest() {
+		return service.monthlyBest();
 	}
 }

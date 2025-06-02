@@ -17,4 +17,8 @@ public class AlarmDTO {
     private String a_url;
     private String a_date;
     private String a_read;
+    private String u_nicname;
+    private String b_title;
+    private String r_u_name;
+    private String s_u_name;
 }

@@ -4,4 +4,6 @@ import java.io.IOException;
 
 public interface GCSService {
 	String uploadObject(GCSRequest gcsRequest) throws IOException;
+	
+	String uploadCompany(GCSRequest gcsRequest) throws IOException;
 }

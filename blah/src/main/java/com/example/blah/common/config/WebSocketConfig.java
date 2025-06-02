@@ -19,8 +19,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic"); // /topic으로 시작하는 주소로 메시지를 클라이언트에게 전달하는 간단한 메모리 기반 브로커를 활성화
-        config.setApplicationDestinationPrefixes("/app"); // @MessageMapping으로 지정된 메서드가 기본적으로 바인딩되는 /app에 메시지 브로커를 설정
+//        config.enableSimpleBroker("/topic"); // /topic으로 시작하는 주소로 메시지를 클라이언트에게 전달하는 간단한 메모리 기반 브로커를 활성화
+//        config.setApplicationDestinationPrefixes("/app"); // @MessageMapping으로 지정된 메서드가 기본적으로 바인딩되는 /app에 메시지 브로커를 설정
+    	// /topic과 /queue 브로커 모두 활성화
+        config.enableSimpleBroker("/topic", "/queue", "/alarm");
+        
+        // 사용자별 개인 메시지를 위한 설정
+        config.setUserDestinationPrefix("/user");
+        
+        // 애플리케이션 목적지 접두사
+        config.setApplicationDestinationPrefixes("/app"); 
     }
 
 }

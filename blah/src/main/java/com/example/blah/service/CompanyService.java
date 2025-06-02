@@ -20,4 +20,7 @@ public interface CompanyService {
 	Double companyStar(int r_c_idx);
 	
 	void companyInsert(Map<String, Object> map);
+	
+	// 회사 순위
+	List<CompanyDTO> companyScore();
 }

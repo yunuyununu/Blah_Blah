@@ -50,4 +50,10 @@ public class CompanyServiceImpl implements CompanyService {
 	public void companyInsert(Map<String, Object> map) {
 		companyMapper.companyInsert(map);
 	}
+	
+	// 회사 순위
+	@Override
+	public List<CompanyDTO> companyScore() {
+		return companyMapper.companyScore();
+	}
 }

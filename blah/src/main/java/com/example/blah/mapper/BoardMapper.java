@@ -41,10 +41,18 @@ public interface BoardMapper {
 	// 게시물 등록 시 이미지 첨부 (다중)
 	void imageInsert(FileDTO image);
 	
+	// 게시물 수정 시
+	void boardUpdate(int b_idx);
+	
 	// 게시물 삭제 시
 	void boardDelete(int b_idx);
 	
 	// 하트 갯수
 	int heartCount(int b_idx);
 	
+	// 주간 토픽 베스트
+	List<BoardDTO> weeklyBest();
+	
+	// 월간 토픽 베스트
+	List<BoardDTO> monthlyBest();
 }

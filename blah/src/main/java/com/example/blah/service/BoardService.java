@@ -33,9 +33,18 @@ public interface BoardService {
 	// 게시물 등록
 	void boardInsert(int u_idx, String title, String content, List<MultipartFile> images) throws IOException;
 
+	// 게시물 수정 시
+	void boardUpdate(int b_idx);
+	
 	// 게시물 삭제 시
 	void boardDelete(int b_idx);
 	
 	// 하트 갯수
 	int heartCount(int b_idx);
+	
+	// 주간 토픽 베스트
+	List<BoardDTO> weeklyBest();
+		
+	// 월간 토픽 베스트
+	List<BoardDTO> monthlyBest();
 }

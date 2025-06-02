@@ -4,6 +4,8 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.blah.mapper.CompanyMapper">
+
+	<!--회사목록-->
     <select id="list" resultType="com.example.blah.domain.CompanyDTO">
         SELECT C_IDX,		<!--회사번호-->
         	   C_NAME,		<!--회사명-->
@@ -18,7 +20,8 @@
         ORDER BY RAND()
         LIMIT #{param1} OFFSET #{param2}
     </select>
-	
+
+	<!--회사상세-->	
 	<select id="companyDetails" resultType="map">
 		SELECT COP.C_IDX AS C_IDX,			<!--회사번호-->
 			   COP.C_NAME AS C_NAME,			<!--회사명-->
@@ -37,6 +40,7 @@
 		WHERE COP.C_IDX = #{c_idx}
 	</select>
 	
+	<!--리뷰리스트-->
 	<select id="reviewList" resultType="com.example.blah.domain.CompanyDTO">
 		SELECT  REW.R_IDX AS R_IDX,			<!--리뷰번호-->
 				REW.R_C_IDX AS R_C_IDX,		<!--리뷰회사번호-->
@@ -76,4 +80,22 @@
 		INSERT INTO COMPANY_REQUEST (CR_U_IDX,CR_NAME,CR_INTRO,CR_BUSINESS,CR_LOGO,CR_EST)
 		VALUES (#{cr_u_idx}, #{cr_name}, #{cr_intro}, #{cr_business},#{cr_logo},#{cr_est})
 	</insert>
+	
+	<select id="companyScore" resultType="com.example.blah.domain.CompanyDTO">
+		SELECT 
+		    COM.C_IDX,
+		    COM.C_NAME,
+		    COM.C_NICNAME,
+		    COM.C_LOGO,
+		    COM.C_INDUSTRY,
+		    IFNULL(ROUND(SUM(REW.R_STAR)/COUNT(REW.R_STAR),1),0) AS STAR,
+		    COUNT(REW.R_IDX) AS REVIEW_COUNT
+		FROM COMPANY COM
+		JOIN REVIEW REW ON COM.C_IDX = REW.R_C_IDX
+		WHERE COM.C_STATUS = 'NORMAL'
+		GROUP BY COM.C_IDX
+		HAVING REVIEW_COUNT >= 1
+		ORDER BY STAR DESC, REVIEW_COUNT DESC
+		LIMIT 10
+	</select>
 </mapper>

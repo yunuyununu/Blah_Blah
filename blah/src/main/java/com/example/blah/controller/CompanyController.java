@@ -76,7 +76,7 @@ public class CompanyController {
 	        GCSRequest gcsRequest = new GCSRequest();
 	        gcsRequest.setName(fileName); // GCS에 저장될 파일명
 	        gcsRequest.setFile(cr_logo); // 실제 파일
-	        String publicUrl = gcsService.uploadObject(gcsRequest); // 업로드 실행
+	        String publicUrl = gcsService.uploadCompany(gcsRequest); // 업로드 실행
 	        
 	        Map<String, Object> map = new HashMap<>();
 	        map.put("cr_u_idx", cr_u_idx);
@@ -91,5 +91,11 @@ public class CompanyController {
 			e.getStackTrace();
 		}
 		
+	}
+	
+	// 회사 목록
+	@GetMapping("score")
+	public List<CompanyDTO> companyScore() {
+		return service.companyScore();
 	}
 }

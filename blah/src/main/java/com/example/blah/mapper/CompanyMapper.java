@@ -24,4 +24,7 @@ public interface CompanyMapper {
 	
 	// 회사 신청
 	void companyInsert(Map<String, Object> map);
+	
+	// 회사 순위
+	List<CompanyDTO> companyScore();
 }

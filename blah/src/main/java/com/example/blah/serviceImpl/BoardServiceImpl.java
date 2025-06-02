@@ -78,7 +78,7 @@ public class BoardServiceImpl implements BoardService {
 			dto.setA_b_idx(b_idx);
 			dto.setA_u_idx(b_u_idx);
 			dto.setA_type("Like");
-			dto.setA_url("/board/boarddetails/"+b_idx);
+			dto.setA_url("/boarddetails/"+b_idx);
 			boardMapper.alarmInsert(dto);
 
 			String message = "게시글 \""+b_title + "\"에 좋아요가 추가되었습니다.";
@@ -120,6 +120,12 @@ public class BoardServiceImpl implements BoardService {
 		}
 	}
 	
+	// 게시물 수정 시
+	@Override
+	public void boardUpdate(int b_idx) {
+		boardMapper.boardUpdate(b_idx);
+	}
+	
 	// 게시물 삭제 시
 	@Override
 	public void boardDelete(int b_idx) {
@@ -130,5 +136,15 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public int heartCount(int b_idx) {
 		return boardMapper.heartCount(b_idx);
+	}
+	
+	@Override
+	public List<BoardDTO> weeklyBest() {
+		return boardMapper.weeklyBest();
+	}
+	
+	@Override
+	public List<BoardDTO> monthlyBest() {
+		return boardMapper.monthlyBest();
 	}
 }

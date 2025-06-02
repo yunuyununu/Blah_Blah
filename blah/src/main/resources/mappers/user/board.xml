@@ -138,6 +138,12 @@
         VALUES (#{i_b_idx}, #{i_image})
     </insert>
     
+    <update id="boardUpdate">
+    	UPDATE BOARD
+		SET B_TITLE = #{b_title}, B_CONTENT = #{b_content} , B_MODIFY = #{b_modify}
+		WHERE B_IDX = #{b_idx}
+    </update>
+    
     <!--게시물 삭제-->
     <delete id="boardDelete">
     	UPDATE BOARD
@@ -151,5 +157,51 @@
 		FROM HEART HRT
 		JOIN BOARD BRD ON BRD.B_IDX = HRT.H_B_IDX
 		WHERE B_IDX = #{b_idx}
+    </select>
+    
+    <!--주간 토픽 베스트-->
+    <select id="weeklyBest" resultType="com.example.blah.domain.BoardDTO">
+    	SELECT 
+		    BRD.B_IDX AS B_IDX,
+		    BRD.B_TITLE AS B_TITLE,
+		    BRD.B_CONTENT AS B_CONTENT,
+		    BRD.B_DATE AS B_DATE,
+		    BRD.B_HITS AS B_HITS,
+		    COUNT(DISTINCT HRT.H_IDX) AS LIKE_COUNT,
+		    COUNT(DISTINCT COM.CM_IDX) AS COMMENT_COUNT
+		FROM BOARD BRD
+		LEFT JOIN HEART HRT
+		    ON BRD.B_IDX = HRT.H_B_IDX
+		    AND HRT.H_IDX IS NOT NULL
+		LEFT JOIN COMMENT COM
+    		ON BRD.B_IDX = COM.CM_B_IDX
+		WHERE BRD.B_DELETE = 'N'
+		  AND BRD.B_DATE >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		GROUP BY BRD.B_IDX
+		ORDER BY LIKE_COUNT DESC, BRD.B_DATE DESC
+		LIMIT 10
+    </select>
+    
+    <!--월간 토픽베스트-->
+    <select id="monthlyBest" resultType="com.example.blah.domain.BoardDTO">
+    	SELECT 
+		    BRD.B_IDX AS B_IDX,
+		    BRD.B_TITLE AS B_TITLE,
+		    BRD.B_CONTENT AS B_CONTENT,
+		    BRD.B_DATE AS B_DATE,
+		    BRD.B_HITS AS B_HITS,
+		    COUNT(HRT.H_IDX) AS LIKE_COUNT,
+		    COUNT(DISTINCT COM.CM_IDX) AS COMMENT_COUNT
+		FROM BOARD BRD
+		LEFT JOIN HEART HRT
+		    ON BRD.B_IDX = HRT.H_B_IDX
+		LEFT JOIN COMMENT COM
+    		ON BRD.B_IDX = COM.CM_B_IDX
+		    AND HRT.H_IDX IS NOT NULL
+		WHERE BRD.B_DELETE = 'N'
+		  AND BRD.B_DATE >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+		GROUP BY BRD.B_IDX
+		ORDER BY LIKE_COUNT DESC, BRD.B_DATE DESC
+		LIMIT 10
     </select>
 </mapper>
