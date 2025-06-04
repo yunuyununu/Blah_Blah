@@ -35,4 +35,10 @@ public class CommentServiceImpl implements CommentService {
 	public void commentDelete(int cm_idx) {
 		commentMapper.commentDelete(cm_idx);
 	}
+	
+	// 댓글/대댓글 수정
+	@Override
+	public void commentUpdate(CommentDTO dto) {
+		commentMapper.commentUpdate(dto);
+	}
 }

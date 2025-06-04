@@ -67,4 +67,10 @@ public class MypageServiceImpl implements MypageService {
 	public void reviewUpdate(Map<String, Object> map) {
 		mypageMapper.reviewUpdate(map);
 	}
+	
+	// 리뷰 삭제
+	@Override
+	public void reviewDelete(int r_idx) {
+		mypageMapper.reviewDelete(r_idx);
+	}
 }

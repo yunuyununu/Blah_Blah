@@ -33,4 +33,7 @@ public interface MypageService {
 	
 	// 리뷰 수정
 	void reviewUpdate(Map<String, Object> map);
+
+	// 리뷰 삭제
+	void reviewDelete(int r_idx);
 }

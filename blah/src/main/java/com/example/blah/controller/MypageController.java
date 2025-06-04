@@ -51,7 +51,7 @@ public class MypageController {
 	        GCSRequest gcsRequest = new GCSRequest();
 	        gcsRequest.setName(fileName); // GCS에 저장될 파일명
 	        gcsRequest.setFile(u_file); // 실제 파일
-	        String publicUrl = gcsService.uploadObject(gcsRequest); // 업로드 실행
+	        String publicUrl = gcsService.uploadCompanyChange(gcsRequest); // 업로드 실행
 	        System.out.println("구글클라우드 업로드=>>"+gcsRequest);
 	        
 	        Map<String, Object> map = new HashMap<>();
@@ -129,7 +129,13 @@ public class MypageController {
 	    map.put("r_title", request.get("r_title"));
 	    map.put("r_content", request.get("r_content"));
 
-	    service.reviewInsert(map);
+	    service.reviewUpdate(map);
+	}
+	
+	// 리뷰 삭제
+	@PostMapping("reviewDelete")
+	public void reviewDelete(@RequestBody Map<String, Integer> request) {
+		service.reviewDelete(request.get("r_idx"));
 	}
 	
 }

@@ -20,9 +20,7 @@
 		FROM COMMENT AS COM 		<!--댓글 테이블-->
 		INNER JOIN USER AS USR		<!--회원 테이블-->
 				ON COM.CM_U_IDX = USR.U_IDX
-		INNER JOIN BOARD AS BRD		<!--게시판 테이블-->
-				ON COM.CM_B_IDX = BRD.B_IDX
-		INNER JOIN COMPANY AS CPN		<!--회사 테이블-->
+		LEFT JOIN COMPANY AS CPN		<!--회사 테이블-->
 				ON CPN.C_IDX = USR.U_C_IDX
 		WHERE CM_B_IDX = #{cm_b_idx}
         ORDER BY 
@@ -48,4 +46,11 @@
     	DELETE FROM COMMENT
 		WHERE CM_IDX = #{cm_idx}
     </delete>
+    
+    <!--댓글/대댓글 수정-->
+    <update id="commentUpdate">
+    	UPDATE COMMENT
+		SET CM_CONTENT = #{cm_content}, CM_MODIFY = CURRENT_TIMESTAMP
+		WHERE CM_IDX = #{cm_idx} 
+    </update>
 </mapper>

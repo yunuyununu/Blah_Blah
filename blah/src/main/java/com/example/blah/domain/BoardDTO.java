@@ -30,10 +30,18 @@ public class BoardDTO {
     private int heart_count;
     private int LIKE_COUNT;
     private int COMMENT_COUNT;
+    private int IMAGE_COUNT;
     
     public BoardDTO(int userId, String title, String content) {
         this.b_u_idx = userId;
         this.b_title = title;
         this.b_content = content;
     }
+    
+    public BoardDTO(String title, int bId, String content) {
+        this.b_title = title;
+        this.b_idx = bId;
+        this.b_content = content;
+    }
+ 
 }

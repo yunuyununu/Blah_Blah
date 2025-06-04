@@ -7,7 +7,7 @@
 
 	<!--회사목록-->
     <select id="list" resultType="com.example.blah.domain.CompanyDTO">
-        SELECT C_IDX,		<!--회사번호-->
+        SELECT C_IDX ,		<!--회사번호-->
         	   C_NAME,		<!--회사명-->
         	   C_LOGO,		<!--회사대표사진-->
         	   C_INDUSTRY,	<!--회사업계-->
@@ -16,8 +16,10 @@
         	   C_NUMBER,	<!--회사인원-->
         	   C_BUSINESS,	<!--사업자등록번호-->
         	   C_REGISTER	<!--등록일자-->
-        FROM COMPANY
-        ORDER BY RAND()
+        FROM COMPANY 
+        WHERE C_NAME LIKE CONCAT('%', #{param3}, '%')
+		AND C_STATUS = 'NORMAL'
+        ORDER BY RAND(), C_REGISTER DESC
         LIMIT #{param1} OFFSET #{param2}
     </select>
 
@@ -83,19 +85,42 @@
 	
 	<select id="companyScore" resultType="com.example.blah.domain.CompanyDTO">
 		SELECT 
-		    COM.C_IDX,
-		    COM.C_NAME,
-		    COM.C_NICNAME,
-		    COM.C_LOGO,
-		    COM.C_INDUSTRY,
+		    COP.C_IDX,
+		    COP.C_NAME,
+		    COP.C_NICNAME,
+		    COP.C_LOGO,
+		    COP.C_INDUSTRY,
 		    IFNULL(ROUND(SUM(REW.R_STAR)/COUNT(REW.R_STAR),1),0) AS STAR,
 		    COUNT(REW.R_IDX) AS REVIEW_COUNT
-		FROM COMPANY COM
-		JOIN REVIEW REW ON COM.C_IDX = REW.R_C_IDX
-		WHERE COM.C_STATUS = 'NORMAL'
-		GROUP BY COM.C_IDX
+		FROM COMPANY COP
+		JOIN REVIEW REW ON COP.C_IDX = REW.R_C_IDX
+		WHERE COP.C_STATUS = 'NORMAL'
+		GROUP BY COP.C_IDX
 		HAVING REVIEW_COUNT >= 1
 		ORDER BY STAR DESC, REVIEW_COUNT DESC
 		LIMIT 10
+	</select>
+	
+	<select id="companySearch">
+		SELECT COP.C_IDX,		<!--회사번호-->
+        	   COP.C_NAME,		<!--회사명-->
+        	   COP.C_LOGO,		<!--회사대표사진-->
+        	   COP.C_INDUSTRY,	<!--회사업계-->
+        	   COP.C_EST,		<!--회사 설립일자-->
+        	   COP.C_INTRO,		<!--회사소개-->
+        	   COP.C_NUMBER,	<!--회사인원-->
+        	   COP.C_BUSINESS,	<!--사업자등록번호-->
+        	   COP.C_REGISTER	<!--등록일자-->
+		FROM COMPANY COP
+		WHERE COP.C_NAME LIKE CONCAT('%', #{c_name}, '%')
+		  AND COP.C_STATUS = 'NORMAL'
+		ORDER BY C_REGISTER DESC
+	</select>
+	
+	<!--회원의 리뷰존재유무-->	
+	<select id="reviewYN">
+		SELECT COUNT(1) AS COUNT
+		FROM REVIEW
+		WHERE R_U_IDX =#{r_u_idx}
 	</select>
 </mapper>

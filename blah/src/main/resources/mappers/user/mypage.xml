@@ -7,19 +7,19 @@
 	
 	<!--회원 마이페이지-->
 	<select id="mypage" resultType="map">
-		SELECT USR.U_IDX,			<!--회원번호-->
-				USR.U_ID,			<!--회원아이디-->
-		        USR.U_C_IDX,		<!--회원회사-->
-		        USR.U_PASSWORD,		<!--비밀번호-->
-		        USR.U_NICNAME,		<!--회원닉네임-->
-		        USR.U_EMAIL,		<!--회원이메일-->
-		        USR.U_PHONE,		<!--회원전화번호-->
-		        USR.U_FILE,			<!--회사인증파일-->
+		SELECT USR.U_IDX AS U_IDX,					<!--회원번호-->
+				USR.U_ID AS U_ID,					<!--회원아이디-->
+		        IFNULL(USR.U_C_IDX,0) AS U_C_IDX,	<!--회원회사-->
+		        USR.U_PASSWORD AS U_PASSWORD,		<!--비밀번호-->
+		        USR.U_NICNAME AS U_NICNAME,			<!--회원닉네임-->
+		        USR.U_EMAIL AS U_EMAIL,				<!--회원이메일-->
+		        USR.U_PHONE AS U_PHONE,				<!--회원전화번호-->
+		        USR.U_FILE AS U_FILE,				<!--회사인증파일-->
 		        DATE_FORMAT(USR.U_JOINDATE,	'%Y-%m-%d') AS U_JOINDATE,	<!--가입일자-->
-		        USR.U_WITHDRAW,		<!--탈퇴일자-->
-		        USR.U_REVIEW,		<!--리뷰작성여부-->
-		        USR.U_STATUS,		<!--회원상태-->
-		        COP.C_NAME			<!--회원회사이름-->
+		        USR.U_WITHDRAW AS U_WITHDRAW,		<!--탈퇴일자-->
+		        USR.U_REVIEW AS U_REVIEW,			<!--리뷰작성여부-->
+		        USR.U_STATUS AS U_STATUS,			<!--회원상태-->
+		        COP.C_NAME AS C_NAME				<!--회원회사이름-->
 		FROM USER AS USR
 			LEFT JOIN COMPANY AS COP		
 	    		ON COP.C_IDX = USR.U_C_IDX
@@ -29,7 +29,7 @@
 	<!--회사 변경-->
 	<update id="companyChange">
 		UPDATE USER
-		SET U_C_IDX = NULL, U_FILE = #{u_file}, U_STATUS = 'Checking', U_REVIEW = 'N'
+		SET U_C_IDX = 0, U_FILE = #{u_file}, U_STATUS = 'Uncertified', U_REVIEW = 'N'
 		WHERE U_IDX = #{u_idx}
 	</update>
 	
@@ -79,7 +79,15 @@
 	
 	<!--리뷰작성유무체크-->
 	<select id="reviewCheck" resultType="map">
-		SELECT U_REVIEW, C_IDX, IFNULL(C_NAME,'회사 확인중') AS C_NAME
+		SELECT U_REVIEW, 							<!--현회사 리뷰 등록 여부-->
+		        IFNULL(C_IDX,0) AS C_IDX,			<!--회사번호-->
+		        IFNULL(C_NAME,'회사 확인중') AS C_NAME,	<!--회사명-->
+		        (
+			        SELECT COUNT(*) 
+			        FROM REVIEW RE
+			        WHERE RE.R_C_IDX = USR.U_C_IDX
+			          AND RE.R_U_IDX = USR.U_IDX
+			    ) AS REVIEW_COUNT
 		FROM USER AS USR
 	        LEFT JOIN COMPANY AS COP		
 				ON COP.C_IDX = USR.U_C_IDX
@@ -98,4 +106,9 @@
 		SET R_STAR = #{r_star}, R_TITLE = #{r_title}, R_CONTENT = #{r_content}
 		WHERE R_IDX = #{r_idx}
 	</update>
+	
+	<delete id="reviewDelete">
+		DELETE FROM REVIEW
+		WHERE R_IDX=#{r_idx}
+	</delete>
 </mapper>

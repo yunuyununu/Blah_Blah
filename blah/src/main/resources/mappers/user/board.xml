@@ -25,6 +25,10 @@
 		    JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
 		    LEFT JOIN HEART HRT ON BRD.B_IDX = HRT.H_B_IDX
 	    WHERE BRD.B_DELETE = 'N'
+		    AND (
+			    BRD.B_TITLE LIKE CONCAT('%', #{searchKeyword}, '%') 
+			    OR BRD.B_CONTENT LIKE CONCAT('%', #{searchKeyword}, '%')
+			  )
 	    GROUP BY 
 	        BRD.B_IDX, BRD.B_U_IDX, BRD.B_TITLE, BRD.B_CONTENT,
 	        BRD.B_HITS, BRD.B_DATE, BRD.B_MODIFY, BRD.B_VOTE, BRD.B_DELETE,
@@ -65,22 +69,25 @@
 	
 	<!--게시글 상세-->
 	<select id="boardDetails" resultType="map">
-		SELECT BRD.B_IDX AS B_IDX,				<!--게시판 번호-->
-			   BRD.B_U_IDX AS B_U_IDX,			<!--게시글 작성자-->
-			   BRD.B_TITLE AS B_TITLE,			<!--게시글 제목-->
-			   BRD.B_CONTENT AS B_CONTENT,		<!--게시글 내용-->
-			   BRD.B_HITS AS B_HITS,			<!--게시글 조회수-->
-			   BRD.B_DATE AS B_DATE,			<!--게시글 작성일-->
-			   BRD.B_MODIFY AS B_MODIFY,		<!--수정일-->
-			   BRD.B_VOTE AS B_VOTE,			<!--투표존재여부-->
-			   BRD.B_DELETE AS B_DELETE,		<!--삭제여부-->
-			   USR.U_NICNAME AS U_NICNAME,		<!--회원 닉네임-->
-			   COP.C_NAME AS C_NAME,			<!--회사명-->
-			   COUNT(DISTINCT HRT.H_IDX) AS COUNT	<!--좋아요수-->
+		SELECT BRD.B_IDX AS B_IDX,					<!--게시판 번호-->
+			   BRD.B_U_IDX AS B_U_IDX,				<!--게시글 작성자-->
+			   BRD.B_TITLE AS B_TITLE,				<!--게시글 제목-->
+			   BRD.B_CONTENT AS B_CONTENT,			<!--게시글 내용-->
+			   BRD.B_HITS AS B_HITS,				<!--게시글 조회수-->
+			   BRD.B_DATE AS B_DATE,				<!--게시글 작성일-->
+			   BRD.B_MODIFY AS B_MODIFY,			<!--수정일-->
+			   BRD.B_VOTE AS B_VOTE,				<!--투표존재여부-->
+			   BRD.B_DELETE AS B_DELETE,			<!--삭제여부-->
+			   USR.U_NICNAME AS U_NICNAME,			<!--회원 닉네임-->
+			   COP.C_NAME AS C_NAME,				<!--회사명-->
+			   COUNT(DISTINCT HRT.H_IDX) AS COUNT,	<!--좋아요수-->
+			   VT.V_IDX AS V_IDX,					<!--투표번호-->
+			   VT.V_TITLE AS V_TITLE				<!--투표제목-->
 		FROM BOARD BRD
 			JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-			JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+			LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
 			LEFT JOIN HEART HRT ON HRT.H_B_IDX = BRD.B_IDX
+			LEFT JOIN VOTE VT ON VT.V_B_IDX = BRD.B_IDX
 		WHERE BRD.B_IDX = #{b_idx}
 	</select>
 	
@@ -138,11 +145,18 @@
         VALUES (#{i_b_idx}, #{i_image})
     </insert>
     
-    <update id="boardUpdate">
+    <!--게시물 수정-->
+    <update id="boardUpdate" parameterType="com.example.blah.domain.BoardDTO" useGeneratedKeys="true" keyProperty="b_idx">
     	UPDATE BOARD
-		SET B_TITLE = #{b_title}, B_CONTENT = #{b_content} , B_MODIFY = #{b_modify}
+		SET B_TITLE = #{b_title}, B_CONTENT = #{b_content} , B_MODIFY = CURRENT_TIMESTAMP
 		WHERE B_IDX = #{b_idx}
     </update>
+    
+    <!--게시물 이미지 삭제-->
+    <delete id="imageDelete">
+    	DELETE FROM IMAGE_FILE
+		WHERE I_IMAGE = #{i_image}
+    </delete>
     
     <!--게시물 삭제-->
     <delete id="boardDelete">
@@ -168,13 +182,16 @@
 		    BRD.B_DATE AS B_DATE,
 		    BRD.B_HITS AS B_HITS,
 		    COUNT(DISTINCT HRT.H_IDX) AS LIKE_COUNT,
-		    COUNT(DISTINCT COM.CM_IDX) AS COMMENT_COUNT
+		    COUNT(DISTINCT COM.CM_IDX) AS COMMENT_COUNT,
+		    COUNT(I_IDX) AS IMAGE_COUNT
 		FROM BOARD BRD
 		LEFT JOIN HEART HRT
 		    ON BRD.B_IDX = HRT.H_B_IDX
 		    AND HRT.H_IDX IS NOT NULL
 		LEFT JOIN COMMENT COM
     		ON BRD.B_IDX = COM.CM_B_IDX
+    	LEFT JOIN IMAGE_FILE IMG
+			ON BRD.B_IDX = IMG.I_B_IDX
 		WHERE BRD.B_DELETE = 'N'
 		  AND BRD.B_DATE >= DATE_SUB(NOW(), INTERVAL 7 DAY)
 		GROUP BY BRD.B_IDX
@@ -191,12 +208,15 @@
 		    BRD.B_DATE AS B_DATE,
 		    BRD.B_HITS AS B_HITS,
 		    COUNT(HRT.H_IDX) AS LIKE_COUNT,
-		    COUNT(DISTINCT COM.CM_IDX) AS COMMENT_COUNT
+		    COUNT(DISTINCT COM.CM_IDX) AS COMMENT_COUNT,
+		    COUNT(I_IDX) AS IMAGE_COUNT
 		FROM BOARD BRD
 		LEFT JOIN HEART HRT
 		    ON BRD.B_IDX = HRT.H_B_IDX
 		LEFT JOIN COMMENT COM
     		ON BRD.B_IDX = COM.CM_B_IDX
+    	LEFT JOIN IMAGE_FILE IMG
+			ON BRD.B_IDX = IMG.I_B_IDX
 		    AND HRT.H_IDX IS NOT NULL
 		WHERE BRD.B_DELETE = 'N'
 		  AND BRD.B_DATE >= DATE_SUB(NOW(), INTERVAL 30 DAY)
@@ -204,4 +224,59 @@
 		ORDER BY LIKE_COUNT DESC, BRD.B_DATE DESC
 		LIMIT 10
     </select>
+    
+    <!--게시물 투표 등록-->
+    <insert id="voteInfoInsert" useGeneratedKeys="true" keyProperty="v_idx">
+    	INSERT INTO VOTE (V_B_IDX, V_TITLE)
+    	VALUES (#{v_b_idx}, #{v_title})
+    </insert>
+    
+    <!--투표 항목-->
+    <insert id="voteOptionInsert">
+    	INSERT INTO VOTE_OPTION (VO_V_IDX, VO_CONTENT)
+    	VALUES (#{vo_v_idx}, #{vo_content})
+    </insert>
+    
+    <!--투표 존재 유무-->
+    <update id="voteYN">
+    	UPDATE BOARD
+    	SET B_DELETE = 'Y'
+    	WHERE B_IDX = #{v_b_idx}
+    </update>
+    
+    <!--투표 정보-->
+    <select id="voteInfo">
+    	SELECT VO.VO_IDX AS VO_IDX,			<!--항목번호-->
+		        VO.VO_CONTENT AS VO_CONTENT,	<!--항목내용-->
+		        VO.VO_COUNT AS VO_COUNT			<!--항목별 투표수-->
+		FROM VOTE VT
+			JOIN VOTE_OPTION VO ON VT.V_IDX = VO.VO_V_IDX
+		WHERE V_B_IDX = #{v_b_idx}
+    </select>
+    
+    <!--투표한 항목상태-->
+    <select id="voteCheck">
+    	SELECT IFNULL(
+			(SELECT VR.VR_VO_IDX
+			FROM VOTE_RESULT VR
+			  JOIN VOTE_OPTION VO ON VR.VR_VO_IDX = VO.VO_IDX
+			  JOIN VOTE VT ON VO.VO_V_IDX = VT.V_IDX
+			WHERE VT.V_B_IDX = #{v_b_idx}
+			  AND VR.VR_U_IDX = #{vr_u_idx}
+			  LIMIT 1
+			), 0) AS USER_VOTE_OPTION
+    </select>
+    
+    <!--회원 투표 선택-->
+    <insert id="votePick">
+    	INSERT INTO VOTE_RESULT (VR_U_IDX, VR_VO_IDX)
+    	VALUES (#{vr_u_idx}, #{vr_vo_idx})
+    </insert>
+    
+    <!--투표수 +1-->
+    <update id="voteCount">
+    	UPDATE VOTE_OPTION
+    	SET VO_COUNT = VO_COUNT + 1
+    	WHERE VO_IDX = #{vr_vo_idx}
+    </update>
 </mapper>

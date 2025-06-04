@@ -7,10 +7,11 @@ import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.blah.domain.BoardDTO;
+import com.example.blah.domain.VoteDTO;
 
 public interface BoardService {
 	// 게시물 목록
-	List<BoardDTO> getBoard(Long lastBIdx);
+	List<BoardDTO> getBoard(Long lastBIdx, String searchKeyword);
 	
 	// 게시물 상세
 	Map<String, Object> details(int b_idx);
@@ -31,10 +32,16 @@ public interface BoardService {
 	void likeDelete(Map<String, Object> map);
 	
 	// 게시물 등록
-	void boardInsert(int u_idx, String title, String content, List<MultipartFile> images) throws IOException;
+	int boardInsert(int u_idx, String title, String content, List<MultipartFile> images) throws IOException;
 
 	// 게시물 수정 시
-	void boardUpdate(int b_idx);
+	void boardUpdate(int u_idx, String b_title, String b_content);
+	
+	// 게시물 수정 시 (첨부파일 변경)
+	void boardImageUpdate(int b_idx,String b_title, String b_content, List<MultipartFile> images) throws IOException;
+	
+	// 게시물 이미지 삭제
+	void imageDelete(String i_image);
 	
 	// 게시물 삭제 시
 	void boardDelete(int b_idx);
@@ -47,4 +54,16 @@ public interface BoardService {
 		
 	// 월간 토픽 베스트
 	List<BoardDTO> monthlyBest();
+	
+	// 투표 등록
+	void voteInfoInsert(int v_b_idx, String v_title, List<String> options);
+	
+	// 투표 정보
+	List<Map<String, Object>> voteInfo(int v_b_idx);
+	
+	// 투표한 항목상태
+	int voteCheck(Map<String, Object> map);
+	
+	// 투표 선택
+	void votePick(int vr_u_idx, int vr_vo_idx);
 }

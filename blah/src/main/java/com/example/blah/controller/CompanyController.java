@@ -32,8 +32,8 @@ public class CompanyController {
 	
 	// 회사 목록
 	@GetMapping("list")
-	public List<CompanyDTO> list(@RequestParam(name = "limit") int limit, @RequestParam(name = "offset") int offset) {
-		List<CompanyDTO> list = service.list(limit, offset);
+	public List<CompanyDTO> list(@RequestParam(name = "limit") int limit, @RequestParam(name = "offset") int offset,@RequestParam(name = "c_name", defaultValue="") String c_name) {
+		List<CompanyDTO> list = service.list(limit, offset,c_name);
 		return list;
 	}
 	
@@ -97,5 +97,11 @@ public class CompanyController {
 	@GetMapping("score")
 	public List<CompanyDTO> companyScore() {
 		return service.companyScore();
+	}
+	
+	// 리뷰 존재 유무
+	@GetMapping("reviewYN")
+	public int reviewYN(HttpSession session) {
+		return service.reviewYN((int)session.getAttribute("UserIdx"));
 	}
 }

@@ -40,7 +40,9 @@ public class CommentController {
 			dto.setCm_b_idx(Integer.parseInt(request.get("cm_b_idx")));
 			dto.setCm_content(request.get("cm_content"));
 			service.commentInsert(dto);
-			System.out.println("댓글디티오 확인--->"+dto);
+			System.out.println("댓글uuuuuu--->"+dto.getCm_u_idx());
+			System.out.println("댓글bbbbbb--->"+dto.getCm_b_idx());
+			System.out.println("댓글content--->"+dto.getCm_content());
 			System.out.println("댓글 입력--->"+service);
 			result = "success";
 		} catch (Exception e) {
@@ -75,5 +77,12 @@ public class CommentController {
 		service.commentDelete(request.get("cm_idx"));
 	}
 	
-	
+	// 댓글/대댓글 수정
+	@PostMapping("commentUpdate")
+	public void commentUpdate(@RequestBody Map<String, Object> request) {
+		CommentDTO dto = new CommentDTO();
+		dto.setCm_idx((Integer)request.get("cm_idx"));
+		dto.setCm_content(String.valueOf(request.get("cm_content")));
+		service.commentUpdate(dto);
+	}
 }

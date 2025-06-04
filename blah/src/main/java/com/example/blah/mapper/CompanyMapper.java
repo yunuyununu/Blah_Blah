@@ -8,7 +8,7 @@ import com.example.blah.domain.CompanyDTO;
 public interface CompanyMapper {
 	
 	// 회사 목록
-	List<CompanyDTO> list(int limit, int offset);
+	List<CompanyDTO> list(int limit, int offset,String c_name);
 	
 	// 게시물 상세
 	Map<String, Object> companyDetails(int c_idx);
@@ -27,4 +27,7 @@ public interface CompanyMapper {
 	
 	// 회사 순위
 	List<CompanyDTO> companyScore();
+	
+	// 회원의 리뷰 존재유무
+	int reviewYN(int r_u_idx);
 }

@@ -18,8 +18,8 @@ public class CompanyServiceImpl implements CompanyService {
 	 private CompanyMapper companyMapper;
 	
 	@Override
-	public List<CompanyDTO> list(int limit, int offset) {
-		return companyMapper.list(limit, offset);
+	public List<CompanyDTO> list(int limit, int offset,String c_name) {
+		return companyMapper.list(limit, offset,c_name);
 	}
 	
 	@Override
@@ -55,5 +55,11 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public List<CompanyDTO> companyScore() {
 		return companyMapper.companyScore();
+	}
+	
+	// 리뷰 존재 유무
+	@Override
+	public int reviewYN(int r_u_idx) {
+		return companyMapper.reviewYN(r_u_idx);
 	}
 }

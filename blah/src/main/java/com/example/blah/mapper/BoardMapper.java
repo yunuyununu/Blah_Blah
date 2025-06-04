@@ -6,10 +6,11 @@ import java.util.Map;
 import com.example.blah.domain.AlarmDTO;
 import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.FileDTO;
+import com.example.blah.domain.VoteDTO;
 
 public interface BoardMapper {
 	// 처음 게시글
-	List<BoardDTO> firstList();
+	List<BoardDTO> firstList(String searchKeyword);
 	
 	// 더보기 요청 시 게시글
 	List<BoardDTO> plusList(Long lastBIdx);
@@ -42,7 +43,10 @@ public interface BoardMapper {
 	void imageInsert(FileDTO image);
 	
 	// 게시물 수정 시
-	void boardUpdate(int b_idx);
+	void boardUpdate(BoardDTO dto);
+	
+	// 게시물 이미지 삭제
+	void imageDelete(String i_image);
 	
 	// 게시물 삭제 시
 	void boardDelete(int b_idx);
@@ -55,4 +59,25 @@ public interface BoardMapper {
 	
 	// 월간 토픽 베스트
 	List<BoardDTO> monthlyBest();
+	
+	// 투표 정보
+	void voteInfoInsert(VoteDTO dto);
+	
+	// 투표 항목
+	void voteOptionInsert(VoteDTO dto);
+	
+	// 투표 포함 여부
+	void voteYN(int v_b_idx);
+	
+	// 투표 정보
+	List<Map<String, Object>> voteInfo(int v_b_idx);
+	
+	// 투표한 항목 상태
+	int voteCheck(Map<String, Object> map);
+	// 투표 선택
+	void votePick(VoteDTO dto);
+	
+	// 투표 항목 카운트
+	void voteCount(int vr_vo_idx);
+	
 }

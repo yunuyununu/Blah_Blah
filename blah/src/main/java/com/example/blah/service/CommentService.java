@@ -16,4 +16,7 @@ public interface CommentService {
 	
 	// 댓글/대댓글 삭제
 	void commentDelete(int cm_idx);
+	
+	// 댓글/대댓글 수정
+	void commentUpdate(CommentDTO dto);
 }
