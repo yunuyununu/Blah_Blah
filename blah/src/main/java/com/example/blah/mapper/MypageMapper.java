@@ -36,4 +36,7 @@ public interface MypageMapper {
 	
 	// 리뷰 삭제
 	void reviewDelete(int r_idx);
+	
+	// 회원 현회사 리뷰 존재 유무
+	void reviewStatusUpdate(int u_idx);
 }

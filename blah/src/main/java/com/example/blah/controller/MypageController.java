@@ -134,8 +134,9 @@ public class MypageController {
 	
 	// 리뷰 삭제
 	@PostMapping("reviewDelete")
-	public void reviewDelete(@RequestBody Map<String, Integer> request) {
-		service.reviewDelete(request.get("r_idx"));
+	public void reviewDelete(@RequestBody Map<String, Integer> request,HttpSession session) {
+		service.reviewDelete((int)request.get("r_idx"));
+		service.reviewStatusUpdate((int)session.getAttribute("UserIdx"));
 	}
 	
 }

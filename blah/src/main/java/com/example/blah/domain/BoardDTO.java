@@ -20,7 +20,6 @@ public class BoardDTO {
     private String b_vote;
     private String b_delete;
     private String u_nicname;
-    private long lastBIdx;
     private String c_name;
     private int i_idx;
     private int i_b_idx;

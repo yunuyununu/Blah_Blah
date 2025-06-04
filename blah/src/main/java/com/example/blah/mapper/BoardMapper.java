@@ -3,17 +3,19 @@ package com.example.blah.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.example.blah.domain.AlarmDTO;
 import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.FileDTO;
 import com.example.blah.domain.VoteDTO;
 
 public interface BoardMapper {
-	// 처음 게시글
-	List<BoardDTO> firstList(String searchKeyword);
+	// 게시글 목록
+	List<Map<String, Object>> boardList(@Param("searchKeyword") String searchKeyword,@Param("page") int page,@Param("offset") int offset);
 	
-	// 더보기 요청 시 게시글
-	List<BoardDTO> plusList(Long lastBIdx);
+	// 게시물 총 갯수
+	int boardTotalCount(String searchKeyword);
 	
 	// 게시물 상세
 	Map<String, Object> boardDetails(int b_idx);

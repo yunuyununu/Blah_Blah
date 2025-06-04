@@ -78,11 +78,13 @@ public class CompanyController {
 	        gcsRequest.setFile(cr_logo); // 실제 파일
 	        String publicUrl = gcsService.uploadCompany(gcsRequest); // 업로드 실행
 	        
+	        String businessNum = cr_business.replaceAll("-", "");
+	        
 	        Map<String, Object> map = new HashMap<>();
 	        map.put("cr_u_idx", cr_u_idx);
 	        map.put("cr_name", cr_name);
 	        map.put("cr_intro", cr_intro);
-	        map.put("cr_business", cr_business);
+	        map.put("cr_business", businessNum);
 	        map.put("cr_logo", publicUrl);
 	        map.put("cr_est", cr_est);
 	        System.out.println("회사 신청 시 보내는 데이터=>>"+map);

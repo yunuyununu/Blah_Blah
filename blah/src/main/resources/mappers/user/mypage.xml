@@ -107,8 +107,14 @@
 		WHERE R_IDX = #{r_idx}
 	</update>
 	
+	<!--리뷰삭제-->
 	<delete id="reviewDelete">
 		DELETE FROM REVIEW
 		WHERE R_IDX=#{r_idx}
 	</delete>
+	<update id="reviewStatusUpdate">
+		UPDATE USER
+		SET U_REVIEW = 'N'
+		WHERE U_IDX = #{u_idx}
+	</update>
 </mapper>

@@ -5,66 +5,58 @@
 
 <mapper namespace="com.example.blah.mapper.BoardMapper">
     
-    <!--처음 게시글 12개-->
-    <select id="firstList" resultType="com.example.blah.domain.BoardDTO">
+    <!--게시글 목록-->
+	 <select id="boardList" resultType="map">
 	    SELECT 
-	        BRD.B_IDX AS B_IDX,             <!-- 게시판 번호 -->
-	        BRD.B_U_IDX AS B_U_IDX,         <!-- 게시글 작성자 -->
-	        BRD.B_TITLE AS B_TITLE,         <!-- 게시글 제목 -->
-	        BRD.B_CONTENT AS B_CONTENT,     <!-- 게시글 내용 -->
-	        BRD.B_HITS AS B_HITS,           <!-- 게시글 조회수 -->
-	        BRD.B_DATE AS B_DATE,           <!-- 게시글 작성일 -->
-	        BRD.B_MODIFY AS B_MODIFY,       <!-- 수정일 -->
-	        BRD.B_VOTE AS B_VOTE,           <!-- 투표존재여부 -->
-	        BRD.B_DELETE AS B_DELETE,       <!-- 삭제여부 -->
-	        USR.U_NICNAME AS U_NICNAME,     <!-- 회원 닉네임 -->
-	        COP.C_NAME AS C_NAME,           <!-- 회사명 -->
-	        COUNT(HRT.H_IDX) AS HEART_COUNT <!-- 하트 수 -->
-	    FROM BOARD BRD
-		    JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-		    JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
-		    LEFT JOIN HEART HRT ON BRD.B_IDX = HRT.H_B_IDX
-	    WHERE BRD.B_DELETE = 'N'
-		    AND (
-			    BRD.B_TITLE LIKE CONCAT('%', #{searchKeyword}, '%') 
-			    OR BRD.B_CONTENT LIKE CONCAT('%', #{searchKeyword}, '%')
-			  )
-	    GROUP BY 
-	        BRD.B_IDX, BRD.B_U_IDX, BRD.B_TITLE, BRD.B_CONTENT,
-	        BRD.B_HITS, BRD.B_DATE, BRD.B_MODIFY, BRD.B_VOTE, BRD.B_DELETE,
-	        USR.U_NICNAME, COP.C_NAME
-	    ORDER BY BRD.B_IDX DESC
-	    LIMIT 12
-    </select>
+	        board_data.*,
+	        COALESCE(heart_counts.heart_count, 0) AS heart_count
+	    FROM (
+	        SELECT
+	            BRD.B_IDX AS B_IDX,
+	            BRD.B_U_IDX AS B_U_IDX,
+	            BRD.B_TITLE AS B_TITLE,
+	            BRD.B_CONTENT AS B_CONTENT,
+	            BRD.B_HITS AS B_HITS,
+	            BRD.B_DATE AS B_DATE,
+	            BRD.B_MODIFY AS B_MODIFY,
+	            BRD.B_VOTE AS B_VOTE,
+	            BRD.B_DELETE AS B_DELETE,
+	            USR.U_NICNAME AS U_NICNAME,
+	            COP.C_NAME AS C_NAME
+	        FROM BOARD BRD
+	        LEFT JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+	        LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+	        WHERE BRD.B_DELETE = 'N'
+	        <if test="searchKeyword != null and searchKeyword != ''">
+	            AND (
+	                BRD.B_TITLE LIKE CONCAT('%', #{searchKeyword}, '%')
+	                OR BRD.B_CONTENT LIKE CONCAT('%', #{searchKeyword}, '%')
+	            )
+	        </if>
+	        ORDER BY BRD.B_IDX DESC
+	        LIMIT #{page} OFFSET #{offset}
+	    ) board_data
+	    LEFT JOIN (
+	        SELECT H_B_IDX, COUNT(*) as heart_count
+	        FROM HEART
+	        GROUP BY H_B_IDX
+	    ) heart_counts ON board_data.B_IDX = heart_counts.H_B_IDX
+	</select>	
 
-	<!--더보기 요청 시-->
-	<select id="plusList" resultType="com.example.blah.domain.BoardDTO">
 	
-		SELECT 
-		    BRD.B_IDX AS B_IDX,           <!--게시판 번호-->
-		    BRD.B_U_IDX AS B_U_IDX,       <!--게시글 작성자-->
-		    BRD.B_TITLE AS B_TITLE,       <!--게시글 제목-->
-		    BRD.B_CONTENT AS B_CONTENT,   <!--게시글 내용-->
-		    BRD.B_HITS AS B_HITS,         <!--게시글 조회수-->
-		    BRD.B_DATE AS B_DATE,         <!--게시글 작성일-->
-		    BRD.B_MODIFY AS B_MODIFY,     <!--수정일-->
-		    BRD.B_VOTE AS B_VOTE,         <!--투표존재여부-->
-		    BRD.B_DELETE AS B_DELETE,     <!--삭제여부-->
-		    USR.U_NICNAME AS U_NICNAME,   <!--회원 닉네임-->
-		    COP.C_NAME AS C_NAME,          <!--회사명-->
-		    COUNT(HRT.H_IDX) AS HEART_COUNT <!-- 하트 수 -->
+	<!--게시글-->
+	<select id="boardTotalCount" resultType="int">
+		SELECT COUNT(DISTINCT BRD.B_IDX)
 		FROM BOARD BRD
-			JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-			JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
-			LEFT JOIN HEART HRT ON BRD.B_IDX = HRT.H_B_IDX
-		WHERE BRD.B_DELETE = 'N' 
-		  AND BRD.B_IDX &lt; #{lastBIdx}
-	    GROUP BY 
-	       BRD.B_IDX, BRD.B_U_IDX, BRD.B_TITLE, BRD.B_CONTENT,
-	       BRD.B_HITS, BRD.B_DATE, BRD.B_MODIFY, BRD.B_VOTE, BRD.B_DELETE,
-	       USR.U_NICNAME, COP.C_NAME
-		ORDER BY BRD.B_IDX DESC
-		LIMIT 12
+		JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+		JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		WHERE BRD.B_DELETE = 'N'
+		<if test="searchKeyword != null and searchKeyword != ''">
+		    AND (
+		        BRD.B_TITLE LIKE CONCAT('%', #{searchKeyword}, '%')
+		        OR BRD.B_CONTENT LIKE CONCAT('%', #{searchKeyword}, '%')
+		    )
+		</if>
 	</select>
 	
 	<!--게시글 상세-->
@@ -240,7 +232,7 @@
     <!--투표 존재 유무-->
     <update id="voteYN">
     	UPDATE BOARD
-    	SET B_DELETE = 'Y'
+    	SET B_VOTE = 'Y'
     	WHERE B_IDX = #{v_b_idx}
     </update>
     

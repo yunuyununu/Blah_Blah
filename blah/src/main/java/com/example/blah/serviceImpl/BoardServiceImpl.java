@@ -34,12 +34,15 @@ public class BoardServiceImpl implements BoardService {
 	
 	// 게시글 목록
 	@Override
-	public List<BoardDTO> getBoard(Long lastBIdx ,String searchKeyword) {
-	    if (lastBIdx == null) {
-	        return boardMapper.firstList(searchKeyword);
-	    } else {
-	        return boardMapper.plusList(lastBIdx);
-	    }
+	public List<Map<String, Object>> getBoard(String searchKeyword,int page, int offset) {
+		System.out.println("여기확인해=>"+boardMapper.boardList(searchKeyword, page, offset));
+	    return boardMapper.boardList(searchKeyword, page, offset);
+	}
+	
+	// 게시물 총 갯수
+	@Override
+	public int getBoardTotalCount(String searchKeyword) {
+		return boardMapper.boardTotalCount(searchKeyword);
 	}
 	
 	// 게시글 상세

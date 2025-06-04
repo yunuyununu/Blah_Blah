@@ -11,7 +11,10 @@ import com.example.blah.domain.VoteDTO;
 
 public interface BoardService {
 	// 게시물 목록
-	List<BoardDTO> getBoard(Long lastBIdx, String searchKeyword);
+	List<Map<String, Object>> getBoard(String searchKeyword,int page, int offset);
+	
+	// 게시물 총 갯수
+	int getBoardTotalCount(String searchKeyword);
 	
 	// 게시물 상세
 	Map<String, Object> details(int b_idx);

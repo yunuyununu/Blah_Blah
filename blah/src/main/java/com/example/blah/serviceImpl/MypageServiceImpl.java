@@ -73,4 +73,10 @@ public class MypageServiceImpl implements MypageService {
 	public void reviewDelete(int r_idx) {
 		mypageMapper.reviewDelete(r_idx);
 	}
+	
+	// 회원 현회사 리뷰 존재 유무
+	@Override
+	public void reviewStatusUpdate(int u_idx) {
+		mypageMapper.reviewStatusUpdate(u_idx);
+	}
 }

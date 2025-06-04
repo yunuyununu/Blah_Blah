@@ -43,13 +43,25 @@ public class BoardController {
 	
 	// 게시판 목록
 	@GetMapping("boards")
-	public List<BoardDTO> getBoardList(HttpSession session,@RequestParam(name = "lastBIdx", required = false) Long lastBIdx,
-			@RequestParam(name = "searchKeyword", defaultValue="") String searchKeyword) {
-		
-		Integer userIdx = (Integer)session.getAttribute("UserIdx");
-		
-		return service.getBoard(lastBIdx,searchKeyword);
+	public Map<String, Object> getBoardList(
+	    @RequestParam(name = "searchKeyword", defaultValue="") String searchKeyword,
+	    @RequestParam(name = "page", defaultValue = "1") int page,
+	    @RequestParam(name = "pageSize", defaultValue = "12") int pageSize) {
+
+	    int offset = (page - 1) * pageSize;
+	    List<Map<String, Object>> list = service.getBoard(searchKeyword, pageSize, offset);
+	    int totalCount = service.getBoardTotalCount(searchKeyword);
+	    int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("list", list);
+	    result.put("totalCount", totalCount);
+	    result.put("totalPages", totalPages);
+	    result.put("currentPage", page);
+
+	    return result;
 	}
+
 	
 	// 게시글 상세
 	@GetMapping("details")
@@ -69,8 +81,11 @@ public class BoardController {
 		Object userIdx = session.getAttribute("UserIdx");
 		if (userIdx != null) {
 			String boardKey = "board_hit_" + b_idx +"_"+ userIdx;
+			System.out.println("조회수 증가 확인111==>"+boardKey);
 			boolean check = redisService.isFirstView(boardKey);
+
 			if(check == true) { // 처음 조회하면
+				System.out.println("조회수 증가 확인222==>"+check);
 				service.incrementHit(b_idx); // 조회수 1 증가
 			}
 		}
