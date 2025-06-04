@@ -1,12 +1,12 @@
 <template>
   <div class="main-wrapper">
     <!-- 검색창 -->
-    <div class="search-bar">
+    <!-- <div class="search-bar">
       <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
   <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
 </svg></span>
       <input type="text" placeholder="관심있는 내용을 검색해보세요!" />
-    </div>
+    </div> -->
 
     <div class="content-wrapper">
       <!-- 좌측: 주간/월간 토픽 -->
@@ -88,6 +88,51 @@
     </li>
   </ul>
         </div>
+<div class="topic-box">
+      <div class="header">
+        <h2>투표 베스트</h2>
+      </div>
+      <div class="vote-best-wrapper">
+        <div class="vote-card">
+          <h3 class="vote-title">"오늘 점심 추천"</h3>
+          <div class="user-info">
+            <div class="profile-image">
+              <img src="https://storage.googleapis.com/blah_blah_bucket/board/eee256ea-b2b4-4a4c-8fc9-e75c8c876a68_chunsik.png" alt="프로필 이미지" width="33" height="33">
+            </div>
+            <div class="user-details">
+              <span class="name">Name</span>
+              <p class="description">Description</p>
+            </div>
+          </div>
+        </div>
+        <div class="vote-card">
+          <h3 class="vote-title">"여름 vs 겨울"</h3>
+          <div class="user-info">
+            <div class="profile-image">
+              <img src="https://storage.googleapis.com/blah_blah_bucket/board/eee256ea-b2b4-4a4c-8fc9-e75c8c876a68_chunsik.png" alt="프로필 이미지" width="33" height="33">
+            </div>
+            <div class="user-details">
+              <span class="name">Name</span>
+              <p class="description">Description</p>
+            </div>
+          </div>
+        </div>
+        <div class="vote-card">
+          <h3 class="vote-title">"여행지 추천"</h3>
+          <div class="user-info">
+            <div class="profile-image">
+              <img src="https://storage.googleapis.com/blah_blah_bucket/board/eee256ea-b2b4-4a4c-8fc9-e75c8c876a68_chunsik.png" alt="프로필 이미지" width="33" height="33">
+            </div>
+            <div class="user-details">
+              <span class="name">Name</span>
+              <p class="description">Description</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
       </div>
 
       <!-- 우측: 실시간 인기 회사 -->
@@ -154,7 +199,17 @@ onMounted(async () => {
 const goToBoardDetail = async (url) => {
 
   let b_url = "/boarddetails/"+url;
-
+  console.log("여기 확인해 데이터타입==>",url)
+  
+  try {
+    await axios.post('http://localhost:80/board/hits', null, {
+      params: { url },
+      withCredentials: true
+    });
+    alert("여기 맞아?")
+  } catch (err) {1
+    console.error('조회수 증가 실패:', err);
+  }
   if (router.currentRoute.value.path === b_url) {
     // 동일한 경로일 경우 강제로 새로고침
     await router.replace({ path: '/_redirect' }) // 임시 페이지로 이동
@@ -350,6 +405,64 @@ const goToBoardDetail = async (url) => {
   align-items: center;
   gap: 4px;
 }
+.vote-best-wrapper {
+display: flex;
+gap: 15px;
+margin-top: 15px;
+}
 
+.vote-card {
+flex: 1;
+background-color: #f9f9f9;
+border: 1px solid #eee;
+border-radius: 5px;
+padding: 15px;
+text-align: center;
+}
+
+.vote-title {
+font-size: 16px;
+margin-top: 0;
+margin-bottom: 10px;
+}
+
+.user-info {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.profile-image {
+width: 30px;
+height: 30px;
+border-radius: 50%;
+overflow: hidden;
+}
+
+.profile-image img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.user-details {
+text-align: left;
+flex-grow: 1;
+}
+
+.user-details .name {
+display: block;
+font-weight: bold;
+font-size: 14px;
+}
+
+.user-details .description {
+font-size: 12px;
+color: #777;
+margin-top: 3px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
 </style>
 

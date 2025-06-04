@@ -12,7 +12,7 @@ import * as directives from 'vuetify/directives'
 
 // Pinia 스토어 import
 import { useUserStore } from './store/userStore'
-import { useAlarmStore } from './store/alarmStore'
+// import { useAlarmStore } from './store/alarmStore'
 
 const vuetify = createVuetify({
   components,
@@ -34,13 +34,13 @@ app.use(pinia)
 
 // 세션 확인 후 mount
 const userStore = useUserStore()
-const AlarmStore = useAlarmStore()
+// const AlarmStore = useAlarmStore()
 
 // 세션 체크 후 앱 마운트
 userStore.checkSession().finally(() => {
-  if (userStore.isLogin && !AlarmStore.connected) {
-    AlarmStore.connect(userStore.userIdx, AlarmStore.onMessage)
-  }
+  // if (userStore.isLogin && !AlarmStore.connected) {
+  //   AlarmStore.connect(userStore.userIdx, AlarmStore.onMessage)
+  // }
   app.use(vuetify)
     .use(Toast, {
       position: POSITION.TOP_CENTER,

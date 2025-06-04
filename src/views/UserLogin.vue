@@ -106,7 +106,6 @@ const submit = async () => {
     }, { withCredentials: true }) // 세션유지
     if (response.data.result === 'success') {
         userStore.setLoginSuccess(response.data.userIdx);
-      alert('로그인 성공!')
       console.log('로그인 응답:', response.data)
        router.push('/')
      } else if(response.data.result === 'withdraw') {

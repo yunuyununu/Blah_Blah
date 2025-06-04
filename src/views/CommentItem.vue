@@ -7,14 +7,24 @@
     <div class="comment-header">
       <span class="nickname">
         <span class="nickname-blue">{{ comment.c_nicname }}</span> · 
-        <span class="nickname-gray">{{ comment.u_nicname }}</span>
+        <span class="nickname-gray">{{ comment.u_nicname }}
+          <span v-if="comment.u_idx === postWriterId" class="author-tag">(작성자)</span>
+        </span>
       </span>
       <span class="comment-date">{{ comment.cm_date }}</span>
     </div>
 
      <!-- 수정 중일 때 textarea 표시 -->
     <div class="comment-body" v-if="isEditing">
-      <textarea v-model="editedContent" class="edit-textarea"></textarea>
+      <textarea
+        v-model="editedContent"
+        class="edit-textarea"
+        @input="validateEdit"
+      ></textarea>
+      <!-- 글자 수 -->
+      <div class="char-count">{{ editedContent.length }}자</div>
+      <!-- 에러 메시지 -->
+      <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
       <div class="edit-actions">
         <button class="btn btn-sm btn-primary" @click="saveEdit">저장</button>
         <button class="btn btn-sm btn-secondary" @click="cancelEdit">취소</button>
@@ -80,6 +90,7 @@ const userStore = useUserStore()
 
 const props = defineProps({
   comment: Object,
+  postWriterId: Number,
   replyToList: Object,
   replyContentMap: Object
 });
@@ -88,6 +99,8 @@ const props = defineProps({
 const isEditing = ref(false);
 // 수정 내용 임시 저장
 const editedContent = ref('');
+
+const errorMessage = ref('')
 
 // emit 객체를 setup context에서 가져오기
 const internalInstance = getCurrentInstance();
@@ -101,15 +114,26 @@ function startEdit() {
 
 // 수정 저장
 function saveEdit() {
-  // 부모 컴포넌트에 이벤트로 전달
-  // 'save-edit' 이벤트로 cm_idx와 수정된 내용을 전달
+  if (!editedContent.value.trim()) {
+    errorMessage.value = '내용을 입력해주세요.';
+    return;
+  }
+
   emit('save-edit', props.comment.cm_idx, editedContent.value);
   isEditing.value = false;
+  errorMessage.value = '';
 }
 
 // 수정 취소
 function cancelEdit() {
   isEditing.value = false;
+  errorMessage.value = '';
+}
+
+function validateEdit() {
+  if (editedContent.value.trim()) {
+    errorMessage.value = '';
+  }
 }
 </script>
 
@@ -209,6 +233,24 @@ textarea {
 .edit-actions {
   display: flex;
   gap: 8px;
+}
+.author-tag {
+  font-size: 12px;
+  color: #e46868;
+  margin-left: 4px;
+}
+.char-count {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+  margin-top: -4px;
+  margin-bottom: 4px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-bottom: 4px;
 }
 
 </style>

@@ -4,6 +4,9 @@
     <div class="post-header">
       <h2 v-if="!isEditing">{{ post.B_TITLE }}</h2>
       <input v-else v-model="editedTitle" class="form-control" />
+      <div v-if="titleError" class="text-danger" style="font-size: 12px;">
+        {{ titleError }}
+      </div>
       <br>
       <div class="post-meta">
         <span>{{ post.C_NAME }} · {{ post.U_NICNAME }}</span>
@@ -26,6 +29,12 @@
     <div class="post-content">
       <p v-if="!isEditing" v-html="post.B_CONTENT"></p>
       <textarea v-else v-model="editedContent" class="form-control" rows="10"></textarea>
+      <div class="text-muted" style="font-size: 12px;">
+        {{ editedContent.length }}자 입력됨
+      </div>
+      <div v-if="contentError" class="text-danger" style="font-size: 12px;">
+        {{ contentError }}
+      </div>
     </div>
     <div class="board-images" v-if="boardImages.length > 0 && previewImages.length === 0">
         <img
@@ -117,7 +126,7 @@
           </template>
           <template v-else>
             <button class="btn btn-primary" @click="saveUpdate">💾 저장</button>
-            <button class="btn btn-secondary" @click="isEditing = false">❌ 취소</button>
+            <button class="btn btn-secondary" @click="cancelUpdate">❌ 취소</button>
           </template>
         </div>
     <hr />
@@ -135,6 +144,7 @@
             :comment="comment"
             :reply-to-list="replyToList"
             :reply-content-map="replyContentMap"
+            :post-writer-id="postWriterId"
             @toggle-reply="toggleReply"
             @submit-reply="submitReply"
             @update-reply-content="updateReplyContent"
@@ -262,12 +272,29 @@ const isEditing = ref(false);
 const editedTitle = ref('');
 const editedContent = ref('');
 
+const titleError = ref('');
+const contentError = ref('');
 const updateBoard = () => {
   isEditing.value = true;
   editedTitle.value = post.value.B_TITLE;
   editedContent.value = post.value.B_CONTENT;
 }
 const saveUpdate = async () => {
+  titleError.value = '';
+  contentError.value = '';
+
+  if (editedTitle.value.trim().length === 0) {
+    titleError.value = '제목을 입력해주세요.';
+  }
+  if (editedContent.value.trim().length === 0) {
+    contentError.value = '내용을 입력해주세요.';
+  }
+
+  if (titleError.value || contentError.value) {
+    // 에러가 있으면 저장 중단
+    return;
+  }
+
     if(files.value.length === 0) {
     try {
       await axios.post('http://localhost:80/board/boardUpdate', {
@@ -306,6 +333,15 @@ const saveUpdate = async () => {
         isEditing.value = false;
         await fetchPostDetail(); // 다시 로드
   }
+};
+
+const cancelUpdate = () => {
+  isEditing.value = false;
+  previewImages.value = [];
+  files.value = [];
+  // 제목, 내용도 원래 글로 되돌리기
+  editedTitle.value = post.value.B_TITLE;
+  editedContent.value = post.value.B_CONTENT;
 };
 
 const deleteBoard = async () => {

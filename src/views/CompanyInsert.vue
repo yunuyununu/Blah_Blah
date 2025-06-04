@@ -7,7 +7,7 @@
             <!-- 회사명 -->
             <div class="form-group">
               <label>회사명 (한글/영문)</label>
-              <input type="text" v-model="companyName" ref="companyNameInput"
+              <input type="text" v-model="companyName" ref="companyNameInput" placeholder="20자 이내로 작성하세요."
               :class="['custom-input', { 'input-error': errors.companyName  }]" />
               <p v-if="errors.companyName" class="error-text">{{ errors.companyName }}</p>
             </div>
@@ -22,24 +22,24 @@
             <!-- 회사소개 -->
             <div class="form-group">
               <label>회사 소개</label>
-              <input type="text" v-model="companyIntro" ref="companyIntroInput"
+              <input type="text" v-model="companyIntro" ref="companyIntroInput" placeholder="100자 이내로 작성하세요."
               :class="['custom-input', { 'input-error': errors.companyIntro  }]" />
               <p v-if="errors.companyIntro" class="error-text">{{ errors.companyIntro }}</p>
             </div>
 
             <!-- 설립일자 -->
             <div class="form-group">
-              <label>설립일자 (8자리, 예: 20240101)</label>
-              <input type="text" v-model="companyEst" ref="companyEstInput" maxlength="8"
-              :class="['custom-input', { 'input-error': errors.companyEst  }]" />
+              <label>설립일자</label>
+              <input type="text" v-model="companyEst" @input="formatEstNumber" ref="companyEstInput" maxlength="10"
+              :class="['custom-input', { 'input-error': errors.companyEst  }]" placeholder="숫자만 입력하세요. (8자리) ex. 2024-01-01"/>
               <p v-if="errors.companyEst" class="error-text">{{ errors.companyEst }}</p>
             </div>
 
             <!-- 사업자등록번호 -->
             <div class="form-group">
-              <label>사업자등록번호 (10자리, 예: 1234567890)</label>
-              <input type="text" v-model="companyBusiness" ref="companyBusinessInput" maxlength="10"
-              :class="['custom-input', { 'input-error': errors.companyBusiness  }]"/>
+              <label>사업자등록번호</label>
+              <input type="text" v-model="companyBusiness" @input="formatBusinessNumber" ref="companyBusinessInput" maxlength="12"
+              :class="['custom-input', { 'input-error': errors.companyBusiness  }]" placeholder="숫자만 입력하세요. (10자리) ex. 123-45-67890"/>
               <p v-if="errors.companyBusiness" class="error-text">{{ errors.companyBusiness }}</p>
             </div>
             <br>
@@ -149,9 +149,41 @@ const submit = () => {
   } else {
     alert('로그인 후 이용해주세요.')
     return
-  }
-        
+  }    
+}
 
+const formatEstNumber = () => {
+  let digits = companyEst.value.replace(/\D/g, '') // 숫자만 추출
+
+  // 최대 8자리까지만 허용 (yyyyMMdd)
+  if (digits.length > 9) {
+    digits = digits.slice(0, 9)
+  }
+
+  if (digits.length <= 4) {
+    companyEst.value = digits
+  } else if (digits.length <= 6) {
+    companyEst.value = `${digits.slice(0, 4)}-${digits.slice(4)}`
+  } else {
+    companyEst.value = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`
+  }
+}
+
+
+const formatBusinessNumber = () => {
+  let digits = companyBusiness.value.replace(/\D/g, ''); // 숫자만 추출
+
+  if (digits.length > 10) {
+    digits = digits.slice(0, 10); // 최대 10자리까지
+  }
+
+  if (digits.length <= 3) {
+    companyBusiness.value = digits;
+  } else if (digits.length <= 5) {
+    companyBusiness.value = `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  } else {
+    companyBusiness.value = `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+  }
 }
 
 watch(companyName, () => {

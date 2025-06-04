@@ -11,7 +11,7 @@
                 ({{ review.length }})
               </span>
             </a>
-            <div v-if="reviewCheck.U_REVIEW === 'N' && reviewCheck.C_IDX !== 0 && REVIEW_COUNT === 0">
+            <div v-if="reviewCheck.U_REVIEW === 'N' && reviewCheck.C_IDX !== 0 && reviewCheck.REVIEW_COUNT === 0">
               <button class="review-btn" @click="showModal = true">
                 리뷰 작성하기
               </button>
@@ -73,7 +73,7 @@
                   </button>&nbsp;&nbsp;
                   <button
                     class="btn btn-outline-secondary"
-                    @click="deleteReview(item)"
+                    @click="deleteReview(item.r_idx)"
                   >
                     삭제
                   </button>
@@ -125,10 +125,17 @@
         </div>
 
         <label>제목</label>
-        <input type="text" v-model="form.r_title" />
+        <input type="text" v-model="form.r_title" maxlength="50" ref="titleInsertInput"
+        :class="['custom-input', { 'input-error': errors.form.r_title  }]"/>
+        <p v-if="errors.form.r_title" class="error-text">{{ errors.form.r_title }}</p>
 
         <label>내용</label>
-        <textarea rows="5" v-model="form.r_content"></textarea>
+        <textarea rows="5" v-model="form.r_content" ref="contentInsertInput"
+        :class="['custom-input', { 'input-error': errors.form.r_content  }]"></textarea>
+        <p class="text-muted text-end">{{ form.r_content.length }}자</p>
+        <p v-if="errors.form.r_content" class="error-text">{{ errors.form.r_content }}</p>
+
+
       </div>
       <div class="modal-footer">
         <button class="submit-btn" @click="submitReview">
@@ -186,10 +193,15 @@
         </div>
 
         <label>제목</label>
-        <input type="text" v-model="currentReview.r_title" />
+        <input type="text" v-model="currentReview.r_title" maxlength="50" ref="titleInput"
+        :class="['custom-input', { 'input-error': errors.currentReview.r_title  }]"/>
+        <p v-if="errors.currentReview.r_title" class="error-text">{{ errors.currentReview.r_title }}</p>
 
         <label>내용</label>
-        <textarea rows="5" v-model="currentReview.r_content"></textarea>
+        <textarea rows="5" v-model="currentReview.r_content" ref="contentInput"
+        :class="['custom-input', { 'input-error': errors.currentReview.r_content  }]"></textarea>
+        <p class="text-muted text-end">{{ currentReview.r_content.length }}자</p>
+        <p v-if="errors.currentReview.r_content" class="error-text">{{ errors.currentReview.r_content }}</p>
       </div>
 
       <div class="modal-footer">
@@ -207,6 +219,20 @@ import axios from 'axios';
 
 const review = ref([]);
 const reviewCheck = ref({});
+
+const titleInput = ref(null)
+const contentInput = ref(null)
+
+const errors = ref({
+  form: {
+    r_title: '',
+    r_content: ''
+  },
+  currentReview: {
+    r_title: '',
+    r_content: ''
+  }
+});
 const getRworkLabel = (code) => {
   switch (code) {
     case 'CURRENT':
@@ -315,14 +341,21 @@ const submitUpdate = async () => {
   }
 };
 
-const deleteReview = async () => {
+const deleteReview = async (item) => {
   const confirmed = window.confirm('정말 이 리뷰를 삭제하시겠습니까?');
     if (!confirmed) return;
+    currentReview.value = item;
+    console.log("여기확인해=>",currentReview.value)
+
   try {
-    await axios.post(
-      'http://localhost:80/mypage/reviewDelete',
-      currentReview.value
-    );
+    await axios.post('http://localhost:80/mypage/reviewDelete',
+    { r_idx : currentReview.value },
+    {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+  );
     alert('리뷰가 삭제되었습니다.');
     currentReview.value = null;
     await fetchReviewList();
@@ -593,5 +626,24 @@ const deleteReview = async () => {
   align-items: center;
   gap: 0.3rem;
   cursor: pointer;
+}
+.custom-input::placeholder {
+  font-size: 12px;   /* 크기 */
+  color: #a3a2a2;       /* 색상 */
+  font-style: italic; /* 스타일 */
+}
+.input-error {
+  border: 2px solid red !important;
+}
+.error-text {
+  color: red;
+  font-size: 12px;
+  margin-top: 3px;
+  margin-bottom: 8px;
+}
+input[disabled] {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
 }
 </style>
