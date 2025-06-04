@@ -58,28 +58,23 @@
             <p v-if="errors.newPhone" class="error-text">{{ errors.newPhone }}</p>
         </div>
         
-
-        <div class="form-group" v-if="userInfo.U_STATUS == 'Certified'">
-          <label>회원회사</label>
-          <input type="text" :value="userInfo.C_NAME" readonly />
-        </div>
-
-        <div class="form-group" v-else>
+        <div class="form-group" v-if="userInfo.U_C_IDX === 0">
           <label>회원회사</label>
           <input type="text" placeholder="관리자 확인중입니다." readonly />
         </div>
 
+        <div class="form-group" v-else>
+          <label>회원회사</label>
+          <input type="text" :value="userInfo.C_NAME" readonly />
+        </div>
+
         <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Uncertified'">
           <label>회사인증유무</label>
-          <input type="text" :value="'N'" readonly/>
+          <input type="text" placeholder="관리자 확인중입니다." readonly/>
         </div>
         <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Certified'">
           <label>회사인증유무</label>
           <input type="text" :value="'Y'" readonly/>
-        </div>
-        <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Checking'">
-          <label>회사인증유무</label>
-          <input type="text" placeholder="관리자 확인중입니다." readonly/>
         </div>
         <div class="form-group company-change" v-if="userInfo.U_REVIEW == 'N'">
           <label>리뷰작성유무</label>

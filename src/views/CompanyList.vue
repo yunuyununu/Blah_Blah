@@ -2,15 +2,18 @@
   <div class="content">
     <div class="container">
       <div class="search-box">
-        <input type="text" placeholder="회사명을 입력하세요" v-model="searchKeyword" />
+        <input type="text" placeholder="회사명을 입력하세요" v-model="searchKeyword" @keyup.enter="searchCompanies" ref="searchInput"/>
+        <button @click="searchCompanies">검색</button>
       </div>
+
       <div class="no-result-text" style="text-align: center;">
-        찾으시는 회사가 없나요? <span class="underline-link" @click="goCompanyInsert">궁금한 회사를 직접 신청해주세요!</span>
+        찾으시는 회사가 없나요? 
+        <span class="underline-link" @click="goCompanyInsert">궁금한 회사를 직접 신청해주세요!</span>
       </div>
 
       <div class="company-grid">
         <div
-          v-for="company in filteredCompanies"
+          v-for="company in companyList"
           :key="company.c_idx"
           class="company-card"
           @click="goCompanyDetails(company.c_idx)"
@@ -24,76 +27,80 @@
 
       <div class="pagination">
         <button v-if="offset > 0" @click="prevPage" :disabled="offset === 0">이전</button>
-        <button v-if="company.length === limit"  @click="nextPage">다음</button>
+        <button v-if="companyList.length === limit" @click="nextPage">다음</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios';
+import axios from 'axios'
 
-
-const company = ref([])
+const companyList = ref([])
 const searchKeyword = ref('')
-
 const router = useRouter()
-
 
 const limit = 18
 const offset = ref(0)
 
+const searchInput = ref(null)
 
 const getImageUrl = (filename) => {
   if (filename.startsWith('https')) {
     return filename;
   } else if (filename !== "") {
-    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`;
+    return `https://storage.googleapis.com/blah_blah_bucket/company/${filename}`;
   } else {
     return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`;
   }
 };
 
-
-
-const fetchCompanies = async () => {
+// 검색어에 따른 회사 리스트 조회 함수
+const fetchCompanies = async (keyword = '') => {
   const response = await axios.get('http://localhost:80/company/list', {
     params: {
       limit,
-      offset: offset.value
+      offset: offset.value,
+      c_name: keyword.trim(),
     }
   })
-  company.value = response.data
+  companyList.value = response.data
 }
 
-const goCompanyDetails = async (c_idx) => {
+// 검색 버튼 클릭 시 호출할 함수
+const searchCompanies = () => {
+  if (!searchKeyword.value.trim()) {
+    // 검색어가 없으면 input에 포커스 주기
+    searchInput.value.focus()
+    return
+  }
+  offset.value = 0
+  fetchCompanies(searchKeyword.value)
+}
+
+const goCompanyDetails = (c_idx) => {
   router.push({ name: 'companydetails', params: { c_idx } });
 };
 
 const nextPage = () => {
-  offset.value += limit
-  fetchCompanies()
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  if (companyList.value.length === limit) {
+    offset.value += limit
+    fetchCompanies(searchKeyword.value)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 }
 
 const prevPage = () => {
   if (offset.value >= limit) {
     offset.value -= limit
-    fetchCompanies()
+    fetchCompanies(searchKeyword.value)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
-const filteredCompanies = computed(() => {
-  const keyword = searchKeyword.value.trim().toLowerCase()
-  if (keyword.length === 0) return company.value
-  return company.value.filter(c =>
-    c.c_name.toLowerCase().includes(keyword)
-  )
-})
-
+// 초기 전체 리스트 호출 (검색어 없을 때)
 onMounted(() => {
   fetchCompanies()
 })
@@ -108,7 +115,6 @@ const goCompanyInsert = () => {
   }
   router.push('/company/companyInsert')
 }
-
 </script>
 
 <style scoped>
@@ -144,10 +150,12 @@ const goCompanyInsert = () => {
 
 .search-box {
   margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
 }
 
 .search-box input {
-  width: 100%;
+  flex-grow: 1;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -163,5 +171,18 @@ const goCompanyInsert = () => {
   text-decoration: underline;
   color: #007bff; /* 원하는 링크 색상 */
   cursor: pointer;
+}
+
+.search-box button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.search-box button:hover {
+  background-color: #0056b3;
 }
 </style>

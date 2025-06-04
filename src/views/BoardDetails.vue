@@ -2,7 +2,8 @@
   <div class="post-container" v-if="post">
     <!-- 게시글 내용 -->
     <div class="post-header">
-      <h2>{{ post.B_TITLE }}</h2>
+      <h2 v-if="!isEditing">{{ post.B_TITLE }}</h2>
+      <input v-else v-model="editedTitle" class="form-control" />
       <br>
       <div class="post-meta">
         <span>{{ post.C_NAME }} · {{ post.U_NICNAME }}</span>
@@ -23,22 +24,101 @@
     </div>
     <hr />
     <div class="post-content">
-      <p v-html="post.B_CONTENT"></p>
+      <p v-if="!isEditing" v-html="post.B_CONTENT"></p>
+      <textarea v-else v-model="editedContent" class="form-control" rows="10"></textarea>
     </div>
-    <div class="board-images" v-if="boardImages.length > 0">
-      <img
-        v-for="img in boardImages"
-        :key="img.I_IDX"
-        :src="getImageUrl(img.I_IMAGE)"
-        alt="게시글 이미지"
-        class="board-image"
-      />
-    </div>
+    <div class="board-images" v-if="boardImages.length > 0 && previewImages.length === 0">
+        <img
+          v-for="img in boardImages"
+          :key="img.I_IDX"
+          :src="getImageUrl(img.I_IMAGE)"
+          alt="게시글 이미지"
+          class="board-image"
+        />
+      </div>
+      <br>
+      <input v-if="isEditing && userStore.userIdx === post.B_U_IDX" type="file" multiple @change="onImageChange" accept=".jpg,.jpeg,.png,.pdf"/>
+
+      <div class="image-preview" v-if="previewImages.length > 0">
+        <img v-for="(img, i) in previewImages" :key="i" :src="img" />
+        <br>
+      </div>
     <br>
-    <button class="btn btn-outline-danger" @click="$router.back()"  style="text-align: left;">← 목록으로</button>
+    <!-- 투표 -->
+     <!-- 투표 게시글 표시 영역 -->
+    <div v-if="post.B_VOTE === 'Y'" class="vote-container">
+    <div class="vote-header">
+      <div class="vote-icon"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
+  <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1z"/>
+</svg></div>
+      <div class="vote-info">
+        <h3 class="vote-title">투표 참여 {{ getTotalVotes() }}명</h3>
+        <p class="vote-subtitle">하나만 선택할 수 있습니다</p>
+      </div>
+    </div>
+
+    <div class="vote-options">
+      <div 
+        v-for="option in voteOptions" 
+        :key="option.VO_IDX" 
+        class="vote-option-item"
+        :class="{ 'selected': selectedVoteOption === option.VO_IDX, 'disabled': hasVoted }"
+        @click="!hasVoted && (selectedVoteOption = option.VO_IDX)"
+      >
+        <label class="vote-option-label">
+          <input 
+            type="radio"
+            :value="option.VO_IDX"
+            v-model="selectedVoteOption"
+            :disabled="hasVoted"
+            class="vote-radio"
+          />
+          <div class="vote-option-content">
+            <span class="vote-option-text">{{ option.VO_CONTENT }}</span>
+            <span v-if="hasVoted" class="vote-count">{{ option.VO_COUNT || 0 }}표</span>
+          </div>
+        </label>
+
+        <!-- 투표 결과 바 -->
+        <transition name="progress-fade">
+          <div v-if="hasVoted" class="vote-progress">
+            <div 
+              class="vote-progress-bar" 
+              :style="{ width: getVotePercentage(option.VO_COUNT || 0) + '%' }"
+            ></div>
+          </div>
+        </transition>
+      </div>
+    </div>
+
+    <div class="vote-actions">
+      <button 
+        v-if="!hasVoted" 
+        class="vote-submit-btn"
+        :class="{ 'active': selectedVoteOption }"
+        :disabled="!selectedVoteOption"
+        @click="submitVote"
+      >
+        투표하기
+      </button>
+      <div v-else class="vote-completed">
+        <span class="vote-completed-icon">✔️</span>
+        <span class="vote-completed-text">투표가 완료되었습니다</span>
+      </div>
+    </div>
+  </div>
+
+
+    <button v-if="!isEditing" class="btn btn-outline-danger" @click="$router.back()"  style="text-align: left;">← 목록으로</button>
         <div v-if="userStore.userIdx === post.B_U_IDX" style="text-align:right">
-          <span class="action" @click="updateBoard">✏️ 수정</span>
-          <span class="action" @click="deleteBoard">🗑️ 삭제</span>
+          <template v-if="!isEditing">
+            <span class="action" @click="updateBoard">✏️ 수정</span>
+            <span class="action" @click="deleteBoard">🗑️ 삭제</span>
+          </template>
+          <template v-else>
+            <button class="btn btn-primary" @click="saveUpdate">💾 저장</button>
+            <button class="btn btn-secondary" @click="isEditing = false">❌ 취소</button>
+          </template>
         </div>
     <hr />
 
@@ -59,6 +139,7 @@
             @submit-reply="submitReply"
             @update-reply-content="updateReplyContent"
             @delete-comment="handleDeleteComment"
+            @save-edit="updateCommentContent"
           />
         </div>
 
@@ -73,11 +154,11 @@
 <script setup>
 import CommentItem from '@/views/CommentItem.vue';
 import { useUserStore } from '@/store/userStore'
-import { useAlarmStore } from '@/store/alarmStore'
+// import { useAlarmStore } from '@/store/alarmStore'
 import { useRouter } from 'vue-router'
 
 
-const alarmStore = useAlarmStore()
+// const alarmStore = useAlarmStore()
 const userStore = useUserStore()
 const router = useRouter()
 
@@ -93,6 +174,10 @@ const btitle = ref(null);
 
 // 게시글 이미지
 const boardImages = ref([]);
+
+// 게시글 수정
+const files = ref([])
+const previewImages = ref([])
 
 const commentList = ref([]);
 const newComment = ref('');
@@ -125,7 +210,6 @@ const handleDeleteComment = async (cm_idx) => {
     await axios.post(`http://localhost:80/reply/commentDelete`, {
       cm_idx : cm_idx
     });
-    alert('댓글이 삭제되었습니다.');
 
     // 댓글 목록 갱신
     fetchPostComment(); // 댓글 목록 다시 불러오는 함수
@@ -157,7 +241,7 @@ const getImageUrl = (filename) => {
   if (filename.startsWith('https')) {
     return filename;
   } else if (filename !== "") {
-    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`;
+    return `https://storage.googleapis.com/blah_blah_bucket/board/${filename}`;
   } else {
     return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`;
   }
@@ -174,21 +258,78 @@ const fetchPostComment = async () => {
   }
 };
 
-const updateBoard = async () => {
-  try {
+const isEditing = ref(false);
+const editedTitle = ref('');
+const editedContent = ref('');
 
-  } catch(err) {
-    
-  }
+const updateBoard = () => {
+  isEditing.value = true;
+  editedTitle.value = post.value.B_TITLE;
+  editedContent.value = post.value.B_CONTENT;
 }
+const saveUpdate = async () => {
+    if(files.value.length === 0) {
+    try {
+      await axios.post('http://localhost:80/board/boardUpdate', {
+        b_idx: bidx,
+        b_title: editedTitle.value,
+        b_content: editedContent.value,
+      });
+        alert('게시글이 수정되었습니다.');
+        isEditing.value = false;
+        await fetchPostDetail(); // 다시 로드
+  
+    } catch (err) {
+      console.error('게시글 수정 실패:', err);
+      alert('오류 발생');
+    }
+  }else {
+    const formData = new FormData()
+    formData.append('b_idx', bidx)
+    formData.append('b_title', editedTitle.value)
+    formData.append('b_content', editedContent.value)
+    files.value.forEach(file => formData.append('images', file))
+
+    // 기존 이미지 파일명도 같이 보냄
+    boardImages.value.forEach(img => {
+      formData.append('originalImages', img.I_IMAGE);
+    });
+
+      const res = await axios.post('http://localhost:80/board/boardImageUpdate',formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          withCredentials: true
+      });
+      console.log("이미지 수정 게시물 통과여부?=>=>", res.data)
+      alert('게시글이 수정되었습니다.');
+        isEditing.value = false;
+        await fetchPostDetail(); // 다시 로드
+  }
+};
 
 const deleteBoard = async () => {
+
+  const formData = new FormData()
+    formData.append('b_idx', bidx)
+
+    // 기존 이미지 보내기
+    boardImages.value.forEach(img => {
+      formData.append('originalImages', img.I_IMAGE);
+    });
+
+
   try {
     const confirmed = window.confirm('정말 이 게시물을 삭제하시겠습니까?');
     if (!confirmed) return;
-    await axios.post(`http://localhost:80/board/boardDelete`, {
-      b_idx: bidx
-    });
+    const res = await axios.post(`http://localhost:80/board/boardDelete`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          withCredentials: true
+      });
+    console.log("삭제데이터=>", formData)
+    console.log("삭제더미더미=>",res.data)
     router.push('/board/boardlist')
   } catch (err) {
     console.error('게시글 삭제 실패:', err);
@@ -198,17 +339,19 @@ const deleteBoard = async () => {
 onMounted(async () => {
   fetchPostDetail();
   fetchPostComment();
+  fetchVoteOptions();
   
   if (userStore.isLogin) {
     fetchLikeStatus();
+    checkUserVoteStatus();
     
     // 웹소켓 연결 상태 확인 (단순화)
-    if (!alarmStore.connected) {
-      console.log(' 웹소켓 연결 상태:', {
-        connected: alarmStore.connected,
-        connecting: alarmStore.connecting
-      });
-    }
+    // if (!alarmStore.connected) {
+    //   console.log(' 웹소켓 연결 상태:', {
+    //     connected: alarmStore.connected,
+    //     connecting: alarmStore.connecting
+    //   });
+    // }
   } else {
     fetchLikeCount();
   }
@@ -264,6 +407,20 @@ const submitComment = async() => {
   }else{
     alert('로그인 후 이용해주세요.')
     return
+  }
+};
+
+const updateCommentContent = async (cmIdx, newContent) => {
+  try {
+    await axios.post('http://localhost:80/reply/commentUpdate', {
+      cm_idx: cmIdx,
+      cm_content: newContent
+    });
+    alert("댓글 수정 성공")
+    fetchPostComment();
+    // 필요한 경우 comments를 다시 fetch하거나 수정된 항목만 업데이트
+  } catch (err) {
+    console.error("댓글 수정 실패", err);
   }
 };
 
@@ -372,6 +529,111 @@ const toggleLike = async () => {
     console.error('좋아요 처리 실패:', err);
   }
 };
+
+const onImageChange = (e) => {
+  files.value = Array.from(e.target.files)
+  previewImages.value = files.value.map(file => URL.createObjectURL(file))
+}
+
+// 투표
+const voteOptions = ref([]);
+const selectedVoteOption = ref(null);
+const hasVoted = ref(false);
+
+// 투표 항목 불러오기
+const fetchVoteOptions = async () => {
+  // if (post.value.B_VOTE !== 'N') return;
+
+  try {
+    const res = await axios.get(`http://localhost:80/board/voteInfo`, {
+      params: { v_b_idx: bidx },
+    });
+
+    voteOptions.value = res.data;
+    console.log("투표항목=>",voteOptions.value)
+    // hasVoted.value = res.data.hasVoted;
+
+    // // 이미 투표한 경우, 각 옵션에 count 포함되어 있다고 가정
+    // if (hasVoted.value) {
+    //   selectedVoteOption.value = res.data.selectedOption;
+    // }
+  } catch (err) {
+    console.error('투표 옵션 불러오기 실패:', err);
+  }
+};
+
+// 투표 제출
+const submitVote = async () => {
+  if (!selectedVoteOption.value) {
+    alert('투표 항목을 선택해주세요.');
+    return;
+  }
+  console.log("selectedVoteOption.value====>",selectedVoteOption.value)
+  try {
+    await axios.post(`http://localhost:80/board/votePick`, {}, {
+      params: {
+        vr_vo_idx: selectedVoteOption.value
+      }
+    });
+
+    alert('투표가 완료되었습니다.');
+    hasVoted.value = true;
+    await fetchVoteOptions(); // 투표 후 결과 다시 로드
+  } catch (err) {
+    console.error('투표 제출 실패:', err);
+    alert('투표 중 오류 발생');
+  }
+};
+
+// 사용자 투표 상태 확인
+const checkUserVoteStatus = async () => {
+  if (!userStore.isLogin) return;
+  
+  try {
+    const res = await axios.get('http://localhost:80/board/voteCheck', {
+      params: { 
+        v_b_idx: bidx
+      },
+    });
+
+    const votedOptionIdx = res.data;
+    console.log("투표한 항목번호===>",res.data)
+    
+    if (votedOptionIdx > 0) { // 투표한 경우 (0보다 큰 값)
+      hasVoted.value = true;
+      selectedVoteOption.value = votedOptionIdx;
+    } else { // 투표하지 않은 경우 (0 또는 음수)
+      hasVoted.value = false;
+      selectedVoteOption.value = null;
+    }
+    
+    console.log("투표 상태 확인 결과:", { hasVoted: hasVoted.value, selectedOption: selectedVoteOption.value });
+  } catch (err) {
+    console.error('투표 상태 확인 실패:', err);
+  }
+};
+
+// 총 투표 수 계산
+const getTotalVotes = () => {
+  return voteOptions.value.reduce((total, option) => total + (option.VO_COUNT || 0), 0)
+};
+
+// 투표 비율 계산
+const getVotePercentage = (count) => {
+  const total = getTotalVotes();
+  return total > 0 ? Math.round((count / total) * 100) : 0;
+};
+
+
+
+// const editedImages = ref([]);
+// const isImageChanged = ref(false);
+
+// // 이미지 선택 시
+// const handleImageChange = (event) => {
+//   editedImages.value = Array.from(event.target.files);
+//   isImageChanged.value = true;
+// };
 
 </script>
 
@@ -569,5 +831,217 @@ hr {
 }
 .heart-icon.liked {
   color: red;
+}
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.image-preview img {
+  width: 100px;
+  height: 100px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.image-preview img:hover {
+  opacity: 0.7;
+}
+
+.vote-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  font-family: 'Noto Sans KR', sans-serif;
+  user-select: none;
+}
+
+.vote-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.vote-icon {
+  font-size: 28px;
+}
+
+.vote-info {
+  flex: 1;
+}
+
+.vote-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.vote-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.vote-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vote-option-item {
+  cursor: pointer;
+  border: 1.8px solid #ddd;
+  border-radius: 10px;
+  padding: 14px 18px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.vote-option-item.selected {
+  border-color: #3b82f6;
+  background-color: #e0f0ff;
+  box-shadow: 0 0 8px rgba(59,130,246,0.3);
+}
+
+.vote-option-item.disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.vote-option-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.vote-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #bbb;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.vote-radio:checked {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+}
+
+.vote-radio:checked::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+.vote-option-content {
+  flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vote-option-text {
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+}
+
+.vote-count {
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: right;
+}
+
+.vote-progress {
+  height: 8px;
+  margin-top: 8px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.vote-progress-bar {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 6px 0 0 6px;
+  transition: width 0.6s ease;
+}
+
+.vote-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.vote-submit-btn {
+  background-color: #cbd5e1;
+  border: none;
+  color: #777;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 30px;
+  cursor: not-allowed;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  user-select: none;
+}
+
+.vote-submit-btn.active {
+  background-color: #3b82f6;
+  color: white;
+  cursor: pointer;
+}
+
+.vote-submit-btn:disabled {
+  pointer-events: none;
+}
+
+.vote-completed {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.vote-completed-icon {
+  font-size: 22px;
+}
+
+/* 애니메이션 효과 */
+.progress-fade-enter-active,
+.progress-fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.progress-fade-enter-from,
+.progress-fade-leave-to {
+  opacity: 0;
 }
 </style>

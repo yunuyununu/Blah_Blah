@@ -3,234 +3,337 @@
     <div class="container">
       <div class="row">
         <div class="col">
+          <!-- 헤더 -->
           <div class="review-header">
-            <a>나의리뷰<span style="font-size: 16px; color: #888;">({{review.length}})</span></a>
-            <div v-if="reviewCheck.U_REVIEW === 'N'">
-              <button class="review-btn" @click="goToWriteReview">
+            <a>
+              나의리뷰
+              <span style="font-size: 16px; color: #888;">
+                ({{ review.length }})
+              </span>
+            </a>
+            <div v-if="reviewCheck.U_REVIEW === 'N' && reviewCheck.C_IDX !== 0 && REVIEW_COUNT === 0">
+              <button class="review-btn" @click="showModal = true">
                 리뷰 작성하기
               </button>
             </div>
           </div>
+
+          <!-- 리뷰 목록 -->
           <div class="ratings">
-              <div v-if="review.length === 0" style="margin-top: 1rem; color: #888;">
-                작성된 리뷰가 없습니다.
-              </div>  
-                <div v-else>
-                  <div v-for="item in review" :key="item.r_idx" class="review-box">
-                      <div class="review-body">
-                        <img :src="getImageUrl(item.c_logo)" alt="로고" class="logo" />
-                        <!-- 왼쪽: 별점 -->
-                        <div class="review-score">
-                          <div class="score-number" >{{ item.r_star.toFixed(1) }}</div>
-                          <div class="score-stars">{{ '★'.repeat(item.r_star) }}{{ '☆'.repeat(5 - item.r_star) }}</div>
-                        </div>
+            <div v-if="review.length === 0" style="margin-top: 1rem; color: #888;">
+              회사 검증이 완료되면 리뷰를 작성해주세요.
+            </div>
+            <div v-else>
+              <div
+                v-for="item in review"
+                :key="item.r_idx"
+                class="review-box"
+              >
+                <div class="review-body">
+                  <img
+                    :src="getImageUrl(item.c_logo)"
+                    alt="로고"
+                    class="logo"
+                  />
 
-                        <!-- 오른쪽: 리뷰내용 -->
-                        <div class="review-main">
-                          <div class="review-title-row">
-                            <h3 class="review-title">“{{ item.r_title }}”</h3>
-                          </div>
-                          <div class="review-meta">
-                            {{ getRworkLabel(item.r_work) }} ｜ {{ item.u_nicname }} ｜ {{ item.c_nicname }} ｜ {{ item.r_date }}
-                          </div>
-                          <div class="review-section">
-                            <strong>내용</strong>
-                            <p>{{ item.r_content }}</p>
-                          </div>
-
-                        </div>
-                      </div>
-                      <div style="text-align: right;">
-                        <button class="btn btn-outline-secondary" @click="goToUpdateReview">수정</button>
-                      </div>
-                       <!-- 리뷰 수정 모달 -->
-                        <div class="modal-overlay" v-if="showReviewUpdateModal">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h2>리뷰 수정</h2>
-                              <button class="close-btn" @click="showModal = false">×</button>
-                            </div>
-
-                            <div class="modal-body">
-                              <input />
-                              <label>회사</label>
-                              <input :value="item.r_idx" readonly/>
-                              <label>별점 선택</label>
-                              <div class="star-rating">
-                                <span
-                                  v-for="star in 5"
-                                  :key="star"
-                                  @click="form.r_star = star"
-                                  class="star"
-                                  :class="{ active: form.r_star >= star }"
-                                >★</span>
-                              </div>
-
-                              <div class="row-inline">
-                                <label class="inline-label">소속</label>
-                                <div class="radio-group">
-                                  <label class="radio-item">
-                                    <input type="radio" value="CURRENT" v-model="item.r_work" />
-                                    현직원
-                                  </label>
-                                  <label class="radio-item">
-                                    <input type="radio" value="FORMER" v-model="item.r_work" />
-                                    전직원
-                                  </label>
-                                </div>
-                              </div>
-
-                              <label>제목</label>
-                              <input type="text" v-model="item.r_title" />
-
-                              <label>내용</label>
-                              <textarea rows="5" v-model="item.r_content"></textarea>
-                            </div>
-
-                            <div class="modal-footer">
-                              <button class="submit-btn" @click="submitReview">작성 완료</button>
-                            </div>
-                          </div>
-                        </div>
+                  <!-- 왼쪽: 별점 -->
+                  <div class="review-score">
+                    <div class="score-number">
+                      {{ item.r_star.toFixed(1) }}
                     </div>
+                    <div class="score-stars">
+                      {{ '★'.repeat(Math.floor(item.r_star)) }}
+                      {{ '☆'.repeat(5 - Math.floor(item.r_star)) }}
+                    </div>
+                  </div>
+
+                  <!-- 오른쪽: 리뷰 내용 -->
+                  <div class="review-main">
+                    <div class="review-title-row">
+                      <h3 class="review-title">“{{ item.r_title }}”</h3>
+                    </div>
+                    <div class="review-meta">
+                      {{ getRworkLabel(item.r_work) }} ｜ {{ item.u_nicname }}
+                      ｜ {{ item.c_nicname }} ｜ {{ item.r_date }}
+                    </div>
+                    <div class="review-section">
+                      <strong>내용</strong>
+                      <p>{{ item.r_content }}</p>
+                    </div>
+                  </div>
                 </div>
+
+                <!-- 수정 버튼 -->
+                <div style="text-align: right;">
+                  <button
+                    class="btn btn-outline-secondary"
+                    @click="openUpdateModal(item)"
+                  >
+                    수정
+                  </button>&nbsp;&nbsp;
+                  <button
+                    class="btn btn-outline-secondary"
+                    @click="deleteReview(item)"
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
   <!-- 리뷰 작성 모달 -->
-<div class="modal-overlay" v-if="showModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>리뷰 작성</h2>
-      <button class="close-btn" @click="showModal = false">×</button>
-    </div>
-
-    <div class="modal-body">
-      <label>회사</label>
-      <input :value="reviewCheck.C_NAME" readonly/>
-      <label>별점 선택</label>
-      <div class="star-rating">
-        <span
-          v-for="star in 5"
-          :key="star"
-          @click="form.r_star = star"
-          class="star"
-          :class="{ active: form.r_star >= star }"
-        >★</span>
+  <div class="modal-overlay" v-if="showModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>리뷰 작성</h2>
+        <button class="close-btn" @click="showModal = false">×</button>
       </div>
+      <div class="modal-body">
+        <label>회사</label>
+        <input :value="reviewCheck.C_NAME" readonly />
 
-      <div class="row-inline">
-        <label class="inline-label">소속</label>
-        <div class="radio-group">
-          <label class="radio-item">
-            <input type="radio" value="CURRENT" v-model="form.r_work" />
-            현직원
-          </label>
-          <label class="radio-item">
-            <input type="radio" value="FORMER" v-model="form.r_work" />
-            전직원
-          </label>
+        <label>별점 선택</label>
+        <div class="star-rating">
+          <span
+            v-for="star in 5"
+            :key="star"
+            @click="form.r_star = star"
+            class="star"
+            :class="{ active: form.r_star >= star }"
+          >
+            ★
+          </span>
         </div>
+
+        <div class="row-inline">
+          <label class="inline-label">소속</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" value="CURRENT" v-model="form.r_work" />
+              현직원
+            </label>
+            <label class="radio-item">
+              <input type="radio" value="FORMER" v-model="form.r_work" />
+              전직원
+            </label>
+          </div>
+        </div>
+
+        <label>제목</label>
+        <input type="text" v-model="form.r_title" />
+
+        <label>내용</label>
+        <textarea rows="5" v-model="form.r_content"></textarea>
       </div>
-
-      <label>제목</label>
-      <input type="text" v-model="form.r_title" />
-
-      <label>내용</label>
-      <textarea rows="5" v-model="form.r_content"></textarea>
-    </div>
-
-    <div class="modal-footer">
-      <button class="submit-btn" @click="submitReview">작성 완료</button>
+      <div class="modal-footer">
+        <button class="submit-btn" @click="submitReview">
+          작성 완료
+        </button>
+      </div>
     </div>
   </div>
-</div>
-  </template>
-  
-  <script setup>
+
+  <!-- 리뷰 수정 모달 -->
+  <div class="modal-overlay" v-if="showReviewUpdateModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>리뷰 수정</h2>
+        <button class="close-btn" @click="closeUpdateModal">×</button>
+      </div>
+
+      <div class="modal-body" v-if="currentReview">
+        <label>회사</label>
+        <input :value="currentReview.c_name" readonly />
+
+        <label>별점 선택</label>
+        <div class="star-rating">
+          <span
+            v-for="star in 5"
+            :key="star"
+            @click="currentReview.r_star = star"
+            class="star"
+            :class="{ active: currentReview.r_star >= star }"
+          >
+            ★
+          </span>
+        </div>
+
+        <div class="row-inline">
+          <label class="inline-label">소속</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input
+                type="radio"
+                value="CURRENT"
+                v-model="currentReview.r_work"
+              />
+              현직원
+            </label>
+            <label class="radio-item">
+              <input
+                type="radio"
+                value="FORMER"
+                v-model="currentReview.r_work"
+              />
+              전직원
+            </label>
+          </div>
+        </div>
+
+        <label>제목</label>
+        <input type="text" v-model="currentReview.r_title" />
+
+        <label>내용</label>
+        <textarea rows="5" v-model="currentReview.r_content"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="submit-btn" @click="submitUpdate">
+          수정 완료
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
 
-
-const getImageUrl = (filename) => {
-  if(filename != "") {
-    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`
-  } else {
-    return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`
-  }
-}
-
-const review = ref([])
-const reviewCheck = ref([])
+const review = ref([]);
+const reviewCheck = ref({});
 const getRworkLabel = (code) => {
   switch (code) {
-    case 'CURRENT': return '현직원';
-    case 'FORMER': return '전직원';
-    default: return '기타';
+    case 'CURRENT':
+      return '현직원';
+    case 'FORMER':
+      return '전직원';
+    default:
+      return '기타';
   }
 };
 
-const fetchReviewCheck = async () => {
-  try {
-    const res = await axios.get(`http://localhost:80/mypage/myreviewCheck`);
-    reviewCheck.value = res.data;
-    form.value.r_c_idx = reviewCheck.value.C_IDX;
-    console.log("리뷰체크=>",form.value.r_c_idx)
-  } catch (err) {
-    console.error('리뷰작성유무 로딩 실패:', err);
+const getImageUrl = (filename) => {
+  if (filename) {
+    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`;
+  } else {
+    return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`;
   }
 };
 
-const fetchReviewList = async () => {
-  try {
-    const res = await axios.get(`http://localhost:80/mypage/myreviewList`);
-    review.value = res.data;
-  } catch (err) {
-    console.error('리뷰 로딩 실패:', err);
-  }
-};
-
-onMounted(() => {
-  fetchReviewList();
-  fetchReviewCheck();
-});
-
-const showModal = ref(false)
-const showReviewUpdateModal = ref(false)
-
+// 리뷰 작성용 form
 const form = ref({
   r_c_idx: '',
   r_star: 0,
   r_work: '',
   r_title: '',
   r_content: ''
-})
-const goToWriteReview = () => {
-  showModal.value = true
-}
+});
 
-const goToUpdateReview = () => {
-  showReviewUpdateModal.value = true
-}
-
-const submitReview = () => {
+// 리뷰 작성 여부, 리뷰 리스트 가져오기
+const fetchReviewCheck = async () => {
   try {
-    axios.post('http://localhost:80/mypage/reviewInsert', form.value)
-    console.log("리뷰작성시 입력데이터==>", form.value)
-    alert('리뷰가 등록되었습니다.')
-    showModal.value = false
-    fetchReviewList()
-    fetchReviewCheck()
+    const res = await axios.get('http://localhost:80/mypage/myreviewCheck');
+    reviewCheck.value = res.data;
+    form.value.r_c_idx = reviewCheck.value.C_IDX;
   } catch (err) {
-    console.error('리뷰 등록 실패:', err)
-    alert('리뷰 등록 중 오류가 발생했습니다.')
+    console.error('리뷰 작성 여부 로딩 실패:', err);
   }
-}
-  </script>
-  
-  <style scoped>
+};
+
+const fetchReviewList = async () => {
+  try {
+    const res = await axios.get('http://localhost:80/mypage/myreviewList');
+    review.value = res.data;
+  } catch (err) {
+    console.error('리뷰 목록 로딩 실패:', err);
+  }
+};
+
+onMounted(() => {
+  fetchReviewCheck();
+  fetchReviewList();
+});
+
+// 모달 토글 변수
+const showModal = ref(false);
+const showReviewUpdateModal = ref(false);
+
+// 현재 편집 중인 리뷰 객체
+const currentReview = ref(null);
+
+// “리뷰 작성하기” 버튼 클릭
+const submitReview = async () => {
+  try {
+    await axios.post('http://localhost:80/mypage/reviewInsert', form.value);
+    alert('리뷰가 등록되었습니다.');
+    showModal.value = false;
+    await fetchReviewList();
+    await fetchReviewCheck();
+  } catch (err) {
+    console.error('리뷰 등록 실패:', err);
+    alert('리뷰 등록 중 오류가 발생했습니다.');
+  }
+};
+
+// “수정” 버튼 클릭 → 모달 열기
+const openUpdateModal = (item) => {
+  // 얕은 복사: 원본을 바로 변경해도 무방하면 이대로 쓰셔도 됩니다.
+  // 깊이 복사하고 싶으면 Object.assign({}, item) 또는 JSON.parse(JSON.stringify(item)) 사용하세요.
+  currentReview.value = { ...item };
+  console.log("수정모달 열때=>",currentReview.value)
+  showReviewUpdateModal.value = true;
+};
+
+// “리뷰 수정” 모달 닫기
+const closeUpdateModal = () => {
+  showReviewUpdateModal.value = false;
+  currentReview.value = null;
+};
+
+// “수정 완료” 버튼 클릭 → 서버에 전송
+const submitUpdate = async () => {
+  if (!currentReview.value) return;
+
+  try {
+    await axios.post(
+      'http://localhost:80/mypage/reviewUpdate',
+      currentReview.value
+    );
+    alert('리뷰가 수정되었습니다.');
+    showReviewUpdateModal.value = false;
+    currentReview.value = null;
+    await fetchReviewList();
+  } catch (err) {
+    console.error('리뷰 수정 실패:', err);
+    alert('리뷰 수정 중 오류가 발생했습니다.');
+  }
+};
+
+const deleteReview = async () => {
+  const confirmed = window.confirm('정말 이 리뷰를 삭제하시겠습니까?');
+    if (!confirmed) return;
+  try {
+    await axios.post(
+      'http://localhost:80/mypage/reviewDelete',
+      currentReview.value
+    );
+    alert('리뷰가 삭제되었습니다.');
+    currentReview.value = null;
+    await fetchReviewList();
+  } catch (err) {
+    console.error('리뷰 삭제 실패:', err);
+    alert('리뷰 수정 중 오류가 발생했습니다.');
+  }
+};
+</script>
+
+<style scoped>
 .header {
   display: flex;
   align-items: center;
@@ -330,7 +433,7 @@ const submitReview = () => {
 
 .score-stars {
   font-size: 14px;
-  color: #FFD700;
+  color: #ffd700;
 }
 
 .review-main {
@@ -365,7 +468,6 @@ const submitReview = () => {
   line-height: 1.6;
 }
 
-
 .review-section strong {
   display: inline-block;
   margin-bottom: 4px;
@@ -380,23 +482,26 @@ const submitReview = () => {
   border-radius: 4px;
   cursor: pointer;
 }
+
 .review-write-btn-wrapper {
   text-align: right;
   margin: 1rem 0;
 }
+
 .review-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
+
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -449,7 +554,7 @@ const submitReview = () => {
 }
 
 .star-rating .star.active {
-  color: #FFD700;
+  color: #ffd700;
 }
 
 .modal-footer {
@@ -465,6 +570,7 @@ const submitReview = () => {
   border-radius: 4px;
   cursor: pointer;
 }
+
 .row-inline {
   display: flex;
   align-items: center;
@@ -488,6 +594,4 @@ const submitReview = () => {
   gap: 0.3rem;
   cursor: pointer;
 }
-
-
-  </style>
+</style>

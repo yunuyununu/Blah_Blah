@@ -43,7 +43,7 @@
                     </div>
                     <div class="review-meta">{{ item.r_work }} ｜ {{ item.u_nicname }} ｜ {{ item.c_nicname }} ｜ {{ item.r_date }}</div>
 
-                    <div class="review-section" v-if="userStore.isLogin == true">
+                    <div class="review-section" v-if="userStore.isLogin === true && reviewYN > 0">
                       <strong>내용</strong>
                       <p>{{ item.r_content }}</p>
                     </div>
@@ -76,13 +76,13 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
+import { useRoute,useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
 import { useUserStore } from '@/store/userStore'
 
 const userStore = useUserStore()
-
+ const router = useRouter();
 
 const route = useRoute();
 const companyDetails = ref(null);
@@ -149,10 +149,34 @@ const prevPage = () => {
   }
 }
 
+const reviewYN = ref(null)
+
+const fetchReviewYN = async () => {
+  try {
+    const res = await axios.get(`http://localhost:80/company/reviewYN`);
+    reviewYN.value = res.data;
+  } catch (err) {
+    console.error('리뷰 로딩 실패:', err);
+  }
+};
+
 onMounted(() => {
   fetchCompanyDetail();
   fetchReviewList();
+  if(userStore.isLogin === true) {
+    fetchReviewYN();
+  }
 });
+
+const goWriteReview = async () => {
+  const confirmLogout = confirm('마이페이지로 이동하시겠습니까?')
+      if (confirmLogout) {
+          router.push('/mypage/myreview')
+      } else {
+        return
+      }
+}
+
 </script>
 
 <style scoped>

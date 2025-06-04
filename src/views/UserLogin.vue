@@ -61,8 +61,7 @@
   import { useRouter } from 'vue-router';
   import { useUserStore } from '@/store/userStore'
 
-  const router = useRouter(); //기능
-  // const route = useRoute(); //정보
+  const router = useRouter();
    import { ref, watch } from 'vue'
    import axios from 'axios'
   const goJoin = () => router.push('/join');

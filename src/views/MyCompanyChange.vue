@@ -1,6 +1,6 @@
 <template>
     <div class="content">
-    <div class="container" v-if="userInfo.U_STATUS !== 'Checking'">
+    <div class="container" v-if="userInfo.U_C_IDX !== 0">
 
       <div class="row">
         <div class="col" style="text-align: center;">
@@ -40,9 +40,9 @@
 
       <div class="row">
         <div class="col" style="text-align: center;">
-          <a>현재 회사 변경 신청 처리 중입니다.</a>
+          <a>현재 관리자가 회사 확인중입니다.</a>
           <br>
-          <a>변경이 완료 될 때 까지는 중복신청이 불가합니다.</a>
+          <a>신청한 회사가 확인 되기 전까지는 회사 변경 신청이 불가합니다.</a>
           <br><br>
         </div>
       </div>

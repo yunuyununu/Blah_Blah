@@ -11,7 +11,18 @@
       </span>
       <span class="comment-date">{{ comment.cm_date }}</span>
     </div>
-    <div class="comment-body">{{ comment.cm_content }}</div>
+
+     <!-- 수정 중일 때 textarea 표시 -->
+    <div class="comment-body" v-if="isEditing">
+      <textarea v-model="editedContent" class="edit-textarea"></textarea>
+      <div class="edit-actions">
+        <button class="btn btn-sm btn-primary" @click="saveEdit">저장</button>
+        <button class="btn btn-sm btn-secondary" @click="cancelEdit">취소</button>
+      </div>
+    </div>
+
+    <!-- 기본 상태일 때 내용 표시 -->
+    <div class="comment-body" v-else>{{ comment.cm_content }}</div>
     
     <!-- 댓글만 답글 버튼 표시 -->
     <div v-if="!comment.cm_parent_idx" class="comment-footer">
@@ -21,13 +32,13 @@
             ({{ comment.replies.length }})
           </span>
         </span>
+      </div>
 
         <!-- 수정/삭제 버튼: 댓글/대댓글 모두 표시 -->
         <div v-if="userStore.userIdx === comment.cm_u_idx" class="comment-actions">
-          <span class="action" @click="$emit('edit-comment', comment.cm_idx)">✏️ 수정</span>
+          <span class="action" @click="startEdit" v-if="!isEditing && !comment.cm_parent_idx">✏️ 수정</span>
           <span class="action" @click="$emit('delete-comment', comment.cm_idx)">🗑️ 삭제</span>
         </div>
-    </div>
 
     <!-- 답글 입력창 및 대댓글 리스트 (replyTo일 때만 보여줌) -->
     <div v-if="replyToList.has(comment.cm_idx)" class="reply-area">
@@ -42,6 +53,7 @@
         </button>
       </div>
       <br>
+
       <!-- 대댓글 리스트 재귀 렌더링 -->
       <div class="replies-list">
         <CommentItem 
@@ -53,6 +65,7 @@
           @toggle-reply="$emit('toggle-reply', $event)"
           @submit-reply="$emit('submit-reply', $event)"
           @update-reply-content="$emit('update-reply-content', ...arguments)"
+          @delete-comment="$emit('delete-comment', $event)"
         />
       </div>
     </div>
@@ -60,17 +73,44 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, ref,getCurrentInstance } from 'vue';
 import { useUserStore } from '@/store/userStore'
 
 const userStore = useUserStore()
 
-defineProps({
+const props = defineProps({
   comment: Object,
   replyToList: Object,
   replyContentMap: Object
 });
 
+// 수정 상태 변수
+const isEditing = ref(false);
+// 수정 내용 임시 저장
+const editedContent = ref('');
+
+// emit 객체를 setup context에서 가져오기
+const internalInstance = getCurrentInstance();
+const emit = internalInstance?.emit; // 타입 보호
+
+// 수정 시작
+function startEdit() {
+  isEditing.value = true;
+  editedContent.value = props.comment.cm_content;
+}
+
+// 수정 저장
+function saveEdit() {
+  // 부모 컴포넌트에 이벤트로 전달
+  // 'save-edit' 이벤트로 cm_idx와 수정된 내용을 전달
+  emit('save-edit', props.comment.cm_idx, editedContent.value);
+  isEditing.value = false;
+}
+
+// 수정 취소
+function cancelEdit() {
+  isEditing.value = false;
+}
 </script>
 
 <style scoped>
@@ -158,4 +198,17 @@ textarea {
   margin-left: 4px;
   font-size: 12px;
 }
+.edit-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
 </style>

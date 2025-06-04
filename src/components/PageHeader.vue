@@ -102,24 +102,24 @@ const fetchNotifications = async () => {
   }
 }
 
-// 📌 실시간 알림 수신용 웹소켓 연결
-const connectWebSocket = () => {
-  const userId = userStore.user?.id // 로그인된 사용자 ID (store에 저장된 값 사용)
-  if (!userId) return
+// // 📌 실시간 알림 수신용 웹소켓 연결
+// const connectWebSocket = () => {
+//   const userId = userStore.user?.id // 로그인된 사용자 ID (store에 저장된 값 사용)
+//   if (!userId) return
 
-  socket = new WebSocket(`ws://localhost:80/ws/alarm/${userId}`)
+//   socket = new WebSocket(`ws://localhost:80/ws/alarm/${userId}`)
 
-  socket.onmessage = (event) => {
-    const newAlarm = JSON.parse(event.data)
-    notifications.value.unshift(newAlarm)
-    hasUnread.value = true
-  }
+//   socket.onmessage = (event) => {
+//     const newAlarm = JSON.parse(event.data)
+//     notifications.value.unshift(newAlarm)
+//     hasUnread.value = true
+//   }
 
-  socket.onclose = () => {
-    console.log('알림 소켓 연결 종료됨')
-    // 자동 재연결 필요시 setTimeout(() => connectWebSocket(), 3000)
-  }
-}
+//   socket.onclose = () => {
+//     console.log('알림 소켓 연결 종료됨')
+//     // 자동 재연결 필요시 setTimeout(() => connectWebSocket(), 3000)
+//   }
+// }
 
 // 📌 알림 패널 열면 읽음 처리 API 호출
 const toggleNotificationPanel = async () => {
@@ -140,7 +140,6 @@ const toggleNotificationPanel = async () => {
 onMounted(() => {
   if(userStore.isLogin === true){
     fetchNotifications()
-    connectWebSocket()
   }
   // 필요하다면 주기적으로 알림을 폴링 할 수 있습니다.
   // setInterval(fetchNotifications, 30000)
@@ -152,8 +151,14 @@ onBeforeUnmount(() => {
 
 const goLogin = () => router.push('/login')
 const logout = async () => {
-  await userStore.logout()
-  router.push('/login')
+  const confirmLogout = confirm('로그아웃 하시겠습니까?')
+      if (confirmLogout) {
+          await axios.post('/login/logout')
+          await userStore.logout()
+          router.push('/login')
+      } else {
+        return
+      }
 }
 
 watch(notifications, (newVal) => {

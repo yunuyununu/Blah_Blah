@@ -26,17 +26,8 @@ export const useUserStore = defineStore('user', {
       }
     },
     async logout() {
-
-      const confirmLogout = confirm('로그아웃 하시겠습니까?')
-      if (!confirmLogout) return
-
-      try {
-        await axios.post('/login/logout')
-        this.isLogin = false
-        this.userIdx = null
-      } catch (e) {
-        console.error('로그아웃 실패', e)
-      }
+          this.isLogin = false
+          this.userIdx = null
     },
     async setLoginSuccess(userIdx) {
       this.isLogin = true

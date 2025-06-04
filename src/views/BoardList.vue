@@ -1,5 +1,16 @@
 <template>
   <div class="board-container">
+    <div class="search-container">
+      <input
+        v-model="searchKeyword"
+        type="text"
+        placeholder="게시글 제목 또는 내용을 입력하세요"
+        @keyup.enter="onSearch"
+        class="search-input"
+         ref="searchInput"
+      />
+      <button @click="onSearch">검색</button>
+    </div>
     <div class="card-grid">
       <div class="card" v-for="item in board" :key="item.b_idx" @click="goBoardDetails(item.b_idx)">
         <div class="card-title">{{ item.b_title }}</div>
@@ -15,7 +26,11 @@
         </div>
       </div>
     </div>
-
+    <!-- 검색결과 없을 때 메시지 -->
+    <div v-if="board.length === 0 && searchKeyword.trim() !== ''" class="no-results">
+      <p>검색결과가 없습니다!</p>
+      <p>검색할 단어를 변경하거나, 단어의 철자가 정확한지 확인해 보세요.</p>
+    </div>
     <!-- 무한스크롤 감지용 div -->
     <div ref="infiniteScrollTrigger" class="scroll-trigger" v-show="hasMore"></div>
   </div>
@@ -25,6 +40,7 @@
 import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+
 const formatDate = (datetime) => {
   return new Date(datetime).toLocaleDateString();
 };
@@ -36,14 +52,28 @@ const hasMore = ref(true);
 const infiniteScrollTrigger = ref(null);
 let observer;
 
+const searchKeyword = ref('');  // 검색어 상태
+const searchInput = ref(null);
+
 const savedY = parseInt(sessionStorage.getItem('boardScrollY')) || 0;
 let isRestoringScroll = savedY > 0;
 
-const fetchBoards = async () => {
+// 게시글 목록 가져오기 함수
+const fetchBoards = async (isSearch = false) => {
   if (!hasMore.value) return;
 
+  // 검색이면 리스트 초기화 + lastBIdx 초기화
+  if (isSearch) {
+    board.value = [];
+    lastBIdx.value = null;
+    hasMore.value = true;
+  }
+
   const res = await axios.get('http://localhost:80/board/boards', {
-    params: { lastBIdx: lastBIdx.value },
+    params: { 
+      lastBIdx: lastBIdx.value,
+      searchKeyword: searchKeyword.value.trim()  // 검색어 같이 전달
+    },
   });
 
   const newPosts = res.data;
@@ -54,28 +84,43 @@ const fetchBoards = async () => {
     lastBIdx.value = newPosts[newPosts.length - 1].b_idx;
   }
 
-  // 스크롤 복원이 필요한 경우, 충분히 로드될 때까지 반복 호출
   if (isRestoringScroll) {
-    await nextTick(); // 렌더링 기다림
-    const waitUntilScrollable = async (targetY) => {
-        return new Promise((resolve) => {
-          const interval = setInterval(async () => {
-            if (document.documentElement.scrollHeight >= targetY + window.innerHeight) {
-              clearInterval(interval);
-              resolve();
-            } else {
-              if (hasMore.value) {
-                await fetchBoards(); // 계속 불러오기
-              }
-            }
-          }, 100); // 0.1초마다 체크
-        });
-    };
-    await waitUntilScrollable(savedY);
-    window.scrollTo({ top: savedY, behavior: 'auto' }); // 바로 이동
-    sessionStorage.removeItem('boardScrollY');
-    isRestoringScroll = false;
+  await nextTick();
+  const waitUntilScrollable = async (targetY) => {
+    return new Promise((resolve) => {
+      const interval = setInterval(async () => {
+        if (document.documentElement.scrollHeight >= targetY + window.innerHeight) {
+          clearInterval(interval);
+          resolve();
+        } else {
+          if (hasMore.value) {
+            await fetchBoards();
+          }
+        }
+      }, 30);
+    });
+  };
+  await waitUntilScrollable(savedY);
+
+  // 바로 scrollTo 하고, scroll 잠금 해제
+  window.scrollTo({ top: savedY, behavior: 'auto' });
+
+  sessionStorage.removeItem('boardScrollY');
+  isRestoringScroll = false;
+
+  // 복원 후 스크롤 다시 허용
+  document.body.style.overflow = '';
+}
+};
+
+// 검색 버튼 클릭 또는 Enter 키 이벤트
+const onSearch = async () => {
+  if (searchKeyword.value.trim() === '') {
+    searchInput.value?.focus(); // ✅ 검색어가 없으면 input에 포커스
+    return;
   }
+  hasMore.value = true;
+  await fetchBoards(true);
 };
 
 const goBoardDetails = async (b_idx) => {
@@ -104,6 +149,10 @@ const createObserver = () => {
 };
 
 onMounted(async () => {
+  if (isRestoringScroll) {
+    document.body.style.overflow = 'hidden'; // 스크롤 잠금
+  }
+
   await fetchBoards();
   createObserver();
 });
@@ -115,13 +164,56 @@ onBeforeUnmount(() => {
 });
 </script>
 
+
 <style scoped>
 .board-container {
   max-width: 1000px;
   margin: auto;
   padding: 20px;
 }
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 8px;
+}
+.search-container button {
+  padding: 8px 16px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.search-input {
+  width: 400px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.search-bar input {
+  flex-grow: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px 0 0 6px;
+  font-size: 1rem;
+}
 
+.search-bar button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #f44336;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 0 6px 6px 0;
+  transition: background-color 0.3s ease;
+}
+
+.search-bar button:hover {
+  background-color: #d32f2f;
+}
 h2 {
   margin-bottom: 16px;
 }
@@ -172,5 +264,35 @@ h2 {
 }
 .scroll-trigger {
   height: 1px;
+}
+.no-results {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  height: 300px; /* 적당한 높이 지정 */
+  color: #999;
+  font-size: 1.2rem;
+  white-space: pre-line; /* 줄바꿈 유지 */
+  user-select: none;
+  text-align: center;
+  padding: 20px;
+}
+.no-results p {
+  margin: 8px 0;
+}
+/* src/style.css - 스크롤 애니메이션 완전 차단 */
+html, body {
+  scroll-behavior: auto !important;
+}
+
+* {
+  scroll-behavior: auto !important;
+}
+
+/* Vuetify가 적용하는 smooth scroll도 차단 */
+.v-application {
+  scroll-behavior: auto !important;
 }
 </style>
