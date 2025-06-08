@@ -16,7 +16,7 @@
         <!-- <li><strong>홈페이지:</strong> <a :href="companyDetails.website" target="_blank">{{ companyDetails.website }}</a></li> -->
         <li><strong>업계:</strong> {{ companyDetails.C_INDUSTRY }}</li>
         <li><strong>설립:</strong> {{ companyDetails.C_EST }}</li>
-        <li><strong>직원수:</strong> {{ companyDetails.C_NUMBER }}</li>
+        <li><strong>직원수:</strong> {{ Number(companyDetails.C_NUMBER).toLocaleString() }}명</li>
         <!-- <li><strong>연봉정보:</strong> {{ companyDetails.salary }}</li> -->
       </ul>
     </div>
@@ -169,12 +169,16 @@ onMounted(() => {
 });
 
 const goWriteReview = async () => {
-  const confirmLogout = confirm('마이페이지로 이동하시겠습니까?')
-      if (confirmLogout) {
-          router.push('/mypage/myreview')
-      } else {
-        return
-      }
+  if(userStore.isLogin === true) {
+    const confirmLogout = confirm('마이페이지로 이동하시겠습니까?')
+        if (confirmLogout) {
+            router.push('/mypage/myreview')
+        } else {
+          return
+        }
+  } else {
+    alert("회원가입 후 이용 가능합니다.")
+  }
 }
 
 </script>

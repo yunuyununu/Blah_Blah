@@ -27,6 +27,7 @@
 
             <!-- 이미지 업로드 -->
             <input type="file" multiple @change="onImageChange"  accept=".jpg,.jpeg,.png,.pdf" />
+            <p>※ 첨부 가능한 파일은 JPG, JPEG, PNG, PDF 형식만 가능합니다.</p>
             <div class="image-preview">
               <img v-for="(img, i) in previewImages" :key="i" :src="img" />
             </div>

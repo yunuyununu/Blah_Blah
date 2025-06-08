@@ -68,6 +68,7 @@
                   <button
                     class="btn btn-outline-secondary"
                     @click="openUpdateModal(item)"
+                    v-if="canEdit(item.r_date)"
                   >
                     수정
                   </button>&nbsp;&nbsp;
@@ -364,6 +365,15 @@ const deleteReview = async (item) => {
     alert('리뷰 수정 중 오류가 발생했습니다.');
   }
 };
+const canEdit = (rDateStr) => {
+  if (!rDateStr) return false;
+  const reviewDate = new Date(rDateStr);
+  const today = new Date();
+  const diffTime = today - reviewDate;
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+  return diffDays <= 30;
+};
+
 </script>
 
 <style scoped>

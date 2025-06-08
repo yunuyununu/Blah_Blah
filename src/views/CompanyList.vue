@@ -51,7 +51,7 @@ const getImageUrl = (filename) => {
   if (filename.startsWith('https')) {
     return filename;
   } else if (filename !== "") {
-    return `https://storage.googleapis.com/blah_blah_bucket/company/${filename}`;
+    return `https://storage.googleapis.com/blah_blah_bucket/${filename}`;
   } else {
     return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`;
   }
@@ -135,6 +135,12 @@ const goCompanyInsert = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.company-card:hover {
+  transform: translateY(-5px); /* 살짝 떠오르게 */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* 그림자 강조 */
 }
 
 .company-logo {

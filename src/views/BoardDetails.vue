@@ -29,7 +29,7 @@
     <div class="post-content">
       <p v-if="!isEditing" v-html="post.B_CONTENT"></p>
       <textarea v-else v-model="editedContent" class="form-control" rows="10"></textarea>
-      <div class="text-muted" style="font-size: 12px;">
+      <div v-if="isEditing" class="text-muted" style="font-size: 12px;">
         {{ editedContent.length }}자 입력됨
       </div>
       <div v-if="contentError" class="text-danger" style="font-size: 12px;">
@@ -102,7 +102,7 @@
 
     <div class="vote-actions">
       <button 
-        v-if="!hasVoted" 
+        v-if="!hasVoted && userStore.userIdx" 
         class="vote-submit-btn"
         :class="{ 'active': selectedVoteOption }"
         :disabled="!selectedVoteOption"
@@ -110,7 +110,14 @@
       >
         투표하기
       </button>
-      <div v-else class="vote-completed">
+      <button 
+        v-if="!userStore.userIdx"
+        class="vote-submit-btn"
+        disabled
+      >
+        투표는 회원만 가능합니다.
+      </button>
+      <div v-if="hasVoted" class="vote-completed">
         <span class="vote-completed-icon">✔️</span>
         <span class="vote-completed-text">투표가 완료되었습니다</span>
       </div>
@@ -342,6 +349,8 @@ const cancelUpdate = () => {
   // 제목, 내용도 원래 글로 되돌리기
   editedTitle.value = post.value.B_TITLE;
   editedContent.value = post.value.B_CONTENT;
+  titleError.value = '';
+  contentError.value = '';
 };
 
 const deleteBoard = async () => {
@@ -381,13 +390,6 @@ onMounted(async () => {
     fetchLikeStatus();
     checkUserVoteStatus();
     
-    // 웹소켓 연결 상태 확인 (단순화)
-    // if (!alarmStore.connected) {
-    //   console.log(' 웹소켓 연결 상태:', {
-    //     connected: alarmStore.connected,
-    //     connecting: alarmStore.connecting
-    //   });
-    // }
   } else {
     fetchLikeCount();
   }
@@ -532,7 +534,6 @@ const fetchLikeCount = async () => {
     likeCount.value = 0;
   }
 };
-
 
 // 좋아요 토글
 const toggleLike = async () => {

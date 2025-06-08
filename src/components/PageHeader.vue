@@ -73,111 +73,80 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted,onBeforeUnmount } from 'vue'
+import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/store/userStore'
 import { useRouter } from 'vue-router'
-import axios from 'axios';
+import axios from 'axios'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const isLogin = computed(() => userStore.isLogin)
 
-// 알림 관련 상태
-const notifications = ref([])
+const notifications = computed(() => userStore.notifications)
 const showNotifications = ref(false)
-const hasUnread = ref(false)
+const hasUnread = computed(() => userStore.hasUnread)
 
-let socket = null
+let eventSource = null // SSE 연결 객체
 
-// 알림 목록 
-const fetchNotifications = async () => {
-  try {
-    const res = await axios.get(`http://localhost:80/alarm/list`) // 로그인된 유저의 알림 목록 요청
-    notifications.value = res.data
-    console.log("알림리스트==>>>>",notifications.value)
-    hasUnread.value = notifications.value.some(n => !n.read)
-  } catch (e) {
-    console.error('알림 불러오기 실패', e)
-  }
-}
-
-// // 📌 실시간 알림 수신용 웹소켓 연결
-// const connectWebSocket = () => {
-//   const userId = userStore.user?.id // 로그인된 사용자 ID (store에 저장된 값 사용)
-//   if (!userId) return
-
-//   socket = new WebSocket(`ws://localhost:80/ws/alarm/${userId}`)
-
-//   socket.onmessage = (event) => {
-//     const newAlarm = JSON.parse(event.data)
-//     notifications.value.unshift(newAlarm)
-//     hasUnread.value = true
-//   }
-
-//   socket.onclose = () => {
-//     console.log('알림 소켓 연결 종료됨')
-//     // 자동 재연결 필요시 setTimeout(() => connectWebSocket(), 3000)
-//   }
-// }
-
-// 📌 알림 패널 열면 읽음 처리 API 호출
 const toggleNotificationPanel = async () => {
   showNotifications.value = !showNotifications.value
 
   if (showNotifications.value) {
-    try {
-      await axios.post(`http://localhost:80/alarm/isRead`)
-      notifications.value = notifications.value.map(n => ({ ...n, read: true }))
-      hasUnread.value = false
-    } catch (e) {
-      console.error('읽음 처리 실패', e)
-    }
+    await userStore.markAllAsRead()
   }
 }
 
-// 페이지가 마운트될 때 알림을 가져옴
-onMounted(() => {
-  if(userStore.isLogin === true){
-    fetchNotifications()
+onMounted(async () => {
+  // 브라우저 알림 권한 요청
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission()
   }
-  // 필요하다면 주기적으로 알림을 폴링 할 수 있습니다.
-  // setInterval(fetchNotifications, 30000)
+  
+  if (userStore.isLogin === true) {
+    userStore.fetchNotifications()
+    userStore.subscribeToAlarm()
+  }
 })
 
 onBeforeUnmount(() => {
-  if (socket) socket.close()
+  if (eventSource) eventSource.close()
 })
 
 const goLogin = () => router.push('/login')
 const logout = async () => {
   const confirmLogout = confirm('로그아웃 하시겠습니까?')
-      if (confirmLogout) {
-          await axios.post('/login/logout')
-          await userStore.logout()
-          router.push('/login')
-      } else {
-        return
-      }
+  if (confirmLogout) {
+    await axios.post('/login/logout')
+    await userStore.logout()
+    router.push('/login')
+  }
 }
 
 watch(notifications, (newVal) => {
   hasUnread.value = newVal.some(n => !n.read)
 }, { deep: true })
+watch(
+  () => userStore.userIdx,
+  (newVal) => {
+    if (newVal) {
+      userStore.subscribeToAlarm()
+    }
+  },
+  { immediate: true }
+)
 
 const goToNotification = async (url) => {
   showNotifications.value = false
 
   if (router.currentRoute.value.path === url) {
-    // 동일한 경로일 경우 강제로 새로고침
-    await router.replace({ path: '/_redirect' }) // 임시 페이지로 이동
-    setTimeout(() => {
-      router.replace({ path: url })
-    }, 10)        // 다시 원래 페이지로 이동
+    await router.replace({ path: '/_redirect' })
+    setTimeout(() => router.replace({ path: url }), 10)
   } else {
     router.push({ path: url })
   }
 }
+
 </script>
 
 <style scoped>

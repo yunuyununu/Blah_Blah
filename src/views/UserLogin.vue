@@ -1,62 +1,73 @@
 <template>
   <div class="content">
     <div class="container">
-
-      <div class="row">
-        <div class="col" style="text-align: center;">
-          <h2>로그인</h2>
-          <br>
-          <br>
+      <form @submit.prevent="submit">
+        <!-- 제목 -->
+        <div class="row">
+          <div class="col" style="text-align: center;">
+            <h2>로그인</h2><br><br>
+          </div>
         </div>
-      </div>
 
+        <!-- 아이디 -->
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
             <label>&nbsp;&nbsp;&nbsp;&nbsp;아이디</label>&nbsp;&nbsp;
-            <input type="text"  v-model="userId" ref="userIdInput"
-           :class="['custom-input', { 'input-error': errors.userId  }]"/>&nbsp;&nbsp;
-          <p v-if="errors.userId" class="error-text" style="margin-top: 3px;">{{ errors.userId }}</p>
-            <br>
+            <input
+              type="text"
+              v-model="userId"
+              ref="userIdInput"
+              :class="['custom-input', { 'input-error': errors.userId }]"
+            />&nbsp;&nbsp;
+            <p v-if="errors.userId" class="error-text">{{ errors.userId }}</p>
+          <br>
             <br>
           </div>
         </div>
 
+        <!-- 비밀번호 -->
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
             <label>비밀번호</label>&nbsp;&nbsp;
-            <input type="password" v-model="userPw" ref="userPwInput"
-            :class="['custom-input', { 'input-error': errors.userPw  }]"/>
-            <p v-if="errors.userPw" class="error-text" style="margin-top: 3px;">{{ errors.userPw }}</p>
-            <br>
+            <input
+              type="password"
+              v-model="userPw"
+              ref="userPwInput"
+              :class="['custom-input', { 'input-error': errors.userPw }]"
+            />
+            <p v-if="errors.userPw" class="error-text">{{ errors.userPw }}</p>
+          <br>
             <br>
           </div>
         </div>
 
+        <!-- 로그인 버튼 -->
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
-            <button type="button" class="btn btn-outline-dark" @click="submit">로그인</button>&nbsp;&nbsp;
-            <br>
+            <button type="submit" class="btn btn-outline-dark">로그인</button>&nbsp;&nbsp;
+          <br>
             <br>
           </div>
         </div>
 
+        <!-- 기타 -->
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
             <button type="button" class="btn btn-light" @click="goSearchId">아이디 찾기</button>&nbsp;&nbsp;
             <button type="button" class="btn btn-light" @click="goSearchPw">비밀번호 찾기</button>&nbsp;&nbsp;
-            <button class="btn btn-danger" @click="goJoin">회원가입</button>
-            <br>
-            <br>
+            <button type="button" class="btn btn-danger" @click="goJoin">회원가입</button>
+          <br><br>
           </div>
         </div>
-      </div>
+      </form>
     </div>
-  </template>
-  
+  </div>
+</template>
+
   <script setup>
   import { useRouter } from 'vue-router';
   import { useUserStore } from '@/store/userStore'

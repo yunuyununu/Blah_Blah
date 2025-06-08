@@ -20,7 +20,8 @@
             <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com" :disabled="changeEmail || emailDisabled"
             :class="['custom-input', { 'input-error': errors.email  }]"/>
             &nbsp;&nbsp;
-            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode">인증번호 전송</button>
+            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="emailBtnDisabled" >인증번호 전송</button>
+            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="emailAgainDisabled" v-if="timerVisible === false && emailAgain === true">재전송</button>&nbsp;&nbsp;
             <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
           </div>
           <div class="col-2"></div>
@@ -35,6 +36,7 @@
             <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리" :disabled="authcodeDisabled"
             :class="['custom-input', { 'input-error': errors.authcode  }]"/>&nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="authcodeVerify">인증번호확인</button>&nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-dark" @click="emailReset">초기화</button>
             <p v-if="errors.authcode" class="error-text">{{ errors.authcode }}</p>
             <!-- 타이머 -->
             <div v-if="timerVisible" style="margin-top: 3px;">
@@ -116,9 +118,12 @@ const userTelInput = ref(null)
 
 const emailDisabled = ref(false)
 const authcodeDisabled = ref(false)
+const emailBtnDisabled = ref(false)
+const emailAgainDisabled = ref(false)
 
 const verifyMessage = ref('')
 const verifySuccess = ref(null)
+const emailAgain = ref(false)
 
 const countdown = ref(180)
 const timer = ref(null)
@@ -148,7 +153,9 @@ const idCheckMessage = ref('')
 const isCodeVerified = ref(false)
 
 const sendAuthCode = async () => {
-
+       authcode.value = ''
+    verifyMessage.value = ''
+    verifySuccess.value = null
   let isValid = true
 
   errors.value.email = ''
@@ -178,8 +185,12 @@ const sendAuthCode = async () => {
       loading.value = false
       startTimer()
       toast.success('이메일 전송이 완료되었습니다.')
-      timerVisible.value = true
       emailDisabled.value = true
+      if(emailAgain.value === true) {
+          emailAgainDisabled.value = true
+        }else {
+          emailBtnDisabled.value = true
+        }
     } else {
       loading.value = false
       errors.value.email = '등록되지 않은 이메일입니다.'
@@ -195,21 +206,24 @@ const sendAuthCode = async () => {
 }
 
 const startTimer = () => {
+  timerVisible.value = true
   countdown.value = 180
+  clearInterval(timer?.value)
   timer.value = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(timer.value)
-      timerVisible.value = false
-    }
+    if (countdown.value > 0) {
+        countdown.value--
+      } else {
+        clearInterval(timer.value)
+        timerVisible.value = false
+      }
   }, 1000)
 }
 
 const formatTime = () => {
-  const minutes = Math.floor(countdown.value / 60)
-  const seconds = countdown.value % 60
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
-}
+    const minutes = String(Math.floor(countdown.value / 60)).padStart(2, '0')
+    const seconds = String(countdown.value % 60).padStart(2, '0')
+    return `${minutes}:${seconds}`
+  }
 
 const formatPhoneNumber = () => {
   let digits = userTel.value.replace(/\D/g, '') // 숫자만 추출
@@ -296,10 +310,44 @@ const resetPassword = async () => {
   }
 }
 
+const emailReset = () => {
+  emailInput.value = null
+ authcodeInput.value = null
+ email.value = ''
+ authcode.value = ''
+ verifyMessage.value = ''
+ verifySuccess.value = null
+ countdown.value = ''
+ timer.value = null
+ timerVisible.value = false
+ loading.value = false
+
+ emailDisabled.value = false
+ authcodeDisabled.value = false
+ emailAgain.value = false
+
+emailBtnDisabled.value = false
+emailAgainDisabled.value = false
+}
+
 watch(email, () => (errors.value.email = ''))
-watch(authcode, () => (errors.value.authcode = ''))
+watch(authcode, () => {
+  errors.value.authcode = ''
+  verifyMessage.value = ''
+})
 watch(userId, () => (errors.value.userId = ''))
 watch(userTel, () => (errors.value.userTel = ''))
+watch(countdown, (newVal) => {
+  if (newVal === 0) {
+    clearInterval(timer.value)
+    verifyMessage.value = '시간이 초과되었습니다. 인증번호를 재전송 해주세요.'
+    verifySuccess.value = false
+    authcodeDisabled.value = false
+    timerVisible.value = false
+    errors.value.authcode = ''
+    emailAgain.value = true
+  }
+})
 </script>
 
 

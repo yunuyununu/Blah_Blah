@@ -1,12 +1,12 @@
 <template>
   <div class="main-wrapper">
     <!-- 검색창 -->
-    <!-- <div class="search-bar">
+   <div class="search-bar">
       <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
   <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
 </svg></span>
       <input type="text" placeholder="관심있는 내용을 검색해보세요!" />
-    </div> -->
+    </div>
 
     <div class="content-wrapper">
       <!-- 좌측: 주간/월간 토픽 -->
@@ -465,4 +465,3 @@ text-overflow: ellipsis;
 white-space: nowrap;
 }
 </style>
-

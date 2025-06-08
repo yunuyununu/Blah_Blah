@@ -91,8 +91,15 @@
             <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com"
             :class="['custom-input', { 'input-error': errors.email  }]" :disabled="emailDisabled"/>
             &nbsp;&nbsp;
-            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="emailBtnDisabled">인증번호 전송</button>
+            <button type="button" class="btn btn-outline-dark" @click="EmailCheck" v-if="emailCheck === false">이메일중복확인</button>
+            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="emailAgainDisabled" v-if="timerVisible === false && emailCheck === true && emailAgain === true">재전송</button>&nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="emailBtnDisabled" v-if="emailCheck === true">인증번호 전송</button>
             <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
+            <div v-if="verifyEmail" style="margin-top: 3px;">
+                <p :style="{ color: verifyOK === true ? 'green' : verifyOK === false ? 'red' : 'black' }">
+                  {{ verifyEmail }}
+                </p>
+            </div>
           </div>
           <div class="col-2"></div>
         </div>
@@ -106,7 +113,7 @@
             <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리"
             :class="['custom-input', { 'input-error': errors.authcode  }]" :disabled="authcodeDisabled"/>&nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="authcodeVerify" :disabled="authcodeBtnDisabled">인증번호확인</button>&nbsp;&nbsp;
-            <!-- <button type="button" class="btn btn-dark">재전송</button> -->
+            <button type="button" class="btn btn-outline-dark" @click="emailReset">초기화</button>
             <p v-if="errors.authcode" class="error-text">{{ errors.authcode }}</p>
             <!-- 타이머 -->
             <div v-if="timerVisible" style="margin-top: 3px;">
@@ -115,7 +122,7 @@
     
             <!-- 인증 결과 메시지 -->
             <div v-if="verifyMessage" style="margin-top: 3px;">
-                <p :style="{ color: verifySuccess === true ? 'blue' : verifySuccess === false ? 'red' : 'black' }">
+                <p :style="{ color: verifySuccess === true ? 'green' : verifySuccess === false ? 'red' : 'black' }">
                   {{ verifyMessage }}
                 </p>
             </div>
@@ -185,16 +192,22 @@ const email = ref('')
 const authcode = ref('')
 const verifyMessage = ref('')
 const verifySuccess = ref(null)
+const verifyEmail = ref('')
+const verifyOK = ref('')
 const countdown = ref(180) // 3분
 const timer = ref(null)
 const timerVisible = ref(false)
 const isEmailChecked = ref(false)
+const isAuthcodeChecked = ref(false)
 const loading = ref(false)
+const emailAgain = ref(false)
 
-const emailBtnDisabled = ref(false)
 const authcodeBtnDisabled = ref(false)
 const emailDisabled = ref(false)
+const emailBtnDisabled = ref(false)
 const authcodeDisabled = ref(false)
+const emailAgainDisabled = ref(false)
+const emailCheck = ref(false)
 
 const errors = ref({
       userId : '',
@@ -273,7 +286,9 @@ const formatPhoneNumber = () => {
 }
 
 const sendAuthCode = async () => {
-
+     authcode.value = ''
+    verifyMessage.value = ''
+    verifySuccess.value = null
     let isValid = true
 
     errors.value = {
@@ -296,6 +311,7 @@ const sendAuthCode = async () => {
 
     try {
       loading.value = true
+      
       const response = await axios.post('http://localhost:80/join/emailsend', {
         email: email.value
       })
@@ -304,13 +320,19 @@ const sendAuthCode = async () => {
         loading.value = false
         startTimer() // 인증번호 검증 시간 측정
         emailDisabled.value = true
-        emailBtnDisabled.value = true
+        
+        if(emailAgain.value === true) {
+          emailAgainDisabled.value = true
+        }else {
+          emailBtnDisabled.value = true
+        }
+
         toast.success('이메일 전송이 완료되었습니다.')
       } 
     } catch (error) {
       console.error('이메일 전송 실패:', error)
       loading.value = false
-      alert('이메일 전송에 실패했습니다.')
+      alert('이메일 전송에 실패했습니다. 관리자에게 문의하거나 다시 시도해보세요.')
     }
 
     return isValid
@@ -326,6 +348,7 @@ const sendAuthCode = async () => {
         countdown.value--
       } else {
         clearInterval(timer.value)
+        timerVisible.value = false
       }
     }, 1000)
   }
@@ -357,17 +380,18 @@ const sendAuthCode = async () => {
 
       if (response.data === 'success') {
         verifyMessage.value = '인증번호가 확인되었습니다.'
+        verifySuccess.value = true
         //인증번호 검증되면 타이머 숨기기
         timerVisible.value = false
         authcodeBtnDisabled.value = true
-        isEmailChecked.value = true
+        isAuthcodeChecked.value = true
         authcodeDisabled.value = true
         errors.value.authcode = ''
       } else {
         errors.value.authcode = '인증번호가 일치하지 않습니다.'
         authcodeInput.value.focus()
         verifySuccess.value = false
-        isEmailChecked.value = false
+        isAuthcodeChecked.value = false
         return
       }
 
@@ -460,6 +484,11 @@ const submit = () => {
     emailInput.value.focus()
     isValid = false
     return
+  } else if (!isEmailChecked.value) {
+    errors.value.email = '이메일 중복을 확인하세요.'
+    if (isValid) isEmailChecked.value.focus()
+    isValid = false
+    return
   }
 
   //인증번호 체크
@@ -473,7 +502,7 @@ const submit = () => {
     if (isValid) authcodeInput.value.focus()
     isValid = false
     return
-  } else if (!isEmailChecked.value) {
+  } else if (!isAuthcodeChecked.value) {
     errors.value.authcode = '인증번호를 검증하세요.'
     if (isValid) authcodeInput.value.focus()
     isValid = false
@@ -493,6 +522,31 @@ const submit = () => {
     return
   }
 
+  // 회원가입 폼
+    const formData = new FormData()
+    formData.append('userId', userId.value)
+    formData.append('userPw', userPw.value)
+    formData.append('nickname', nickname.value)
+    formData.append('userTel', userTel.value)
+    formData.append('email', email.value)
+    formData.append('userFile', userFile.value)
+  
+    axios.post('http://localhost:80/join/userJoin', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }}).then(response => {
+        alert('회원가입이 완료되었습니다.')
+        console.log("회원가입 성공 =="+response.data)
+        router.push('/login')
+      }).catch(error => {
+        alert('회원가입에 실패했습니다. 관리자에게 문의하세요.')
+        console.error(error)
+      })
+
+}
+
+const EmailCheck = () => {
+
   axios.post('http://localhost:80/join/emailCheck', { email: email.value })
     .then(res => {
       if (res.data === 1) {
@@ -503,37 +557,45 @@ const submit = () => {
         verifyMessage.value = ''
         isEmailChecked.value = false
         verifySuccess.value = false
-        emailBtnDisabled.value = false
-        authcodeBtnDisabled.value = false
+        // authcodeBtnDisabled.value = false
         emailDisabled.value = false
-        authcodeDisabled.value = false
+        // authcodeDisabled.value = false
         return
-      } else { // 이메일 중복 아니면 회원가입 가능
-
-        const formData = new FormData()
-        formData.append('userId', userId.value)
-        formData.append('userPw', userPw.value)
-        formData.append('nickname', nickname.value)
-        formData.append('userTel', userTel.value)
-        formData.append('email', email.value)
-        formData.append('userFile', userFile.value)
-      
-        axios.post('http://localhost:80/join/userJoin', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }}).then(response => {
-            alert('회원가입이 완료되었습니다.')
-            console.log("회원가입 성공 =="+response.data)
-            router.push('/login')
-          }).catch(error => {
-            alert('회원가입에 실패했습니다. 관리자에게 문의하세요.')
-            console.error(error)
-          })
       }
+      emailCheck.value = true
+      errors.value.email = ''
+      verifyEmail.value = '이메일 중복 확인이 완료됐습니다. 전송버튼을 눌러주세요.'
+      verifyOK.value = true
+      isEmailChecked.value = true
     }).catch(error => {
-      alert('이메일 중복 확인 중 오류가 발생했습니다.');
-      console.error(error);
+    alert('이메일 중복 확인 중 오류가 발생했습니다.');
+    console.error(error);
   });
+
+}
+
+const emailReset = () => {
+  emailInput.value = null
+ authcodeInput.value = null
+ email.value = ''
+ authcode.value = ''
+ verifyMessage.value = ''
+ verifySuccess.value = null
+ verifyEmail.value = ''
+ verifyOK.value = ''
+ countdown.value = ''
+ timer.value = null
+ timerVisible.value = false
+ isEmailChecked.value = false
+ isAuthcodeChecked.value = false
+ loading.value = false
+
+ authcodeBtnDisabled.value = false
+ emailDisabled.value = false
+ emailBtnDisabled.value = false
+ authcodeDisabled.value = false
+ emailCheck.value = false
+ emailAgain.value = false
 }
   
 watch(userId, () => {
@@ -559,10 +621,23 @@ watch(email, () => {
 watch(authcode, () => {
   errors.value.authcode = ''
   verifyMessage.value = ''
-  isEmailChecked.value = false
+  // isEmailChecked.value = false
 })
 watch(userFile, () => {
   errors.value.userFile = ''
+})
+watch(countdown, (newVal) => {
+  if (newVal === 0) {
+    clearInterval(timer.value)
+    verifyMessage.value = '시간이 초과되었습니다. 인증번호를 재전송 해주세요.'
+    verifySuccess.value = false
+    verifyEmail.value = false
+    authcodeBtnDisabled.value = false
+    authcodeDisabled.value = false
+    timerVisible.value = false
+    errors.value.authcode = ''
+    emailAgain.value = true
+  }
 })
   </script>
   
