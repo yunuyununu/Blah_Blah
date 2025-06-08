@@ -23,6 +23,14 @@ public class VoteDTO {
     private int vr_vo_idx;
     private String vr_date;
     
+    private int b_idx;
+    private String b_title;
+    private int u_idx;
+    private String u_nicname;
+    private int vote_participants;
+    private int like_count;
+    private int comment_count;
+    
     public VoteDTO(int v_b_idx, String v_title) {
         this.v_b_idx = v_b_idx;
         this.v_title = v_title;

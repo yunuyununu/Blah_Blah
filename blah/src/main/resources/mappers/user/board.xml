@@ -22,7 +22,7 @@
 	            BRD.B_VOTE AS B_VOTE,
 	            BRD.B_DELETE AS B_DELETE,
 	            USR.U_NICNAME AS U_NICNAME,
-	            COP.C_NAME AS C_NAME
+	            IFNULL(COP.C_NAME, '새회사') AS C_NAME
 	        FROM BOARD BRD
 	        LEFT JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
 	        LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
@@ -71,7 +71,7 @@
 			   BRD.B_VOTE AS B_VOTE,				<!--투표존재여부-->
 			   BRD.B_DELETE AS B_DELETE,			<!--삭제여부-->
 			   USR.U_NICNAME AS U_NICNAME,			<!--회원 닉네임-->
-			   COP.C_NAME AS C_NAME,				<!--회사명-->
+			   IFNULL(COP.C_NAME, '새회사') AS C_NAME,<!--회사명-->
 			   COUNT(DISTINCT HRT.H_IDX) AS COUNT,	<!--좋아요수-->
 			   VT.V_IDX AS V_IDX,					<!--투표번호-->
 			   VT.V_TITLE AS V_TITLE				<!--투표제목-->
@@ -272,25 +272,43 @@
     	WHERE VO_IDX = #{vr_vo_idx}
     </update>
     
-    <select id="voteMain" resultType="map">
-    	SELECT 
-		    BRD.B_IDX,
-		    BRD.B_TITLE,
-		    BRD.B_HITS,
-		    BRD.B_DATE,
-		    USR.U_NICNAME,
-		    COP.C_NAME,
-		    VT.V_IDX,
-		    VT.V_TITLE
+    <select id="voteBest" resultType="com.example.blah.domain.VoteDTO">
+      SELECT
+		    VT.V_IDX AS V_IDX,
+		    VT.V_TITLE AS V_TITLE,
+		    BRD.B_IDX AS B_IDX,
+		    BRD.B_TITLE AS B_TITLE,
+		    IFNULL(COP.C_NAME, '새회사') AS C_NAME,
+		    USR.U_IDX AS U_IDX,
+		    USR.U_NICNAME AS U_NICNAME,
+		    (
+		        SELECT COUNT(1)
+		        FROM VOTE_RESULT VR
+		        JOIN VOTE_OPTION VO ON VR.VR_VO_IDX = VO.VO_IDX
+		        WHERE VO.VO_V_IDX = VT.V_IDX
+		    ) AS VOTE_PARTICIPANTS,
+		    (
+		        SELECT COUNT(1)
+		        FROM Heart HRT
+		        WHERE HRT.H_B_IDX = BRD.B_IDX
+		    ) AS LIKE_COUNT,
+	    	(
+			SELECT COUNT(1)
+			FROM COMMENT COM
+			WHERE COM.CM_B_IDX = BRD.B_IDX
+		    ) AS COMMENT_COUNT
 		FROM VOTE VT
-		JOIN BOARD BRD ON VT.V_B_IDX = BRD.B_IDX
-		JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-		LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
-		WHERE 
-		    BRD.B_DELETE = 'N'
-		    AND BRD.B_VOTE = 'Y'
-		    AND VT.V_DATE >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-		ORDER BY BRD.B_HITS DESC
+		    JOIN BOARD BRD ON VT.V_B_IDX = BRD.B_IDX
+		    JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+		    LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		WHERE VT.V_DATE >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		  AND BRD.B_DELETE = 'N'
+		  AND BRD.B_VOTE = 'Y'
+		ORDER BY (
+		        SELECT SUM(VO.VO_COUNT)
+		        FROM VOTE_OPTION VO
+		        WHERE VO.VO_V_IDX = VT.V_IDX
+		      ) DESC
 		LIMIT 3
     </select>
 </mapper>

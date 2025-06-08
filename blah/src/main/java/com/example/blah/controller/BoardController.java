@@ -19,6 +19,7 @@ import com.example.blah.common.util.GCSRequest;
 import com.example.blah.common.util.GCSService;
 import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.FileDTO;
+import com.example.blah.domain.VoteDTO;
 import com.example.blah.service.AlarmService;
 import com.example.blah.service.BoardService;
 import com.example.blah.service.RedisService;
@@ -310,5 +311,11 @@ public class BoardController {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
+	}
+	
+	// 투표베스트
+	@GetMapping("voteBest")
+	public List<VoteDTO> voteBest() {
+		return service.voteBest();
 	}
 }

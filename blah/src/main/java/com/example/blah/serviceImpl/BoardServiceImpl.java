@@ -227,10 +227,10 @@ public class BoardServiceImpl implements BoardService {
 		boardMapper.votePick(dto);
 		boardMapper.voteCount(vr_vo_idx);
 	}
-	
+
 	// 메인 투표 베스트
 	@Override
-	public List<Map<String, Object>> voteMain() {
-		return boardMapper.voteMain();
+	public List<VoteDTO> voteBest() {
+		return boardMapper.voteBest();
 	}
 }
