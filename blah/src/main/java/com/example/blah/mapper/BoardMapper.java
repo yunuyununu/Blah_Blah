@@ -82,4 +82,6 @@ public interface BoardMapper {
 	// 투표 항목 카운트
 	void voteCount(int vr_vo_idx);
 	
+	// 메인 투표 베스트
+	List<Map<String, Object>> voteMain();
 }

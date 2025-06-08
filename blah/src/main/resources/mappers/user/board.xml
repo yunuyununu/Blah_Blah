@@ -115,8 +115,8 @@
 	
 	<!--알람 전송-->
 	<insert id="alarmInsert" parameterType="com.example.blah.domain.AlarmDTO">
-		INSERT INTO ALARM (A_B_IDX, A_U_IDX, A_TYPE, A_URL)
-    	VALUES (#{a_b_idx}, #{a_u_idx}, #{a_type}, #{a_url})
+		INSERT INTO ALARM (A_B_IDX, A_RECEIVER_IDX,A_SENDER_IDX,  A_TYPE, A_URL)
+    	VALUES (#{a_b_idx}, #{a_receiver_idx}, #{a_sender_idx}, #{a_type}, #{a_url})
 	</insert>
 	
 	<!--좋아요 취소-->
@@ -271,4 +271,26 @@
     	SET VO_COUNT = VO_COUNT + 1
     	WHERE VO_IDX = #{vr_vo_idx}
     </update>
+    
+    <select id="voteMain" resultType="map">
+    	SELECT 
+		    BRD.B_IDX,
+		    BRD.B_TITLE,
+		    BRD.B_HITS,
+		    BRD.B_DATE,
+		    USR.U_NICNAME,
+		    COP.C_NAME,
+		    VT.V_IDX,
+		    VT.V_TITLE
+		FROM VOTE VT
+		JOIN BOARD BRD ON VT.V_B_IDX = BRD.B_IDX
+		JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
+		LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		WHERE 
+		    BRD.B_DELETE = 'N'
+		    AND BRD.B_VOTE = 'Y'
+		    AND VT.V_DATE >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		ORDER BY BRD.B_HITS DESC
+		LIMIT 3
+    </select>
 </mapper>

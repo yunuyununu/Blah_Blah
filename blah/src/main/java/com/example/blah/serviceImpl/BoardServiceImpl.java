@@ -20,6 +20,8 @@ import com.example.blah.mapper.BoardMapper;
 import com.example.blah.service.AlarmService;
 import com.example.blah.service.BoardService;
 
+import jakarta.servlet.http.HttpSession;
+
 @Service
 public class BoardServiceImpl implements BoardService {
 	
@@ -75,18 +77,19 @@ public class BoardServiceImpl implements BoardService {
 		int b_idx = (int) map.get("h_b_idx");
 		int h_u_idx = (int) map.get("h_u_idx");
 		int b_u_idx = (int) map.get("b_u_idx");
-		String b_title = (String) map.get("b_title");
+		String btitle = (String) map.get("b_title");
 		
 		if(h_u_idx != b_u_idx) {
 			AlarmDTO dto = new AlarmDTO();
 			dto.setA_b_idx(b_idx);
-			dto.setA_u_idx(b_u_idx);
+			dto.setA_receiver_idx(b_u_idx);
+			dto.setA_sender_idx(h_u_idx);
 			dto.setA_type("Like");
 			dto.setA_url("/boarddetails/"+b_idx);
 			boardMapper.alarmInsert(dto);
-
-			String message = "게시글 \""+b_title + "\"에 좋아요가 추가되었습니다.";
-			alarmservice.sendLikeNotification(b_u_idx, message);
+			
+			String message = "게시글 \""+btitle + "\"에 좋아요가 추가되었습니다.";
+			alarmservice.sendNotification(b_u_idx, message);
 			System.out.println("여기 확인해->"+message+"/게시판작성자="+b_u_idx);
 		}
 	}
@@ -223,5 +226,11 @@ public class BoardServiceImpl implements BoardService {
 		VoteDTO dto = new VoteDTO(vr_u_idx,vr_vo_idx);
 		boardMapper.votePick(dto);
 		boardMapper.voteCount(vr_vo_idx);
+	}
+	
+	// 메인 투표 베스트
+	@Override
+	public List<Map<String, Object>> voteMain() {
+		return boardMapper.voteMain();
 	}
 }

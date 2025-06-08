@@ -12,7 +12,8 @@ import lombok.Setter;
 public class AlarmDTO {
 	private int a_idx;
     private int a_b_idx;
-    private int a_u_idx;
+    private int a_receiver_idx;
+    private int a_sender_idx;
     private String a_type;
     private String a_url;
     private String a_date;

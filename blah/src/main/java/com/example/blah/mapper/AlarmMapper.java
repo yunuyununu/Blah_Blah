@@ -9,4 +9,6 @@ public interface AlarmMapper {
 	List<AlarmDTO> alarmList(int a_u_idx);
 	
 	void isRead(int a_u_idx);
+	
+	// void deleteAlarm(int a_idx);
 }

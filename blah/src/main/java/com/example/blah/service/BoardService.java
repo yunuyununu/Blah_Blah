@@ -9,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.blah.domain.BoardDTO;
 import com.example.blah.domain.VoteDTO;
 
+import jakarta.servlet.http.HttpSession;
+
 public interface BoardService {
 	// 게시물 목록
 	List<Map<String, Object>> getBoard(String searchKeyword,int page, int offset);
@@ -69,4 +71,7 @@ public interface BoardService {
 	
 	// 투표 선택
 	void votePick(int vr_u_idx, int vr_vo_idx);
+	
+	// 메인 투표 베스트
+	List<Map<String, Object>> voteMain();
 }
