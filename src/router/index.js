@@ -101,6 +101,11 @@ const routes = [
           component: () => import('@/views/BoardDetails')
         },
       ],
+  },
+  {
+      path: '/conditions',
+      name: 'conditions',
+      component: () => import('@/views/ConditionsOfUse')
   }
 
 ];

@@ -88,49 +88,49 @@
     </li>
   </ul>
         </div>
-<div class="topic-box">
-      <div class="header">
-        <h2>투표 베스트</h2>
+<div class="topic-box2">
+  <div class="header">
+    <h2>투표 베스트</h2>
+  </div>
+  
+  <div class="vote-cards-container">
+    <div 
+      v-for="vote in voteTopPosts" 
+      :key="vote.b_idx" 
+      class="vote-card"
+      @click="goToBoardDetail(vote.b_idx)"
+    >
+      <div class="category-tag">{{ vote.category }}</div>
+      <h3 class="vote-title">{{ vote.v_title }}</h3>
+      
+      <div class="participants-section">
+        <div class="participants-count">
+          <svg class="vote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M3 14.5A1.5 1.5 0 0 1 1.5 13V3A1.5 1.5 0 0 1 3 1.5h8a.5.5 0 0 1 0 1H3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V8a.5.5 0 0 1 1 0v5a1.5 1.5 0 0 1-1.5 1.5z"/>
+            <path d="m8.354 10.354 7-7a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0"/>
+          </svg>
+          <span>{{ vote.vote_participants }}</span>
+        </div>
+        <div class="participants-label"></div>
       </div>
-      <div class="vote-best-wrapper">
-        <div class="vote-card">
-          <h3 class="vote-title">"오늘 점심 추천"</h3>
-          <div class="user-info">
-            <div class="profile-image">
-              <img src="https://storage.googleapis.com/blah_blah_bucket/board/eee256ea-b2b4-4a4c-8fc9-e75c8c876a68_chunsik.png" alt="프로필 이미지" width="33" height="33">
-            </div>
-            <div class="user-details">
-              <span class="name">Name</span>
-              <p class="description">Description</p>
-            </div>
-          </div>
+
+      <div class="vote-stats">
+        <div class="stat-item">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+            <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.6 7.6 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+          </svg>
+          <span>{{ vote.like_count }}</span>
         </div>
-        <div class="vote-card">
-          <h3 class="vote-title">"여름 vs 겨울"</h3>
-          <div class="user-info">
-            <div class="profile-image">
-              <img src="https://storage.googleapis.com/blah_blah_bucket/board/eee256ea-b2b4-4a4c-8fc9-e75c8c876a68_chunsik.png" alt="프로필 이미지" width="33" height="33">
-            </div>
-            <div class="user-details">
-              <span class="name">Name</span>
-              <p class="description">Description</p>
-            </div>
-          </div>
-        </div>
-        <div class="vote-card">
-          <h3 class="vote-title">"여행지 추천"</h3>
-          <div class="user-info">
-            <div class="profile-image">
-              <img src="https://storage.googleapis.com/blah_blah_bucket/board/eee256ea-b2b4-4a4c-8fc9-e75c8c876a68_chunsik.png" alt="프로필 이미지" width="33" height="33">
-            </div>
-            <div class="user-details">
-              <span class="name">Name</span>
-              <p class="description">Description</p>
-            </div>
-          </div>
+        <div class="stat-item">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894m-.493 3.905a22 22 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a10 10 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105"/>
+          </svg>
+          <span>{{ vote.comment_count || 0 }}</span>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
 
       </div>
@@ -144,15 +144,11 @@
           <li
             v-for="(company, index) in topCompanies"
             :key="company.c_idx"
+            @click="goToCompanyDetail(company.c_idx)"
             class="rank-item"
           >
             <span class="rank-number">{{ index + 1 }}</span>
             <span class="rank-name">{{ company.c_name }}</span>
-            <!-- <span class="rank-change" :class="getRankChangeClass(company.rank_change)">
-              <span v-if="company.rank_change === 'up'">▲</span>
-              <span v-else-if="company.rank_change === 'down'">▼</span>
-              <span v-else>-</span>
-            </span> -->
           </li>
         </ol>
         <div class="rank-info"></div>
@@ -172,28 +168,34 @@ const router = useRouter()
 const weeklyPosts  = ref([]);
 const monthlyPosts  = ref([]);
 const topCompanies = ref([]);
+const voteTopPosts = ref([]);
 
 const fetchWeeklyPosts  = async () => {
   const res = await axios.get('http://localhost:80/board/weeklyBest');
   weeklyPosts.value = res.data;
-  console.log("주간목록=>",res)
 }
 
 const fetchMonthlyPosts  = async () => {
   const res = await axios.get('http://localhost:80/board/monthlyBest');
   monthlyPosts.value = res.data;
-  console.log("월간목록=>",res)
 }
 
 const fetchTopCompanies = async () => {
   const res = await axios.get('http://localhost:80/company/score');
   topCompanies.value = res.data;
+  console.log("탑회사=>",topCompanies.value)
 };
+
+const fetchVoteTopPosts = async () => {
+  const res = await axios.get('http://localhost:80/board/voteBest')
+  voteTopPosts.value = res.data
+}
 
 onMounted(async () => {
   await fetchWeeklyPosts();
   await fetchMonthlyPosts();
   await fetchTopCompanies();
+  await fetchVoteTopPosts();
 });
 
 const goToBoardDetail = async (url) => {
@@ -220,6 +222,13 @@ const goToBoardDetail = async (url) => {
     router.push({ path: b_url })
   }
 }
+
+const goToCompanyDetail = (c_idx) => {
+  router.push({
+    name: 'companydetails',
+    params: { c_idx: c_idx }
+  });
+};
 </script>
 
 <style scoped>
@@ -289,7 +298,24 @@ const goToBoardDetail = async (url) => {
 }
 
 /* 개별 박스 */
-.topic-box, .ranking-box {
+.topic-box {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+.topic-box2 {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.ranking-box {
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 16px;
@@ -298,9 +324,10 @@ const goToBoardDetail = async (url) => {
 }
 
 .header h2 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  color: #333;
 }
 
 .post-list {
@@ -366,24 +393,62 @@ const goToBoardDetail = async (url) => {
 
 .rank-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
-  font-size: 14px;
-  border-bottom: 1px solid #f3f3f3;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
-
+.rank-item:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+.rank-item:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+}
 .rank-number {
- font-weight: bold;
-  width: 20px;
+ display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 14px;
+  margin-right: 12px;
+  transition: all 0.3s ease;
 }
 
 .rank-name {
-  flex: 1;
-  margin-left: 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+   flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f2937;
+  transition: color 0.3s ease;
+}
+.rank-item:nth-child(1) .rank-number {
+  background: linear-gradient(135deg, #ffd700, #ffb700);
+  color: #1f2937;
+}
+
+.rank-item:nth-child(2) .rank-number {
+  background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+  color: #1f2937;
+}
+
+.rank-item:nth-child(3) .rank-number {
+  background: linear-gradient(135deg, #cd7f32, #b8860b);
+  color: white;
 }
 /* 변화 스타일 */
 .rank-change.up {
@@ -412,18 +477,51 @@ margin-top: 15px;
 }
 
 .vote-card {
-flex: 1;
-background-color: #f9f9f9;
-border: 1px solid #eee;
-border-radius: 5px;
-padding: 15px;
-text-align: center;
+    flex: 1;
+    min-width: 200px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    border: 1px solid #e8e9f3;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.vote-cards-container {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.vote-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border-color: #437adf;
+}
+
+.vote-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #5076dd, #4f73e7);
 }
 
 .vote-title {
-font-size: 16px;
-margin-top: 0;
-margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .user-info {
@@ -463,5 +561,77 @@ margin-top: 3px;
 overflow: hidden;
 text-overflow: ellipsis;
 white-space: nowrap;
+}
+.category-tag {
+    display: inline-block;
+    background: #6366f1;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+}
+
+.participants-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.participants-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #6366f1;
+    margin-bottom: 8px;
+}
+
+.participants-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.vote-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.stat-item svg {
+    width: 14px;
+    height: 14px;
+}
+
+.vote-icon {
+    width: 24px;
+    height: 24px;
+    fill: #6366f1;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .vote-cards-container {
+        flex-direction: column;
+    }
+    
+    .vote-card {
+        min-width: unset;
+    }
 }
 </style>
