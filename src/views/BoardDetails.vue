@@ -123,12 +123,12 @@
       </div>
     </div>
   </div>
-
-
+<br>
+<br>
     <button v-if="!isEditing" class="btn btn-outline-danger" @click="$router.back()"  style="text-align: left;">← 목록으로</button>
         <div v-if="userStore.userIdx === post.B_U_IDX" style="text-align:right">
           <template v-if="!isEditing">
-            <span class="action" @click="updateBoard">✏️ 수정</span>
+            <span class="action" @click="updateBoard">✏️ 수정</span>&nbsp;&nbsp;
             <span class="action" @click="deleteBoard">🗑️ 삭제</span>
           </template>
           <template v-else>
@@ -138,11 +138,32 @@
         </div>
     <hr />
 
-      <div class="comment-section">
+    <div class="comment-section">
         <h3>댓글 {{ commentList.length }}</h3>
-        <textarea v-model="newComment" placeholder="댓글을 남겨주세요."></textarea>
+        <textarea
+          v-model="newComment"
+          :disabled="!isLogin"
+          :placeholder="isLogin ? '댓글을 남겨주세요.' : '로그인 후 댓글을 작성하실 수 있습니다.'"
+          @input="validateNewComment"
+        ></textarea>
+        <!-- 글자 수 표시 영역 추가 -->
+        <div class="comment-char-count" style="text-align: right; font-size: 12px; margin-top: 5px;">
+          <span :style="{ color: newComment.length >= 300 ? '#d32f2f' : '#666' }">
+            {{ newComment.length }}/300자
+          </span>
+        </div>
+        <!-- 에러 메시지 -->
+        <div v-if="newCommentError" class="error-message" style="color: #d32f2f; font-size: 12px; margin-top: 5px;">
+          {{ newCommentError }}
+        </div>
         <div class="comment-action">
-          <button class="btn btn-outline-primary" @click="submitComment">등록</button>
+          <button
+            class="btn btn-outline-primary"
+            @click="submitComment"
+            :disabled="!isLogin"
+          >
+            등록
+          </button>
         </div>
          <div class="comment-list" v-if="threadedComments.length > 0">
           <CommentItem 
@@ -151,7 +172,7 @@
             :comment="comment"
             :reply-to-list="replyToList"
             :reply-content-map="replyContentMap"
-            :post-writer-id="postWriterId"
+            :post-writer-id="post.B_U_IDX"
             @toggle-reply="toggleReply"
             @submit-reply="submitReply"
             @update-reply-content="updateReplyContent"
@@ -160,7 +181,7 @@
           />
         </div>
 
-        <div v-else>
+        <div v-else style="text-align: center;">
           <p>작성된 댓글이 없습니다.</p>
         </div>
       </div>
@@ -177,6 +198,7 @@ import { useRouter } from 'vue-router'
 
 // const alarmStore = useAlarmStore()
 const userStore = useUserStore()
+const isLogin = computed(() => userStore.isLogin)
 const router = useRouter()
 
 import { onMounted, ref, computed } from 'vue';
@@ -188,6 +210,7 @@ const post = ref(null);
 const bidx = route.params.b_idx;
 const buidx = ref(null);
 const btitle = ref(null);
+
 
 // 게시글 이미지
 const boardImages = ref([]);
@@ -231,7 +254,6 @@ const handleDeleteComment = async (cm_idx) => {
     // 댓글 목록 갱신
     fetchPostComment(); // 댓글 목록 다시 불러오는 함수
   } catch (err) {
-    alert('댓글 삭제 중 오류가 발생했습니다.');
     console.error(err);
   }
 };
@@ -281,6 +303,8 @@ const editedContent = ref('');
 
 const titleError = ref('');
 const contentError = ref('');
+const newCommentError = ref('');
+
 const updateBoard = () => {
   isEditing.value = true;
   editedTitle.value = post.value.B_TITLE;
@@ -309,13 +333,11 @@ const saveUpdate = async () => {
         b_title: editedTitle.value,
         b_content: editedContent.value,
       });
-        alert('게시글이 수정되었습니다.');
         isEditing.value = false;
         await fetchPostDetail(); // 다시 로드
   
     } catch (err) {
       console.error('게시글 수정 실패:', err);
-      alert('오류 발생');
     }
   }else {
     const formData = new FormData()
@@ -329,14 +351,12 @@ const saveUpdate = async () => {
       formData.append('originalImages', img.I_IMAGE);
     });
 
-      const res = await axios.post('http://localhost:80/board/boardImageUpdate',formData, {
+      await axios.post('http://localhost:80/board/boardImageUpdate',formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           },
           withCredentials: true
       });
-      console.log("이미지 수정 게시물 통과여부?=>=>", res.data)
-      alert('게시글이 수정되었습니다.');
         isEditing.value = false;
         await fetchPostDetail(); // 다시 로드
   }
@@ -367,14 +387,12 @@ const deleteBoard = async () => {
   try {
     const confirmed = window.confirm('정말 이 게시물을 삭제하시겠습니까?');
     if (!confirmed) return;
-    const res = await axios.post(`http://localhost:80/board/boardDelete`, formData, {
+    await axios.post(`http://localhost:80/board/boardDelete`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           },
           withCredentials: true
       });
-    console.log("삭제데이터=>", formData)
-    console.log("삭제더미더미=>",res.data)
     router.push('/board/boardlist')
   } catch (err) {
     console.error('게시글 삭제 실패:', err);
@@ -418,15 +436,37 @@ const threadedComments = computed(() => {
   return roots;
 });
 
+// 새 댓글 검증
+function validateNewComment() {
+  const length = newComment.value.length;
+  if (length === 0) {
+    newCommentError.value = '';
+  } else if (length > 300) {
+    newCommentError.value = '댓글은 300자 이하로 입력해주세요.';
+  } else {
+    newCommentError.value = '';
+  }
+}
+
 const submitComment = async() => {
   if(userStore.isLogin === false){
     alert('로그인 후 이용가능합니다.')
     return
   }
-  if (!newComment.value.trim()) {
-    alert('댓글을 작성해주세요.')
+  
+  const trimmedComment = newComment.value.trim();
+  if (trimmedComment.length === 0) {
+    newCommentError.value = '댓글을 작성해주세요.';
     return;
   }
+  if (trimmedComment.length > 300) {
+    newCommentError.value = '댓글은 300자 이하로 입력해주세요.';
+    return;
+  }
+  
+  // 에러가 없으면 에러 메시지 초기화
+  newCommentError.value = '';
+  
   if(userStore.isLogin !== false){
     try {
       const response = await axios.post('http://localhost:80/reply/commentInsert', {
@@ -435,9 +475,8 @@ const submitComment = async() => {
       })
       if(response.data === "success"){
         newComment.value = '';
+        newCommentError.value = ''; // 성공 시 에러 메시지 초기화
         fetchPostComment();
-      } else {
-        alert('댓글 등록에 실패했습니다.')
       }
     } catch (err) {
       console.error('댓글 등록 실패:', err);
@@ -454,7 +493,6 @@ const updateCommentContent = async (cmIdx, newContent) => {
       cm_idx: cmIdx,
       cm_content: newContent
     });
-    alert("댓글 수정 성공")
     fetchPostComment();
     // 필요한 경우 comments를 다시 fetch하거나 수정된 항목만 업데이트
   } catch (err) {
@@ -489,8 +527,6 @@ const submitReply = async (parentIdx) => {
           replyToList.value.delete(parentIdx);
           fetchPostComment();
           replyToList.value = new Set(currentReplyToList);
-      } else {
-        alert('대댓글 등록에 실패했습니다.')
       }
     } catch (err) {
       console.error('대댓글 등록 실패:', err);
@@ -552,7 +588,6 @@ const toggleLike = async () => {
     h_u_idx: userStore.userIdx,
     b_idx: bidx
   };
-  console.log("펭로드=>>",payload)
   try {
     if (isLiked.value) {
       await axios.post('http://localhost:80/board/likeDelete', deleteload);
@@ -567,10 +602,25 @@ const toggleLike = async () => {
   }
 };
 
-const onImageChange = (e) => {
-  files.value = Array.from(e.target.files)
-  previewImages.value = files.value.map(file => URL.createObjectURL(file))
-}
+const onImageChange = (event) => {
+  const filesSelected = Array.from(event.target.files);
+
+  // 기존 이미지 개수 + 새로 업로드할 이미지 개수가 10을 초과하면 경고
+  if (files.value.length + filesSelected.length > 10) {
+    alert(`이미지는 최대 10개까지 업로드할 수 있습니다.`);
+    return;
+  }
+
+  // 파일 미리보기 추가
+  filesSelected.forEach(file => {
+    files.value.push(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImages.value.push(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+};
 
 // 투표
 const voteOptions = ref([]);
@@ -587,13 +637,6 @@ const fetchVoteOptions = async () => {
     });
 
     voteOptions.value = res.data;
-    console.log("투표항목=>",voteOptions.value)
-    // hasVoted.value = res.data.hasVoted;
-
-    // // 이미 투표한 경우, 각 옵션에 count 포함되어 있다고 가정
-    // if (hasVoted.value) {
-    //   selectedVoteOption.value = res.data.selectedOption;
-    // }
   } catch (err) {
     console.error('투표 옵션 불러오기 실패:', err);
   }
@@ -605,7 +648,6 @@ const submitVote = async () => {
     alert('투표 항목을 선택해주세요.');
     return;
   }
-  console.log("selectedVoteOption.value====>",selectedVoteOption.value)
   try {
     await axios.post(`http://localhost:80/board/votePick`, {}, {
       params: {
@@ -613,12 +655,10 @@ const submitVote = async () => {
       }
     });
 
-    alert('투표가 완료되었습니다.');
     hasVoted.value = true;
     await fetchVoteOptions(); // 투표 후 결과 다시 로드
   } catch (err) {
     console.error('투표 제출 실패:', err);
-    alert('투표 중 오류 발생');
   }
 };
 
@@ -634,7 +674,6 @@ const checkUserVoteStatus = async () => {
     });
 
     const votedOptionIdx = res.data;
-    console.log("투표한 항목번호===>",res.data)
     
     if (votedOptionIdx > 0) { // 투표한 경우 (0보다 큰 값)
       hasVoted.value = true;
@@ -644,7 +683,6 @@ const checkUserVoteStatus = async () => {
       selectedVoteOption.value = null;
     }
     
-    console.log("투표 상태 확인 결과:", { hasVoted: hasVoted.value, selectedOption: selectedVoteOption.value });
   } catch (err) {
     console.error('투표 상태 확인 실패:', err);
   }
@@ -662,15 +700,6 @@ const getVotePercentage = (count) => {
 };
 
 
-
-// const editedImages = ref([]);
-// const isImageChanged = ref(false);
-
-// // 이미지 선택 시
-// const handleImageChange = (event) => {
-//   editedImages.value = Array.from(event.target.files);
-//   isImageChanged.value = true;
-// };
 
 </script>
 
@@ -746,7 +775,7 @@ hr {
   min-height: 80px;
   padding: 12px;
   font-size: 14px;
-  resize: vertical;
+  resize: none;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
@@ -863,7 +892,7 @@ hr {
 }
 .heart-icon {
   cursor: pointer;
-  font-size: 15px;
+  font-size: 17px;
   transition: color 0.2s;
 }
 .heart-icon.liked {
@@ -1080,5 +1109,9 @@ hr {
 .progress-fade-enter-from,
 .progress-fade-leave-to {
   opacity: 0;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

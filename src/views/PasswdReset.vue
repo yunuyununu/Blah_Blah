@@ -91,7 +91,7 @@ const validate = () => {
     errors.value.newPassword = ''
   }
   if (newPassword.value !== confirmPassword.value) {
-    errors.value.confirmPassword = '비밀번호 불일치'
+    errors.value.confirmPassword = '비밀번호가 일치하지 않습니다.'
     if (isValid) pwCheckInput.value.focus()
     isValid = false
     return
@@ -120,7 +120,7 @@ const resetPassword = async () => {
     console.log("response==", response.data)
 
     if (response.data === "success") {
-      alert('비밀번호가 변경되었습니다. 다시 로그인해 주세요.')
+      alert('비밀번호가 변경되었습니다.')
       router.push('/login').then(() => {
         window.location.reload()
       })

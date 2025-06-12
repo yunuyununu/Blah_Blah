@@ -19,7 +19,7 @@
         </div>
         <div class="col-6" style="gap: 5px;">
           <input type="text"  v-model="userId" ref="userIdInput" placeholder="영문,숫자 공백없이 6~12자리"
-           :class="['custom-input', { 'input-error': errors.userId  }]"/>&nbsp;&nbsp;
+           :class="['custom-input', { 'input-error': errors.userId  }]" maxlength="12"/>&nbsp;&nbsp;
           <button type="button" class="btn btn-outline-dark" @click="checkUserId">아이디중복확인</button>
           <p v-if="errors.userId" class="error-text">{{ errors.userId }}</p>
           <div v-if="idCheckMessage" style="margin-top: 5px; color: green;">{{ idCheckMessage }}</div>
@@ -33,7 +33,7 @@
           </div>
           <div class="col-6">
             <input type="password" v-model="userPw" ref="userPwInput" placeholder="8~20자 문자,숫자,특수문자 조합"
-            :class="['custom-input', { 'input-error': errors.userPw  }]"/>
+            :class="['custom-input', { 'input-error': errors.userPw  }]" maxlength="20"/>
             <p v-if="errors.userPw" class="error-text">{{ errors.userPw }}</p>
           </div>
           <div class="col-2"></div>
@@ -46,7 +46,7 @@
           </div>
           <div class="col-6">
             <input type="password" v-model="pwCheck" ref="pwCheckInput"
-            :class="['custom-input', { 'input-error': errors.pwCheck  }]"/>
+            :class="['custom-input', { 'input-error': errors.pwCheck  }]" maxlength="20"/>
             <p v-if="errors.pwCheck" class="error-text">{{ errors.pwCheck }}</p>
           </div>
           <div class="col-2"></div>
@@ -60,7 +60,7 @@
           </div>
           <div class="col-6">
             <input type="text" v-model="nickname" ref="nicknameInput" placeholder="공백없이 5~20자"
-            :class="['custom-input', { 'input-error': errors.nickname  }]"/>
+            :class="['custom-input', { 'input-error': errors.nickname  }]" maxlength="20"/>
             <p v-if="errors.nickname" class="error-text">{{ errors.nickname }}</p>
           </div>
           <div class="col-2"></div>
@@ -89,9 +89,9 @@
           </div>
           <div class="col-6">
             <input type="email" v-model="email" ref="emailInput" placeholder="useremail@example.com"
-            :class="['custom-input', { 'input-error': errors.email  }]" :disabled="emailDisabled"/>
+            :class="['custom-input', { 'input-error': errors.email  }]" :disabled="emailDisabled" maxlength="50"/>
             &nbsp;&nbsp;
-            <button type="button" class="btn btn-outline-dark" @click="EmailCheck" v-if="emailCheck === false">이메일중복확인</button>
+            <button type="button" class="btn btn-outline-dark" @click="EmailCheck" v-if="emailCheck === false">인증번호전송</button>
             <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="emailAgainDisabled" v-if="timerVisible === false && emailCheck === true && emailAgain === true">재전송</button>&nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="sendAuthCode" :disabled="emailBtnDisabled" v-if="emailCheck === true">인증번호 전송</button>
             <p v-if="errors.email" class="error-text">{{ errors.email }}</p>
@@ -110,7 +110,7 @@
             <label>인증번호</label>
           </div>
           <div class="col-6">
-            <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리"
+            <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리" maxlength="6"
             :class="['custom-input', { 'input-error': errors.authcode  }]" :disabled="authcodeDisabled"/>&nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="authcodeVerify" :disabled="authcodeBtnDisabled">인증번호확인</button>&nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="emailReset">초기화</button>
@@ -137,8 +137,32 @@
             <label>회사인증파일</label>
           </div>
           <div class="col-6">
-            <input type="file" ref="userFileInput" @change="handleFileChange" accept=".jpg,.jpeg,.png,.pdf"/>
-            <p style="margin-top: 5px; color: red;">{{ errors.userFile }}</p>
+            <!-- <input type="file" ref="userFileInput" @change="handleFileChange" accept=".jpg,.jpeg,.png"/>
+            <p style="margin-top: 5px; color: red;">{{ errors.userFile }}</p> -->
+
+
+            <div class="file-upload-box">
+                <label class="file-label">
+                  <span class="upload-button">파일 첨부</span>
+                  <input type="file" ref="userFileInput" accept=".jpg,.jpeg,.png" @change="handleFileChange" hidden />
+                </label>
+                <div v-if="userFile" class="file-info">
+                  <span class="file-name">{{ userFile.name }}</span>
+                  <button type="button" class="remove-file" @click="removeFile">×</button>
+                </div>
+              </div>
+              <p v-if="errors.userFile" class="error-text">{{ errors.userFile }}</p>
+          </div>
+          <div class="col-2">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-2">
+          </div>
+          <div class="col-8 text-secondary small">
+            <p>* 회원 가입 후 회사 목록에서 본인이 신청한 회사가 있는지 확인바랍니다.</p>
+            <p>* 없으면 필수로 회사 신청을 해주세요.</p>
           </div>
           <div class="col-2">
           </div>
@@ -285,6 +309,72 @@ const formatPhoneNumber = () => {
   }
 }
 
+const EmailCheck = async () => {
+  authcode.value = ''
+  verifyMessage.value = ''
+  verifySuccess.value = null
+  errors.value = { email: '' }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  if (!email.value) {
+    errors.value.email = '이메일 주소를 입력하세요.'
+    emailInput.value.focus()
+    return
+  }
+
+  if (!emailPattern.test(email.value)) {
+    errors.value.email = '이메일 형식에 맞게 입력하세요.'
+    emailInput.value.focus()
+    return
+  }
+
+  try {
+    // 이메일 중복 확인
+    const res = await axios.post('http://localhost:80/join/emailCheck', { email: email.value })
+    if (res.data === 1) {
+      errors.value.email = '이미 등록된 이메일입니다.'
+      emailInput.value.focus()
+      authcode.value = ''
+      verifyMessage.value = ''
+      isEmailChecked.value = false
+      verifySuccess.value = false
+      emailDisabled.value = false
+      return
+    }
+
+    // 이메일 전송
+    loading.value = true
+    const response = await axios.post('http://localhost:80/join/emailsend', { email: email.value })
+
+    if (response.data === 'success') {
+      startTimer()
+      emailDisabled.value = true
+
+      if (emailAgain.value === true) {
+        emailAgainDisabled.value = true
+      } else {
+        emailBtnDisabled.value = true
+      }
+      loading.value = false
+      toast.success('이메일 전송이 완료되었습니다.')
+      emailCheck.value = true
+      verifyEmail.value = '이메일 중복 확인 후 인증번호 전송이 완료되었습니다.'
+      verifyOK.value = true
+      isEmailChecked.value = true
+    } else {
+      toast.error('이메일 전송에 실패했습니다.')
+    }
+  } catch (error) {
+    console.error('에러:', error)
+    alert('이메일 처리 중 오류가 발생했습니다. 다시 시도해주세요.')
+    loading.value = false
+  }
+}
+
+
+
+
 const sendAuthCode = async () => {
      authcode.value = ''
     verifyMessage.value = ''
@@ -383,6 +473,7 @@ const sendAuthCode = async () => {
         verifySuccess.value = true
         //인증번호 검증되면 타이머 숨기기
         timerVisible.value = false
+        clearInterval(timer.value)
         authcodeBtnDisabled.value = true
         isAuthcodeChecked.value = true
         authcodeDisabled.value = true
@@ -407,7 +498,7 @@ const submit = () => {
 
   const idPattern = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/
   const pwPattern = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,20}$/
-  const nicknamePattern = /^\S{5,20}$/ // 공백 없는 5~20자
+  const nicknamePattern = /^\S{3,20}$/ // 공백 없는 3~20자
   const phonePattern = /^010-\d{4}-\d{4}$/
   const authcodePattern = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{6}$/
 
@@ -457,7 +548,7 @@ const submit = () => {
 
   //닉네임 체크
   if (!nicknamePattern.test(nickname.value)) {
-    errors.value.nickname = '닉네임은 공백 없이 5~20자여야 합니다.'
+    errors.value.nickname = '닉네임은 공백 없이 3~20자여야 합니다.'
     if (isValid) nicknameInput.value.focus()
     isValid = false
     return
@@ -534,43 +625,20 @@ const submit = () => {
     axios.post('http://localhost:80/join/userJoin', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
-      }}).then(response => {
-        alert('회원가입이 완료되었습니다.')
-        console.log("회원가입 성공 =="+response.data)
-        router.push('/login')
-      }).catch(error => {
+      }
+    })
+    .then(response => {
+      if (response.data === 'fail') {
         alert('회원가입에 실패했습니다. 관리자에게 문의하세요.')
-        console.error(error)
-      })
-
-}
-
-const EmailCheck = () => {
-
-  axios.post('http://localhost:80/join/emailCheck', { email: email.value })
-    .then(res => {
-      if (res.data === 1) {
-        errors.value.email = '이미 등록된 이메일입니다.'
-        emailInput.value.focus()
-        errors.value.authcode = ''
-        authcode.value = ''
-        verifyMessage.value = ''
-        isEmailChecked.value = false
-        verifySuccess.value = false
-        // authcodeBtnDisabled.value = false
-        emailDisabled.value = false
-        // authcodeDisabled.value = false
+        console.error('회원가입 실패:', response.data)
         return
       }
-      emailCheck.value = true
-      errors.value.email = ''
-      verifyEmail.value = '이메일 중복 확인이 완료됐습니다. 전송버튼을 눌러주세요.'
-      verifyOK.value = true
-      isEmailChecked.value = true
-    }).catch(error => {
-    alert('이메일 중복 확인 중 오류가 발생했습니다.');
-    console.error(error);
-  });
+      router.push('/login')
+    })
+    .catch(error => {
+      alert('회원가입에 실패했습니다. 관리자에게 문의하세요.')
+      console.error(error)
+    })
 
 }
 
@@ -586,6 +654,7 @@ const emailReset = () => {
  countdown.value = ''
  timer.value = null
  timerVisible.value = false
+ clearInterval(timer.value)
  isEmailChecked.value = false
  isAuthcodeChecked.value = false
  loading.value = false
@@ -596,6 +665,11 @@ const emailReset = () => {
  authcodeDisabled.value = false
  emailCheck.value = false
  emailAgain.value = false
+}
+
+const removeFile = () => {
+  userFile.value = ''
+  userFileInput.value = ''
 }
   
 watch(userId, () => {
@@ -748,4 +822,45 @@ input[disabled] {
   color: #6c757d;
   cursor: not-allowed;
 }
+.file-upload-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upload-button {
+  display: inline-block;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #333;
+}
+
+.file-name {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove-file {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
   </style>

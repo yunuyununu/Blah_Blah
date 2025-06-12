@@ -7,23 +7,32 @@
             <!-- 회사명 -->
             <div class="form-group">
               <label>회사명 (한글/영문)</label>
-              <input type="text" v-model="companyName" ref="companyNameInput" placeholder="20자 이내로 작성하세요."
-              :class="['custom-input', { 'input-error': errors.companyName  }]" />
+              <input type="text" v-model="companyName" ref="companyNameInput" placeholder="30자 이내로 작성하세요."
+              :class="['custom-input', { 'input-error': errors.companyName  }]" maxlength="30"/>
               <p v-if="errors.companyName" class="error-text">{{ errors.companyName }}</p>
             </div>
 
             <!-- 대표 사진 -->
             <div class="form-group">
               <label>회사 대표 사진</label>
-              <input type="file" ref="companyFileInput" accept=".jpg,.jpeg,.png,.pdf" @change="handleFileChange" />
-              <p style="margin-top: 5px; color: red;">{{ errors.companyFile }}</p>
+              <div class="file-upload-box">
+                <label class="file-label">
+                  <span class="upload-button">파일 첨부</span>
+                  <input type="file" ref="companyFileInput" accept=".jpg,.jpeg,.png" @change="handleFileChange" hidden />
+                </label>
+                <div v-if="companyFile" class="file-info">
+                  <span class="file-name">{{ companyFile.name }}</span>
+                  <button type="button" class="remove-file" @click="removeFile">×</button>
+                </div>
+              </div>
+              <p v-if="errors.companyFile" class="error-text">{{ errors.companyFile }}</p>
             </div>
 
             <!-- 회사소개 -->
             <div class="form-group">
               <label>회사 소개</label>
-              <input type="text" v-model="companyIntro" ref="companyIntroInput" placeholder="100자 이내로 작성하세요."
-              :class="['custom-input', { 'input-error': errors.companyIntro  }]" />
+              <input type="text" v-model="companyIntro" ref="companyIntroInput" placeholder="200자 이내로 작성하세요."
+              :class="['custom-input', { 'input-error': errors.companyIntro  }]" maxlength="200"/>
               <p v-if="errors.companyIntro" class="error-text">{{ errors.companyIntro }}</p>
             </div>
 
@@ -112,14 +121,18 @@ const submit = () => {
     if (isValid) companyIntroInput.value.focus()
     return
   }
+
+  const date = companyEst.value.replace(/-/g, '');
+
   if (!companyEst.value) {
     errors.value.companyEst = '설립일자를 입력하세요.'
     if (isValid) companyEstInput.value.focus()
     return
-  } else if (companyEst.value.length !== 8 || isNaN(companyEst.value)) {
+  } else if (!/^\d{8}$/.test(date)) {
     alert('설립일자는 숫자 8자리로 입력해주세요.');
     return;
   }
+
   if (!companyBusiness.value) {
     errors.value.companyBusiness = '사업자등록번호를 입력하세요.'
     if (isValid) companyBusinessInput.value.focus()
@@ -139,7 +152,6 @@ const submit = () => {
       headers: {
         'Content-Type': 'multipart/form-data'
       }}).then(response => {
-        alert('회사신청이 완료되었습니다.')
         console.log("회사신청 성공 ==",response.data)
         router.push('/')
       }).catch(error => {
@@ -185,6 +197,12 @@ const formatBusinessNumber = () => {
     companyBusiness.value = `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
   }
 }
+
+const removeFile = () => {
+  companyFile.value = ''
+  companyFileInput.value = ''
+}
+
 
 watch(companyName, () => {
     errors.value.companyName = ''
@@ -255,5 +273,46 @@ input[type="file"] {
 .no-result-text {
   color: gray;
 }
+.file-upload-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upload-button {
+  display: inline-block;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #333;
+}
+
+.file-name {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove-file {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 </style>
 

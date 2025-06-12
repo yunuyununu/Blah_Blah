@@ -20,8 +20,14 @@
 
           <!-- 리뷰 목록 -->
           <div class="ratings">
-            <div v-if="review.length === 0" style="margin-top: 1rem; color: #888;">
-              회사 검증이 완료되면 리뷰를 작성해주세요.
+            <div v-if="review.length === 0" style="margin-top: 1rem; color: #888;text-align: center;">
+              <br>
+              <br>
+              <br><br><br>
+              작성된 리뷰가 없습니다. 리뷰를 작성해주세요.
+              <br><br>
+              <br>
+              <br>
             </div>
             <div v-else>
               <div
@@ -50,10 +56,10 @@
                   <!-- 오른쪽: 리뷰 내용 -->
                   <div class="review-main">
                     <div class="review-title-row">
-                      <h3 class="review-title">“{{ item.r_title }}”</h3>
+                      <h3 class="review-title">"{{ item.r_title }}"</h3>
                     </div>
                     <div class="review-meta">
-                      {{ getRworkLabel(item.r_work) }} ｜ {{ item.u_nicname }}
+                      {{item.r_work}} ｜ {{ item.u_nicname }}
                       ｜ {{ item.c_nicname }} ｜ {{ item.r_date }}
                     </div>
                     <div class="review-section">
@@ -110,32 +116,34 @@
             ★
           </span>
         </div>
+        <p v-if="errors.form.r_star" class="error-text">{{ errors.form.r_star }}</p>
 
         <div class="row-inline">
           <label class="inline-label">소속</label>
           <div class="radio-group">
             <label class="radio-item">
-              <input type="radio" value="CURRENT" v-model="form.r_work" />
+              <input type="radio" value="현직원" v-model="form.r_work" />
               현직원
             </label>
             <label class="radio-item">
-              <input type="radio" value="FORMER" v-model="form.r_work" />
+              <input type="radio" value="전직원" v-model="form.r_work" />
               전직원
             </label>
           </div>
         </div>
+        <p v-if="errors.form.r_work" class="error-text">{{ errors.form.r_work }}</p>
 
         <label>제목</label>
         <input type="text" v-model="form.r_title" maxlength="50" ref="titleInsertInput"
         :class="['custom-input', { 'input-error': errors.form.r_title  }]"/>
+        <p class="text-muted text-end">{{ form.r_title.length }}/50자</p>
         <p v-if="errors.form.r_title" class="error-text">{{ errors.form.r_title }}</p>
 
         <label>내용</label>
-        <textarea rows="5" v-model="form.r_content" ref="contentInsertInput"
+        <textarea rows="5" v-model="form.r_content" maxlength="1000" ref="contentInsertInput"
         :class="['custom-input', { 'input-error': errors.form.r_content  }]"></textarea>
-        <p class="text-muted text-end">{{ form.r_content.length }}자</p>
+        <p class="text-muted text-end">{{ form.r_content.length }}/1000자</p>
         <p v-if="errors.form.r_content" class="error-text">{{ errors.form.r_content }}</p>
-
 
       </div>
       <div class="modal-footer">
@@ -170,6 +178,7 @@
             ★
           </span>
         </div>
+        <p v-if="errors.currentReview.r_star" class="error-text">{{ errors.currentReview.r_star }}</p>
 
         <div class="row-inline">
           <label class="inline-label">소속</label>
@@ -177,7 +186,7 @@
             <label class="radio-item">
               <input
                 type="radio"
-                value="CURRENT"
+                value="현직원"
                 v-model="currentReview.r_work"
               />
               현직원
@@ -185,23 +194,25 @@
             <label class="radio-item">
               <input
                 type="radio"
-                value="FORMER"
+                value="전직원"
                 v-model="currentReview.r_work"
               />
               전직원
             </label>
           </div>
         </div>
+        <p v-if="errors.currentReview.r_work" class="error-text">{{ errors.currentReview.r_work }}</p>
 
         <label>제목</label>
         <input type="text" v-model="currentReview.r_title" maxlength="50" ref="titleInput"
         :class="['custom-input', { 'input-error': errors.currentReview.r_title  }]"/>
+        <p class="text-muted text-end">{{ currentReview.r_title.length }}/50자</p>
         <p v-if="errors.currentReview.r_title" class="error-text">{{ errors.currentReview.r_title }}</p>
 
         <label>내용</label>
-        <textarea rows="5" v-model="currentReview.r_content" ref="contentInput"
+        <textarea rows="5" v-model="currentReview.r_content" maxlength="1000" ref="contentInput"
         :class="['custom-input', { 'input-error': errors.currentReview.r_content  }]"></textarea>
-        <p class="text-muted text-end">{{ currentReview.r_content.length }}자</p>
+        <p class="text-muted text-end">{{ currentReview.r_content.length }}/1000자</p>
         <p v-if="errors.currentReview.r_content" class="error-text">{{ errors.currentReview.r_content }}</p>
       </div>
 
@@ -215,7 +226,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import axios from 'axios';
 
 const review = ref([]);
@@ -226,24 +237,18 @@ const contentInput = ref(null)
 
 const errors = ref({
   form: {
+    r_star: '',
+    r_work: '',
     r_title: '',
     r_content: ''
   },
   currentReview: {
+    r_star: '',
+    r_work: '',
     r_title: '',
     r_content: ''
   }
 });
-const getRworkLabel = (code) => {
-  switch (code) {
-    case 'CURRENT':
-      return '현직원';
-    case 'FORMER':
-      return '전직원';
-    default:
-      return '기타';
-  }
-};
 
 const getImageUrl = (filename) => {
   if (filename) {
@@ -294,51 +299,126 @@ const showReviewUpdateModal = ref(false);
 // 현재 편집 중인 리뷰 객체
 const currentReview = ref(null);
 
-// “리뷰 작성하기” 버튼 클릭
+const newErrors = {
+  r_star: '',
+  r_work: '',
+  r_title: '',
+  r_content: ''
+};
+// 유효성 검사 함수
+const validateForm = (formData) => {
+  
+  let isValid = true;
+
+  // 별점 검사
+  if (!formData.r_star || formData.r_star === 0) {
+    newErrors.r_star = '별점을 선택해주세요.';
+    isValid = false;
+  }
+
+  // 소속 검사
+  if (!formData.r_work) {
+    newErrors.r_work = '소속을 선택해주세요.';
+    isValid = false;
+  }
+
+  // 제목 검사
+  if (!formData.r_title || formData.r_title.trim() === '') {
+    newErrors.r_title = '제목을 입력해주세요.';
+    isValid = false;
+  } else if (formData.r_title.length > 50) {
+    newErrors.r_title = '제목은 50자 이하로 입력해주세요.';
+    isValid = false;
+  }
+
+  // 내용 검사
+  if (!formData.r_content || formData.r_content.trim() === '') {
+    newErrors.r_content = '내용을 입력해주세요.';
+    isValid = false;
+  } else if (formData.r_content.length > 1000) {
+    newErrors.r_content = '내용은 1000자 이하로 입력해주세요.';
+    isValid = false;
+  }
+
+  return { isValid, errors: newErrors };
+};
+
+// "리뷰 작성하기" 버튼 클릭
 const submitReview = async () => {
+  // 유효성 검사
+  const validation = validateForm(form.value);
+  errors.value.form = validation.errors;
+
+  if (!validation.isValid) {
+    return;
+  }
+
   try {
     await axios.post('http://localhost:80/mypage/reviewInsert', form.value);
-    alert('리뷰가 등록되었습니다.');
     showModal.value = false;
+    // 폼 초기화
+    form.value = {
+      r_c_idx: reviewCheck.value.C_IDX,
+      r_star: 0,
+      r_work: '',
+      r_title: '',
+      r_content: ''
+    };
+    // 에러 초기화
+    errors.value.form = {
+      r_star: '',
+      r_work: '',
+      r_title: '',
+      r_content: ''
+    };
     await fetchReviewList();
     await fetchReviewCheck();
   } catch (err) {
     console.error('리뷰 등록 실패:', err);
-    alert('리뷰 등록 중 오류가 발생했습니다.');
   }
 };
 
-// “수정” 버튼 클릭 → 모달 열기
+// 수정 버튼 클릭 → 모달 열기
 const openUpdateModal = (item) => {
-  // 얕은 복사: 원본을 바로 변경해도 무방하면 이대로 쓰셔도 됩니다.
-  // 깊이 복사하고 싶으면 Object.assign({}, item) 또는 JSON.parse(JSON.stringify(item)) 사용하세요.
   currentReview.value = { ...item };
-  console.log("수정모달 열때=>",currentReview.value)
   showReviewUpdateModal.value = true;
 };
 
-// “리뷰 수정” 모달 닫기
+// 리뷰 수정 모달 닫기
 const closeUpdateModal = () => {
   showReviewUpdateModal.value = false;
   currentReview.value = null;
 };
 
-// “수정 완료” 버튼 클릭 → 서버에 전송
+// 수정 완료 버튼 클릭 → 서버에 전송
 const submitUpdate = async () => {
   if (!currentReview.value) return;
+
+  // 유효성 검사
+  const validation = validateForm(currentReview.value);
+  errors.value.currentReview = validation.errors;
+
+  if (!validation.isValid) {
+    return;
+  }
 
   try {
     await axios.post(
       'http://localhost:80/mypage/reviewUpdate',
       currentReview.value
     );
-    alert('리뷰가 수정되었습니다.');
     showReviewUpdateModal.value = false;
     currentReview.value = null;
+    // 에러 초기화
+    errors.value.currentReview = {
+      r_star: '',
+      r_work: '',
+      r_title: '',
+      r_content: ''
+    };
     await fetchReviewList();
   } catch (err) {
     console.error('리뷰 수정 실패:', err);
-    alert('리뷰 수정 중 오류가 발생했습니다.');
   }
 };
 
@@ -346,7 +426,6 @@ const deleteReview = async (item) => {
   const confirmed = window.confirm('정말 이 리뷰를 삭제하시겠습니까?');
     if (!confirmed) return;
     currentReview.value = item;
-    console.log("여기확인해=>",currentReview.value)
 
   try {
     await axios.post('http://localhost:80/mypage/reviewDelete',
@@ -357,12 +436,10 @@ const deleteReview = async (item) => {
       }
     }
   );
-    alert('리뷰가 삭제되었습니다.');
     currentReview.value = null;
     await fetchReviewList();
   } catch (err) {
     console.error('리뷰 삭제 실패:', err);
-    alert('리뷰 수정 중 오류가 발생했습니다.');
   }
 };
 const canEdit = (rDateStr) => {
@@ -374,6 +451,54 @@ const canEdit = (rDateStr) => {
   return diffDays <= 30;
 };
 
+// 리뷰 작성 모달에서
+watch(() => form.value.r_title, (newValue) => {
+  if (newValue.trim().length > 0) {
+    errors.value.form.r_title = '';
+  }
+});
+
+watch(() => form.value.r_content, (newValue) => {
+  if (newValue.trim().length > 0) {
+    errors.value.form.r_content = '';
+  }
+});
+
+watch(() => form.value.r_star, (newValue) => {
+  if (newValue > 0) {
+    errors.value.form.r_star = '';
+  }
+});
+
+watch(() => form.value.r_work, (newValue) => {
+  if (newValue) {
+    errors.value.form.r_work = '';
+  }
+});
+
+watch(() => currentReview.value?.r_title, (newValue) => {
+  if (newValue?.trim().length > 0) {
+    errors.value.currentReview.r_title = '';
+  }
+});
+
+watch(() => currentReview.value?.r_content, (newValue) => {
+  if (newValue?.trim().length > 0) {
+    errors.value.currentReview.r_content = '';
+  }
+});
+
+watch(() => currentReview.value?.r_star, (newValue) => {
+  if (newValue > 0) {
+    errors.value.currentReview.r_star = '';
+  }
+});
+// 리뷰 수정 모달에서
+watch(() => currentReview.value?.r_work, (newValue) => {
+  if (newValue) {
+    errors.value.currentReview.r_work = '';
+  }
+});
 </script>
 
 <style scoped>

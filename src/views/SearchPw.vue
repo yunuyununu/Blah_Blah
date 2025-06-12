@@ -10,6 +10,19 @@
           <br><br>
         </div>
       </div>
+      <div class="row">
+        <div class="col-2"></div>
+        <div class="col-2">
+          <label>아이디</label>
+          <br>
+        </div>
+        <div class="col-6" style="gap: 5px;">
+          <input type="text"  v-model="userId" ref="userIdInput" placeholder="영문,숫자 공백없이 6~12자리를 입력하세요." :disabled="changeId"
+           :class="['custom-input', { 'input-error': errors.userId  }]"/>
+          <p v-if="errors.userId" class="error-text">{{ errors.userId }}</p>
+          <div v-if="idCheckMessage" style="margin-top: 5px; color: green;">{{ idCheckMessage }}</div>
+        </div>
+        <div class="col-2"></div></div>
 
       <div class="row">
           <div class="col-2"></div>
@@ -36,7 +49,7 @@
             <input type="text" v-model="authcode" ref="authcodeInput" placeholder="인증코드 6자리" :disabled="authcodeDisabled"
             :class="['custom-input', { 'input-error': errors.authcode  }]"/>&nbsp;&nbsp;
             <button type="button" class="btn btn-outline-dark" @click="authcodeVerify">인증번호확인</button>&nbsp;&nbsp;
-            <button type="button" class="btn btn-outline-dark" @click="emailReset">초기화</button>
+            <button type="button" class="btn btn-outline-dark" @click="emailReset" v-if="!changeId">초기화</button>
             <p v-if="errors.authcode" class="error-text">{{ errors.authcode }}</p>
             <!-- 타이머 -->
             <div v-if="timerVisible" style="margin-top: 3px;">
@@ -52,20 +65,7 @@
           <div class="col-2">
           </div>
         </div>
-        <div class="row">
-        <div class="col-2"></div>
-        <div class="col-2">
-          <label>아이디</label>
-          <br>
-        </div>
-        <div class="col-6" style="gap: 5px;">
-          <input type="text"  v-model="userId" ref="userIdInput" placeholder="영문,숫자 공백없이 6~12자리를 입력하세요." :disabled="changeId"
-           :class="['custom-input', { 'input-error': errors.userId  }]"/>
-          <p v-if="errors.userId" class="error-text">{{ errors.userId }}</p>
-          <div v-if="idCheckMessage" style="margin-top: 5px; color: green;">{{ idCheckMessage }}</div>
-        </div>
-        <div class="col-2"></div></div>
-        <div class="row">
+        <!-- <div class="row">
           <div class="col-2"></div>
           <div class="col-2">
             <label>전화번호</label>
@@ -80,12 +80,12 @@
             <p v-if="errors.userTel" class="error-text">{{ errors.userTel }}</p>
           </div>
           <div class="col-2"></div>
-        </div>
+        </div> -->
 
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
-            <button v-if="isCodeVerified" class="btn btn-danger" @click="resetPassword">비밀번호 재설정</button>
+            <button :disabled="!isCodeVerified" class="btn btn-danger" @click="resetPassword">비밀번호 재설정</button>
             <br>
             <br>
         </div>
@@ -109,12 +109,12 @@ const toast = useToast()
 const email = ref('')
 const authcode = ref('')
 const userId = ref('')
-const userTel = ref('')
+//const userTel = ref('')
 
 const emailInput = ref(null)
 const authcodeInput = ref(null)
 const userIdInput = ref(null)
-const userTelInput = ref(null)
+//const userTelInput = ref(null)
 
 const emailDisabled = ref(false)
 const authcodeDisabled = ref(false)
@@ -131,12 +131,12 @@ const timerVisible = ref(false)
 
 const route = useRoute();
 const changeId = route.query.userId;
-const changeTel = route.query.userTel;
+//const changeTel = route.query.userTel;
 const changeEmail = route.query.userEmail;
 
-if(changeId  && changeTel && changeEmail) {
+if(changeId && changeEmail) {
   userId.value = changeId;
-  userTel.value = changeTel;
+  //userTel.value = changeTel;
   email.value = changeEmail;
 }
 
@@ -145,11 +145,10 @@ const loading = ref(false)
 const errors = ref({
   email: '',
   authcode: '',
-  userId: '',
-  userTel: ''
+  userId: ''
 })
 
-const idCheckMessage = ref('')
+//const idCheckMessage = ref('')
 const isCodeVerified = ref(false)
 
 const sendAuthCode = async () => {
@@ -225,22 +224,22 @@ const formatTime = () => {
     return `${minutes}:${seconds}`
   }
 
-const formatPhoneNumber = () => {
-  let digits = userTel.value.replace(/\D/g, '') // 숫자만 추출
+// const formatPhoneNumber = () => {
+//   let digits = userTel.value.replace(/\D/g, '') // 숫자만 추출
 
-  // 최대 11자리까지만 허용
-  if (digits.length > 11) {
-    digits = digits.slice(0, 11)
-  }
+//   // 최대 11자리까지만 허용
+//   if (digits.length > 11) {
+//     digits = digits.slice(0, 11)
+//   }
 
-  if (digits.length < 4) {
-    userTel.value = digits
-  } else if (digits.length < 8) {
-    userTel.value = `${digits.slice(0, 3)}-${digits.slice(3)}`
-  } else {
-    userTel.value = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
-  }
-}
+//   if (digits.length < 4) {
+//     userTel.value = digits
+//   } else if (digits.length < 8) {
+//     userTel.value = `${digits.slice(0, 3)}-${digits.slice(3)}`
+//   } else {
+//     userTel.value = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+//   }
+// }
 
 const authcodeVerify = async () => {
   errors.value.authcode = ''
@@ -259,6 +258,7 @@ const authcodeVerify = async () => {
     if (response.data === 'success') {
       verifyMessage.value = '이메일 인증에 성공했습니다.'
       timerVisible.value = false
+      clearInterval(timer.value)
       verifySuccess.value = true
       isCodeVerified.value = true
       authcodeDisabled.value = true
@@ -281,26 +281,21 @@ const resetPassword = async () => {
     userIdInput.value.focus()
     return
   }
-  if (!userTel.value) {
-    errors.value.userTel = '전화번호를 입력하세요.'
-    userTelInput.value.focus()
-    return
-  }
+  // if (!userTel.value) {
+  //   errors.value.userTel = '전화번호를 입력하세요.'
+  //   userTelInput.value.focus()
+  //   return
+  // }
 
   try {
     const response = await axios.post('http://localhost:80/login/searchPw', {
       email: email.value,
-      userId: userId.value,
-      userTel: userTel.value
+      userId: userId.value
     })
     
-    console.log("찾기에서 비밀번호재설정 넘어갈때=>",response.data)
     if (response.data) {
-      if(confirm('회원 인증이 완료됐습니다.')){
-        router.push({ path: '/passwdreset', query: { u_idx: response.data.u_idx, u_id: response.data.u_id } })
-      } else {
-        return
-      }
+      router.push({ path: '/passwdreset', query: { u_idx: response.data.u_idx, u_id: response.data.u_id } })
+
     } else {
       alert('일치하는 회원 정보가 없습니다.')
     }
@@ -321,6 +316,7 @@ const emailReset = () => {
  timer.value = null
  timerVisible.value = false
  loading.value = false
+ clearInterval(timer.value)
 
  emailDisabled.value = false
  authcodeDisabled.value = false
@@ -336,7 +332,6 @@ watch(authcode, () => {
   verifyMessage.value = ''
 })
 watch(userId, () => (errors.value.userId = ''))
-watch(userTel, () => (errors.value.userTel = ''))
 watch(countdown, (newVal) => {
   if (newVal === 0) {
     clearInterval(timer.value)

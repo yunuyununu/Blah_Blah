@@ -8,14 +8,14 @@
       <span class="nickname">
         <span class="nickname-blue">{{ comment.c_nicname }}</span> · 
         <span class="nickname-gray">{{ comment.u_nicname }}
-          <span v-if="comment.u_idx === postWriterId" class="author-tag">(작성자)</span>
+          <span v-if="comment.cm_u_idx === postWriterId" class="author-tag">(작성자)</span>
         </span>
       </span>
       <span class="comment-date">{{ comment.cm_date }}</span>
     </div>
 
      <!-- 수정 중일 때 textarea 표시 -->
-    <div class="comment-body" v-if="isEditing">
+    <div class="comment-body comment-edit-form" v-if="isEditing">
       <textarea
         v-model="editedContent"
         class="edit-textarea"
@@ -46,7 +46,7 @@
 
         <!-- 수정/삭제 버튼: 댓글/대댓글 모두 표시 -->
         <div v-if="userStore.userIdx === comment.cm_u_idx" class="comment-actions">
-          <span class="action" @click="startEdit" v-if="!isEditing && !comment.cm_parent_idx">✏️ 수정</span>
+          <span class="action" @click="startEdit" v-if="!isEditing">✏️ 수정</span>
           <span class="action" @click="$emit('delete-comment', comment.cm_idx)">🗑️ 삭제</span>
         </div>
 
@@ -55,12 +55,18 @@
       <div class="reply-form">
         <textarea 
           :value="replyContentMap[comment.cm_idx] || ''"
-          @input="$emit('update-reply-content', comment.cm_idx, $event.target.value)"
+          @input="handleReplyInput"
           placeholder="답글을 입력하세요."
         ></textarea>
-        <button class="btn btn-sm btn-primary" @click="$emit('submit-reply', comment.cm_idx)">
-          등록
-        </button>
+        <!-- 답글 글자 수 표시 -->
+        <div class="reply-char-count">{{ (replyContentMap[comment.cm_idx] || '').length }}자</div>
+        <!-- 답글 에러 메시지 -->
+        <div v-if="replyErrorMessage" class="error-message">{{ replyErrorMessage }}</div>
+        <div class="reply-actions">
+          <button class="btn btn-sm btn-primary" @click="$emit('submit-reply', comment.cm_idx)">
+            등록
+          </button>
+        </div>
       </div>
       <br>
 
@@ -72,10 +78,12 @@
           :comment="child"
           :reply-to-list="replyToList"
           :reply-content-map="replyContentMap"
+          :post-writer-id="postWriterId"
           @toggle-reply="$emit('toggle-reply', $event)"
           @submit-reply="$emit('submit-reply', $event)"
-          @update-reply-content="$emit('update-reply-content', ...arguments)"
+          @update-reply-content="$emit('update-reply-content', $event, arguments[1])"
           @delete-comment="$emit('delete-comment', $event)"
+          @save-edit="(cmIdx, content) => $emit('save-edit', cmIdx, content)"
         />
       </div>
     </div>
@@ -83,7 +91,7 @@
 </template>
 
 <script setup>
-import { defineProps, ref,getCurrentInstance } from 'vue';
+import { defineProps, defineEmits, ref } from 'vue';
 import { useUserStore } from '@/store/userStore'
 
 const userStore = useUserStore()
@@ -95,16 +103,41 @@ const props = defineProps({
   replyContentMap: Object
 });
 
+// defineEmits로 이벤트 정의
+const emit = defineEmits([
+  'toggle-reply',
+  'submit-reply', 
+  'update-reply-content',
+  'delete-comment',
+  'save-edit'
+]);
+
 // 수정 상태 변수
 const isEditing = ref(false);
 // 수정 내용 임시 저장
 const editedContent = ref('');
 
 const errorMessage = ref('')
+const replyErrorMessage = ref('')
 
-// emit 객체를 setup context에서 가져오기
-const internalInstance = getCurrentInstance();
-const emit = internalInstance?.emit; // 타입 보호
+// 답글 입력 처리
+function handleReplyInput(event) {
+  const content = event.target.value;
+  emit('update-reply-content', props.comment.cm_idx, content);
+  validateReply(content);
+}
+
+// 답글 유효성 검사
+function validateReply(content) {
+  const length = content.trim().length;
+  if (length === 0) {
+    replyErrorMessage.value = '';
+  } else if (length > 300) {
+    replyErrorMessage.value = '답글은 300자 이하로 입력해주세요.';
+  } else {
+    replyErrorMessage.value = '';
+  }
+}
 
 // 수정 시작
 function startEdit() {
@@ -114,12 +147,23 @@ function startEdit() {
 
 // 수정 저장
 function saveEdit() {
-  if (!editedContent.value.trim()) {
+  const length = editedContent.value.length;
+
+  if (length === 0) {
     errorMessage.value = '내용을 입력해주세요.';
     return;
   }
 
-  emit('save-edit', props.comment.cm_idx, editedContent.value);
+  if (length > 300) {
+    errorMessage.value = '댓글은 300자 이하로 입력해주세요.';
+    return;
+  }
+
+  // 순환 참조를 피하기 위해 필요한 값만 전달
+  const cmIdx = props.comment.cm_idx;
+  const content = editedContent.value.trim();
+  
+  emit('save-edit', cmIdx, content);
   isEditing.value = false;
   errorMessage.value = '';
 }
@@ -131,7 +175,12 @@ function cancelEdit() {
 }
 
 function validateEdit() {
-  if (editedContent.value.trim()) {
+  const length = editedContent.value.trim().length;
+  if (length === 0) {
+    errorMessage.value = '내용을 입력해주세요.';
+  } else if (length > 300) {
+    errorMessage.value = '댓글은 300자 이하로 입력해주세요.';
+  } else {
     errorMessage.value = '';
   }
 }
@@ -164,35 +213,89 @@ function validateEdit() {
   color: #222;
   margin-left: 4px;
   white-space: pre-line;
+  word-break: break-word; 
+  overflow-wrap: break-word; 
 }
 .comment-footer {
   font-size: 13px;
   color: #888;
   display: flex;
-  justify-content: space-between; /* 버튼을 오른쪽 끝으로 밀기 위함 */
+  justify-content: space-between;
   margin-top: 4px;
   align-items: center;
+}
+.comment-edit-form {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding: 10px;
+  background-color: #fff;
+}
+
+.edit-textarea {
+  width: 100%;
+  height: 60px;
+  padding: 8px;
+  resize: none;
+  /* border: 1px solid #ddd;
+  border-radius: 4px; */
+  margin-bottom: 8px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end; /* 버튼들을 오른쪽 정렬 */
+}
+
+.char-count {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+  margin-bottom: 4px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-bottom: 4px;
 }
 .comment-actions {
   display: flex;
   gap: 12px;
+  justify-content: flex-end;
+  margin-top: 4px;
 }
 .reply-form {
   margin-top: 8px;
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: flex-start;
   border: 1px solid #ccc; /* 테두리 추가 */
   border-radius: 6px;
   padding: 10px;
   background-color: #fff;
 }
+
+.reply-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.reply-char-count {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+  margin-top: -4px;
+}
+
 textarea {
   width: 100%;
-  min-height: 60px;
+  height: 60px;
   padding: 8px;
-  resize: vertical;
+  resize: none;
 }
+
 .nickname {
   font-weight: bold;
   color: #333;
@@ -222,35 +325,10 @@ textarea {
   margin-left: 4px;
   font-size: 12px;
 }
-.edit-textarea {
-  width: 100%;
-  min-height: 60px;
-  padding: 8px;
-  resize: vertical;
-  margin-bottom: 8px;
-}
 
-.edit-actions {
-  display: flex;
-  gap: 8px;
-}
 .author-tag {
   font-size: 12px;
   color: #e46868;
   margin-left: 4px;
 }
-.char-count {
-  font-size: 12px;
-  color: #666;
-  text-align: right;
-  margin-top: -4px;
-  margin-bottom: 4px;
-}
-
-.error-message {
-  color: #e74c3c;
-  font-size: 13px;
-  margin-bottom: 4px;
-}
-
 </style>

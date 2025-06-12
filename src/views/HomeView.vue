@@ -1,12 +1,12 @@
 <template>
   <div class="main-wrapper">
     <!-- 검색창 -->
-   <div class="search-bar">
+   <!-- <div class="search-bar">
       <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
   <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
 </svg></span>
       <input type="text" placeholder="관심있는 내용을 검색해보세요!" />
-    </div>
+    </div> -->
 
     <div class="content-wrapper">
       <!-- 좌측: 주간/월간 토픽 -->
@@ -199,27 +199,35 @@ onMounted(async () => {
 });
 
 const goToBoardDetail = async (url) => {
-
-  let b_url = "/boarddetails/"+url;
-  console.log("여기 확인해 데이터타입==>",url)
+  let b_url = "/boarddetails/" + url;
   
   try {
     await axios.post('http://localhost:80/board/hits', null, {
-      params: { url },
+      params: { b_idx: url },
       withCredentials: true
     });
-    alert("여기 맞아?")
-  } catch (err) {1
+    
+    if (router.currentRoute.value.path === b_url) {
+      // 동일한 경로일 경우 강제로 새로고침
+      await router.replace({ path: '/_redirect' });
+      setTimeout(() => {
+        router.replace({ path: b_url });
+      }, 10);
+    } else {
+      router.push({ path: b_url });
+    }
+    
+  } catch (err) {
     console.error('조회수 증가 실패:', err);
-  }
-  if (router.currentRoute.value.path === b_url) {
-    // 동일한 경로일 경우 강제로 새로고침
-    await router.replace({ path: '/_redirect' }) // 임시 페이지로 이동
-    setTimeout(() => {
-      router.replace({ path: b_url })
-    }, 10)        // 다시 원래 페이지로 이동
-  } else {
-    router.push({ path: b_url })
+    
+    if (router.currentRoute.value.path === b_url) {
+      await router.replace({ path: '/_redirect' });
+      setTimeout(() => {
+        router.replace({ path: b_url });
+      }, 10);
+    } else {
+      router.push({ path: b_url });
+    }
   }
 }
 
@@ -377,12 +385,23 @@ const goToCompanyDetail = (c_idx) => {
 
 /* 우측 실시간 인기 */
 .ranking-box {
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 20px;
-  width: 260px;
-  font-family: sans-serif;
+  padding: 24px;
+  width: 280px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ranking-box .header {
+  margin-bottom: 20px;
+}
+
+.ranking-box .header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
 }
 
 .rank-list {
@@ -394,81 +413,94 @@ const goToCompanyDetail = (c_idx) => {
 .rank-item {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
+  transition: background-color 0.2s ease;
 }
+.rank-item:last-child {
+  border-bottom: none;
+}
+
 .rank-item:hover {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-color: #3b82f6;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  background-color: #f9fafb;
 }
-.rank-item:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
-}
+
 .rank-number {
- display: flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  border-radius: 50%;
-  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  background-color: #f3f4f6;
+  color: #6b7280;
+  border-radius: 4px;
+  font-weight: 500;
   font-size: 14px;
   margin-right: 12px;
-  transition: all 0.3s ease;
 }
 
 .rank-name {
-   flex: 1;
-  font-size: 16px;
+  flex: 1;
+  font-size: 15px;
   font-weight: 500;
-  color: #1f2937;
-  transition: color 0.3s ease;
+  color: #374151;
 }
+
+/* 1-3위만 색상 구분 */
 .rank-item:nth-child(1) .rank-number {
-  background: linear-gradient(135deg, #ffd700, #ffb700);
-  color: #1f2937;
+  background-color: #fbbf24;
+  color: #ffffff;
 }
 
 .rank-item:nth-child(2) .rank-number {
-  background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
-  color: #1f2937;
+  background-color: #9ca3af;
+  color: #ffffff;
 }
 
 .rank-item:nth-child(3) .rank-number {
-  background: linear-gradient(135deg, #cd7f32, #b8860b);
-  color: white;
-}
-/* 변화 스타일 */
-.rank-change.up {
-  color: red;
-}
-.rank-change.down {
-  color: blue;
-}
-.rank-change.same {
-  color: #999;
+  background-color: #f59e0b;
+  color: #ffffff;
 }
 
 /* 하단 안내 */
 .rank-info {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
   font-size: 12px;
-  color: #999;
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .ranking-box {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ranking-box {
+    width: 100%;
+    padding: 20px;
+  }
+  
+  .rank-item {
+    padding: 10px 0;
+  }
+  
+  .rank-number {
+    width: 22px;
+    height: 22px;
+    font-size: 13px;
+    margin-right: 10px;
+  }
+  
+  .rank-name {
+    font-size: 14px;
+  }
 }
 .vote-best-wrapper {
 display: flex;
@@ -634,4 +666,5 @@ white-space: nowrap;
         min-width: unset;
     }
 }
+
 </style>

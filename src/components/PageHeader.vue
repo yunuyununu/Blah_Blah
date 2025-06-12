@@ -97,6 +97,16 @@ const toggleNotificationPanel = async () => {
   }
 }
 
+// 외부 클릭시 알림 패널 닫기
+const handleClickOutside = (event) => {
+  const notificationWrapper = event.target.closest('.notification-wrapper')
+  const notificationPanel = event.target.closest('.notification-panel')
+  
+  if (!notificationWrapper && !notificationPanel && showNotifications.value) {
+    showNotifications.value = false
+  }
+}
+
 onMounted(async () => {
   // 브라우저 알림 권한 요청
   if (Notification.permission === 'default') {
@@ -107,10 +117,15 @@ onMounted(async () => {
     userStore.fetchNotifications()
     userStore.subscribeToAlarm()
   }
+
+  // 외부 클릭 이벤트 리스너 추가
+  document.addEventListener('click', handleClickOutside)
 })
 
 onBeforeUnmount(() => {
   if (eventSource) eventSource.close()
+  // 외부 클릭 이벤트 리스너 제거
+  document.removeEventListener('click', handleClickOutside)
 })
 
 const goLogin = () => router.push('/login')
@@ -177,6 +192,20 @@ const goToNotification = async (url) => {
   color: red;
   font-weight: bold;
 }
+
+/* 메뉴 링크 스타일 */
+.nav-item a {
+  text-decoration: none;
+  color: black;
+  font-weight: normal;
+  transition: font-weight 0.2s ease;
+}
+
+/* 활성화된 메뉴 스타일 */
+.nav-item a.router-link-active {
+  font-weight: bold;
+}
+
 /* 알림 아이콘 및 빨간 점 스타일 */
 .notification-wrapper {
   position: relative;

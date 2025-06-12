@@ -106,6 +106,16 @@ const routes = [
       path: '/conditions',
       name: 'conditions',
       component: () => import('@/views/ConditionsOfUse')
+  },
+  {
+      path: '/privacy',
+      name: 'privacy',
+      component: () => import('@/views/PrivacyInformation')
+  },
+    {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/components/NotFound')
   }
 
 ];

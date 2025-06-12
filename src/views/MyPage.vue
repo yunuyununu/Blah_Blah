@@ -5,9 +5,27 @@
         <div class="board-menu">
           <div class="left"><h2>마이페이지</h2></div>
           <div class="right">
-            <RouterLink to="/mypage/myinformation">회원정보</RouterLink>&nbsp;&nbsp;
-            <RouterLink to="/mypage/myreview">나의리뷰</RouterLink>&nbsp;&nbsp;
-            <RouterLink to="/mypage/mycompanychange">회사변경신청</RouterLink>
+            <RouterLink 
+              to="/mypage/myinformation"
+              class="menu-tab"
+              :class="{ active: $route.path.includes('/mypage/myinformation') }"
+            >
+              회원 정보
+            </RouterLink>
+            <RouterLink 
+              to="/mypage/myreview"
+              class="menu-tab"
+              :class="{ active: $route.path.includes('/mypage/myreview') }"
+            >
+              나의리뷰
+            </RouterLink>
+            <RouterLink 
+              to="/mypage/mycompanychange"
+              class="menu-tab"
+              :class="{ active: $route.path.includes('/mypage/mycompanychange') }"
+            >
+              회사 변경 신청
+            </RouterLink>
           </div>
         </div>
       </div>
@@ -35,28 +53,57 @@
 .board-menu {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 8px;
+  align-items: flex-end;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0;
   margin-bottom: 16px;
 }
 
 .board-menu .left {
   font-size: 20px;
   font-weight: 600;
+  padding-bottom: 12px;
 }
 
-.board-menu .right button {
-  margin-left: 8px;
-  padding: 6px 12px;
-  border: none;
-  background-color: #eee;
-  cursor: pointer;
-  border-radius: 4px;
+.board-menu .right {
+  display: flex;
+  gap: 4px;
 }
 
-.board-menu .right button:last-child {
-  background-color: #007bff;
-  color: white;
+.menu-tab {
+  position: relative;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #6b7280;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+}
+
+.menu-tab:hover {
+  color: #374151;
+  background-color: #f3f4f6;
+}
+
+.menu-tab.active {
+  color: #3b82f6;
+  background-color: #ffffff;
+  border-color: #3b82f6;
+  z-index: 1;
+}
+
+.menu-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #ffffff;
+  z-index: 2;
 }
   </style>

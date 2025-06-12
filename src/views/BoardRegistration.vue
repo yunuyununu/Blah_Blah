@@ -26,11 +26,20 @@
             <br>
 
             <!-- 이미지 업로드 -->
-            <input type="file" multiple @change="onImageChange"  accept=".jpg,.jpeg,.png,.pdf" />
-            <p>※ 첨부 가능한 파일은 JPG, JPEG, PNG, PDF 형식만 가능합니다.</p>
-            <div class="image-preview">
-              <img v-for="(img, i) in previewImages" :key="i" :src="img" />
+            <div class="file-upload-wrapper mb-3">
+            <input type="file" id="fileInput" multiple @change="onImageChange" accept=".jpg,.jpeg,.png" hidden />
+            <button type="button" class="btn btn-sm btn-outline-primary" @click="triggerFileInput">
+              이미지 첨부 ({{ files.length }}/10)
+            </button>
+            <small class="text-muted d-block mt-1">JPG, JPEG, PNG 형식만 첨부 가능</small>
+
+            <div class="image-preview mt-2">
+              <div v-for="(img, i) in previewImages" :key="i" class="image-thumbnail">
+                <img :src="img" />
+                <button type="button" class="remove-btn" @click="removeImage(i)">×</button>
+              </div>
             </div>
+          </div>
 
             <!-- 투표 게시물일 경우 추가 입력란 -->
             <div v-if="isVotePost" class="mt-4">
@@ -96,9 +105,17 @@ const voteOptionRefs = ref([])
 const voteTitleInput = ref('')
 
 const onImageChange = (e) => {
-  files.value = Array.from(e.target.files)
+  const selectedFiles = Array.from(e.target.files)
+
+  if (selectedFiles.length > 10) {
+    alert('최대 10개의 이미지만 첨부할 수 있습니다.')
+    e.target.value = '' // 파일 input 초기화
+    return
+  }
+
+  files.value = selectedFiles
   previewImages.value.forEach(url => URL.revokeObjectURL(url))
-  previewImages.value = files.value.map(file => URL.createObjectURL(file))
+  previewImages.value = selectedFiles.map(file => URL.createObjectURL(file))
 }
 
 const addOption = () => {
@@ -132,12 +149,6 @@ const submitPost = async () => {
   // formData.append('is_vote', isVotePost.value) // 백엔드에서 이걸로 구분
 
   files.value.forEach(file => formData.append('images', file))
-
-  // 투표 게시물인 경우 추가 정보 전송
-  // if (isVotePost.value) {
-  //   formData.append('v_title', voteTitle.value)
-  //   voteOptions.value.forEach(option => formData.append('vote_options', option))
-  // }
 
   if (isVotePost.value) {
     if (!voteTitle.value.trim()) {
@@ -181,17 +192,25 @@ const submitPost = async () => {
         await axios.post('http://localhost:80/board/voteInfoInsert', voteForm)
       }
 
-      alert('등록 완료')
       router.push('/board/boardlist')
-    } else {
-      alert('등록 실패')
     }
 
   } catch (err) {
     console.error(err)
-    alert('등록 중 오류 발생')
   }
 }
+
+const triggerFileInput = () => {
+  document.getElementById('fileInput').click()
+}
+
+const removeImage = (index) => {
+  // revoke URL, remove preview and file
+  URL.revokeObjectURL(previewImages.value[index])
+  previewImages.value.splice(index, 1)
+  files.value.splice(index, 1)
+}
+
 
 watch(title, () => {
     errors.value.title = ''
@@ -224,7 +243,7 @@ textarea {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  resize: vertical;
+  resize: none;
 }
 
 .image-preview {
@@ -287,4 +306,40 @@ input[disabled] {
 .vote-title-input {
   margin-bottom: 16px;
 }
+
+.file-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.image-thumbnail {
+  position: relative;
+  display: inline-block;
+}
+
+.image-thumbnail img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.remove-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 16px;
+}
+
 </style>

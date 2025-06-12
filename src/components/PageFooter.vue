@@ -1,9 +1,16 @@
 <template>
   <footer class="page-footer">
-    <router-link to="/about" class="footer-link">서비스 소개</router-link> |
-    <router-link to="/conditions" class="footer-link">이용약관</router-link> |
-    <router-link to="/directory" class="footer-link">디렉토리</router-link> |
-    <router-link to="/privacy" class="footer-link">개인정보 처리방침</router-link>
+    <div class="footer-links">
+      <!-- <router-link to="/about" class="footer-link">회사 소개</router-link> -->
+      <router-link to="/conditions" class="footer-link">이용약관</router-link>
+      <router-link to="/privacy" class="footer-link">개인정보처리방침</router-link>
+    </div>
+    <div class="footer-cs">
+      고객센터: jyw990802@gmail.com | 운영시간: 평일 10:00 ~ 18:00 (점심시간 12:00 ~ 13:00)
+    </div>
+    <div class="footer-copy">
+      © 2025 익명커뮤니티 Blah Blah. All rights reserved.
+    </div>
   </footer>
 </template>
 
@@ -13,20 +20,38 @@
 
 <style scoped>
 .page-footer {
-  height: 60px;
-  background-color: #c2c2c2;
-  color: rgb(0, 0, 0);
-  padding: 16px;
+  background-color: #f8f9fa;
+  color: #555;
+  font-size: 14px;
+  padding: 24px 16px;
+  border-top: 1px solid #ddd;
   text-align: center;
+  line-height: 1.6;
+}
+
+.footer-links {
+  margin-bottom: 8px;
 }
 
 .footer-link {
-  color: black;
+  color: #666;
+  margin: 0 10px;
   text-decoration: none;
-  margin: 0 8px;
 }
 
 .footer-link:hover {
   text-decoration: underline;
+  color: #000;
+}
+
+.footer-cs {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: #aaa;
 }
 </style>

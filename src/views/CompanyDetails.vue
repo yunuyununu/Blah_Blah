@@ -9,20 +9,36 @@
         </p>
       </div>
     </div>
-
-    <div class="summary-box">
-      <h2>회사소개</h2>
-      <ul>
-        <!-- <li><strong>홈페이지:</strong> <a :href="companyDetails.website" target="_blank">{{ companyDetails.website }}</a></li> -->
-        <li><strong>업계:</strong> {{ companyDetails.C_INDUSTRY }}</li>
-        <li><strong>설립:</strong> {{ companyDetails.C_EST }}</li>
-        <li><strong>직원수:</strong> {{ Number(companyDetails.C_NUMBER).toLocaleString() }}명</li>
-        <!-- <li><strong>연봉정보:</strong> {{ companyDetails.salary }}</li> -->
-      </ul>
+<br>
+   <!-- 회사소개 섹션 -->
+<div class="company-info-section">
+  <h2 class="section-title">{{ companyDetails.C_NAME }} 회사소개</h2>
+  
+  <div class="info-table">
+    <div class="info-row">
+      <span class="info-label">업계</span>
+      <span class="info-value">{{ companyDetails.C_INDUSTRY }}</span>
     </div>
+    <div class="info-row">
+      <span class="info-label">설립</span>
+      <span class="info-value">{{ companyDetails.C_EST }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">직원수</span>
+      <span class="info-value">
+        {{ companyDetails.C_NUMBER ? companyDetails.C_NUMBER.toLocaleString() + '명' : '-' }}
+      </span>
+    </div>
+  </div>
+  <div class="company-description">
+    <p>{{ companyDetails.C_INTRO }}</p>
+  </div>
+</div>
 
+<br>
     <div class="ratings">
       <h2>회사 리뷰 <span style="font-size: 16px; color: #888;">({{ totalCount }}개)</span></h2>
+      <br>
          <div v-if="review.length === 0" style="margin-top: 1rem; color: #888;">
           작성된 리뷰가 없습니다.
         </div>  
@@ -45,7 +61,7 @@
 
                     <div class="review-section" v-if="userStore.isLogin === true && reviewYN > 0">
                       <strong>내용</strong>
-                      <p>{{ item.r_content }}</p>
+                      <p v-html="formatContent(item.r_content)"></p>
                     </div>
 
                       <div v-else class="blur-container">
@@ -180,38 +196,50 @@ const goWriteReview = async () => {
     alert("회원가입 후 이용 가능합니다.")
   }
 }
-
+const formatContent = (text) => {
+  if (!text) return '';
+  return text.replace(/\n/g, '<br>');
+};
 </script>
 
 <style scoped>
 .company-detail {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
-  font-family: 'Arial', sans-serif;
-  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 24px;
+  background: #fff;
 }
 
 .header {
   display: flex;
   align-items: center;
   gap: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 24px;
 }
 
 .logo {
   width: 80px;
   height: 80px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
 }
 
 .info h1 {
-  margin: 0;
-  font-size: 24px;
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #212529;
 }
 
 .rating {
-  color: #f39c12;
-  font-weight: bold;
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
 }
 
 .summary-box {
@@ -269,10 +297,40 @@ const goWriteReview = async () => {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
   min-height: 230px;
 }
+.review-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.review-header {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+}
 
 .review-body {
   display: flex;
   gap: 20px;
+}
+.review-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+.rating-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 4px;
 }
 
 .review-score {
@@ -292,7 +350,21 @@ const goWriteReview = async () => {
   font-size: 14px;
   color: #FFD700;
 }
+.reviews-container {
+  margin-top: 24px;
+}
 
+.review-count {
+  font-size: 16px;
+  color: #6c757d;
+  font-weight: 400;
+}
+.no-reviews {
+  text-align: center;
+  padding: 48px 0;
+  color: #6c757d;
+  font-size: 16px;
+}
 .review-main {
   flex: 1;
 }
@@ -305,11 +377,20 @@ const goWriteReview = async () => {
 }
 
 .review-title {
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #212529;
 }
 
+.review-meta {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.review-content {
+  margin-top: 16px;
+}
 .badge {
   background-color: #ffe200;
   color: #333;
@@ -318,7 +399,14 @@ const goWriteReview = async () => {
   font-size: 12px;
   font-weight: bold;
 }
+.rating-stars {
+  font-size: 14px;
+  color: #ffd700;
+}
 
+.review-meta-info {
+  flex: 1;
+}
 .review-meta {
   font-size: 13px;
   color: #888;
@@ -326,12 +414,13 @@ const goWriteReview = async () => {
 }
 
 .review-section {
-  margin-bottom: 10px;
+  margin-top: 48px;
 }
 
 .review-section p {
-  white-space: pre-wrap;
-  line-height: 1.6;
+    line-height: 1.6;
+  color: #495057;
+  margin: 0;
 }
 
 
@@ -341,20 +430,34 @@ const goWriteReview = async () => {
   color: #333;
 }
 .pagination {
-  display: flex;
+ display: flex;
   justify-content: center;
-  margin-top: 20px;
   gap: 12px;
+  margin-top: 32px;
+}
+.pagination-btn:hover {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.pagination-btn {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 .blurred-text {
-  filter: blur(5px);
+  filter: blur(3px);
   user-select: none;
   pointer-events: none;
   margin: 0;
-  min-height: 120px;
-  background: #f7f7f7;
-  border-radius: 6px;
-  padding: 8px;
+  min-height: 100px;
+  line-height: 1.6;
 }
 
 .blur-container {
@@ -362,42 +465,90 @@ const goWriteReview = async () => {
 }
 
 .blur-overlay {
-  position: absolute;
+   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  backdrop-filter: blur(0);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  z-index: 10;
-  border-radius: 6px;
-  padding: 1rem;
+  gap: 12px;
+  border-radius: 8px;
 }
 
 .lock-icon {
-  width: 24px;
-  height: 24px;
-  color: #666;
+  color: #6c757d;
 }
 
 .blur-message {
-  font-weight: bold;
-  color: #444;
+  font-weight: 600;
+  color: #212529;
   text-align: center;
+  margin: 0;
 }
 
 .review-btn {
-  background-color: #333;
+  background: #070707;
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.review-btn:hover {
+  background: #050505;
+}
+
+
+
+
+.company-info-section {
+  max-width: 600px;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.info-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+
+.info-label {
+  font-weight: bold;
+  color: #555;
+  min-width: 90px;
+}
+
+.info-value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+.company-description {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #444;
 }
 
 </style>

@@ -88,7 +88,7 @@ const nextPage = () => {
   if (companyList.value.length === limit) {
     offset.value += limit
     fetchCompanies(searchKeyword.value)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    //window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
@@ -96,7 +96,7 @@ const prevPage = () => {
   if (offset.value >= limit) {
     offset.value -= limit
     fetchCompanies(searchKeyword.value)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    //window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
@@ -191,4 +191,18 @@ const goCompanyInsert = () => {
 .search-box button:hover {
   background-color: #0056b3;
 }
+/* src/style.css - 스크롤 애니메이션 완전 차단 */
+html, body {
+  scroll-behavior: auto !important;
+}
+
+* {
+  scroll-behavior: auto !important;
+}
+
+/* Vuetify가 적용하는 smooth scroll도 차단 */
+.v-application {
+  scroll-behavior: auto !important;
+}
+
 </style>

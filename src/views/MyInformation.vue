@@ -4,7 +4,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label>아이디</label>
-          <input type="text" v-model="userInfo.U_ID" readonly />
+          <input type="text" v-model="userInfo.U_ID" readonly class="readonly-style"/>
         </div>
 
         <div class="form-group">
@@ -15,7 +15,7 @@
         <div class="form-group">
           <label>닉네임</label>
           <div v-if="!isEditingNickname" class="edit-view">
-            <input type="text" v-model="userInfo.U_NICNAME" readonly />
+            <input type="text" v-model="userInfo.U_NICNAME" readonly class="readonly-style"/>
             <button class="change-password-btn" @click="startNicknameEdit">수정</button>
           </div>
           <div v-else class="edit-view">
@@ -34,13 +34,13 @@
 
         <div class="form-group">
           <label>이메일</label>
-          <input type="text" v-model="userInfo.U_EMAIL" readonly/>
+          <input type="text" v-model="userInfo.U_EMAIL" readonly class="readonly-style"/>
         </div>
 
         <div class="form-group">
           <label>전화번호</label>
             <div v-if="!isEditingPhone" class="edit-view">
-              <input type="text" v-model="userTel" readonly/>
+              <input type="text" v-model="userTel" readonly class="readonly-style"/>
               <button class="change-password-btn" @click="startPhoneEdit">수정</button>
             </div>
           <!-- 전화번호 수정 입력창 -->
@@ -60,33 +60,33 @@
         
         <div class="form-group" v-if="userInfo.U_C_IDX === 0">
           <label>회원회사</label>
-          <input type="text" placeholder="관리자 확인중입니다." readonly />
+          <input type="text" placeholder="관리자 확인중입니다." readonly class="readonly-style"/>
         </div>
 
         <div class="form-group" v-else>
           <label>회원회사</label>
-          <input type="text" :value="userInfo.C_NAME" readonly />
+          <input type="text" :value="userInfo.C_NAME" readonly class="readonly-style"/>
         </div>
 
         <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Uncertified'">
           <label>회사인증유무</label>
-          <input type="text" placeholder="관리자 확인중입니다." readonly/>
+          <input type="text" placeholder="관리자 확인중입니다." readonly class="readonly-style"/>
         </div>
         <div class="form-group company-change" v-if="userInfo.U_STATUS == 'Certified'">
           <label>회사인증유무</label>
-          <input type="text" :value="'Y'" readonly/>
+          <input type="text" :value="'Y'" readonly class="readonly-style"/>
         </div>
         <div class="form-group company-change" v-if="userInfo.U_REVIEW == 'N'">
           <label>리뷰작성유무</label>
-          <input type="text" :value="'N'" readonly/>
+          <input type="text" :value="'N'" readonly class="readonly-style"/>
         </div>
         <div class="form-group company-change" v-if="userInfo.U_REVIEW == 'Y'">
           <label>리뷰작성유무</label>
-          <input type="text" :value="'Y'" readonly/>
+          <input type="text" :value="'Y'" readonly class="readonly-style"/>
         </div>
         <div class="form-group">
           <label>회원가입일자</label>
-          <input type="text" v-model="userInfo.U_JOINDATE" readonly/>
+          <input type="text" v-model="userInfo.U_JOINDATE" readonly class="readonly-style"/>
         </div>
       </div>
 
@@ -172,12 +172,10 @@ const requestPhoneVerification = async() => {
         u_phone: newPhone.value
       })
       console.log('전화번호 수정 응답:', response.data)
-      alert('전화번호가 수정되었습니다.')
       userTel.value = newPhone.value;
       isEditingPhone.value = false;
     } catch (error) {
       console.error('전화번호 수정 실패:', error)
-      alert('전화번호 수정에 실패했습니다.')
     }
 }
 
@@ -196,7 +194,7 @@ const nicknameInput = ref(null)
 
 const updateNickname = async () => {
 
-  const nicknamePattern = /^\S{5,20}$/
+  const nicknamePattern = /^\S{3,20}$/
 
   if (!newNickname.value.trim()) {
     alert('닉네임을 입력해주세요.');
@@ -205,7 +203,7 @@ const updateNickname = async () => {
 
   //닉네임 체크
   if (!nicknamePattern.test(newNickname.value)) {
-    errors.value.newNickname = '닉네임은 공백 없이 5~20자여야 합니다.'
+    errors.value.newNickname = '닉네임은 공백 없이 3~20자여야 합니다.'
     nicknameInput.value.focus()
     return
   }
@@ -215,12 +213,10 @@ const updateNickname = async () => {
       u_nicname: newNickname.value
     });
     console.log('닉네임 수정 응답:', response.data);
-    alert('닉네임이 수정되었습니다.');
     userInfo.value.U_NICNAME = newNickname.value;
     isEditingNickname.value = false;
   } catch (error) {
     console.error('닉네임 수정 실패:', error);
-    alert('닉네임 수정에 실패했습니다.');
   }
 };
 const startNicknameEdit = () => {
@@ -236,9 +232,9 @@ const cancelNicknameEdit = () => {
 // 회원 탈퇴
 const userWithdraw = async () => {
   try {
-    const response = await axios.post('http://localhost:80/mypage/userWithdraw');
-    console.log('회원 탈퇴 응답:', response.data);
     if(confirm('블라블라를 탈퇴하시겠습니까?')){
+        const response = await axios.post('http://localhost:80/mypage/userWithdraw');
+        console.log('회원 탈퇴 응답:', response.data);
         alert('회원 탈퇴가 완료되었습니다.\n 작성하신 게시글 및 댓글 중 개인정보가 포함되지 않은 내용은 삭제되지 않고 유지됩니다.');
         router.push('/').then(() => {
           window.location.reload()
@@ -248,7 +244,7 @@ const userWithdraw = async () => {
       }
   } catch (error) {
     console.error('회원 탈퇴 실패:', error);
-    alert('회원 탈퇴에 실패했습니다.');
+    alert('회원 탈퇴에 실패했습니다. 관리자에게 문의바랍니다.');
   }
 };
 
@@ -382,5 +378,9 @@ input[type="number"] {
   font-size: 12px;
   margin-top: 3px;
   margin-bottom: 8px;
+}
+.readonly-style {
+  background-color: #fcf9f9;
+  color: #999797;
 }
   </style>

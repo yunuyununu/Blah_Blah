@@ -10,14 +10,33 @@
         </div>
       </div>
 
-      <div class="row">
-        <div class="col" style="text-align: center;">
-          &nbsp;&nbsp;&nbsp;<label>변경 할 회사 인증파일</label>&nbsp;&nbsp;
-          <input type="file" ref="userFileInput" @change="handleFileChange" accept=".jpg,.jpeg,.png,.pdf"/>
-            <p style="margin-top: 5px; color: red;">{{ errors.userFile }}</p>
-          <br><br>
-        </div>
-      </div>
+      <!-- 회사 인증파일 업로드 -->
+ <!-- 회사 인증파일 업로드 - 수평 정렬 -->
+<div class="row justify-content-center mb-3">
+  <div class="col-md-5 d-flex align-items-center gap-3 flex-wrap">
+    <!-- 라벨 -->
+    <label class="mb-0" style="white-space: nowrap;">변경 할 회사 인증파일</label>&nbsp;&nbsp;
+
+    <!-- 파일 첨부 버튼 -->
+    <label class="file-label mb-0">
+      <span class="upload-button">파일 첨부</span>
+      <input type="file" ref="userFileInput" accept=".jpg,.jpeg,.png" @change="handleFileChange" hidden />
+    </label>
+
+    <!-- 파일 이름 + 삭제 버튼 -->
+    <div v-if="userFile" class="file-info mb-0 d-flex align-items-center gap-2">
+      <span class="file-name">{{ userFile.name }}</span>
+      <button type="button" class="remove-file" @click="removeFile">×</button>
+    </div>
+  </div>
+
+  <!-- 에러 메시지 -->
+  <div class="col-md-8 mt-2" v-if="errors.userFile">
+    <p class="error-text">{{ errors.userFile }}</p>
+  </div>
+</div>
+
+
 
       <div class="row">
         <div class="col" style="text-align: center;">
@@ -112,13 +131,17 @@
       headers: {
             'Content-Type': 'multipart/form-data'
       }}).then(res => {
-        alert('회사변경신청이 완료되었습니다.')
         console.log("회사변경 성공 ==",res.data)
         router.push('/')
       }).catch(error => {
         console.error('회사변경 에러:', error)
       })
   }
+
+  const removeFile = () => {
+  userFile.value = ''
+  userFileInput.value = ''
+}
 
   onMounted(() => {
     fetchMypage();
@@ -164,4 +187,89 @@ input[type="password"] {
   color: #a3a2a2;
   font-style: italic;
 }
+.file-upload-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upload-button {
+  display: inline-block;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #333;
+}
+
+.file-name {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove-file {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.file-label {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.upload-button {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.file-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.file-name {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+
+.remove-file {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.error-text {
+  font-size: 12px;
+  color: red;
+}
+
   </style>

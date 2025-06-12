@@ -137,11 +137,15 @@ const changePage = async (page) => {
   await fetchBoards();
   
   // 페이지 변경 시 스크롤을 맨 위로
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  //window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 // 검색
 const onSearch = async () => {
+    if (searchKeyword.value.trim() === '') {
+    searchInput.value.focus(); // 입력창에 포커스 주기
+    return; // 검색 호출 중단
+  }
   await fetchBoards(true);
 };
 
@@ -168,7 +172,6 @@ onMounted(() => {
   fetchBoards();
 });
 </script>
-
 <style scoped>
 .board-container {
   max-width: 1200px;
@@ -282,4 +285,18 @@ onMounted(() => {
   padding: 40px;
   color: #666;
 }
+/* src/style.css - 스크롤 애니메이션 완전 차단 */
+html, body {
+  scroll-behavior: auto !important;
+}
+
+* {
+  scroll-behavior: auto !important;
+}
+
+/* Vuetify가 적용하는 smooth scroll도 차단 */
+.v-application {
+  scroll-behavior: auto !important;
+}
+
 </style>
