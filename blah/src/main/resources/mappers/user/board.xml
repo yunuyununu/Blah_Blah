@@ -9,22 +9,24 @@
 	 <select id="boardList" resultType="map">
 	    SELECT 
 	        board_data.*,
-	        COALESCE(heart_counts.heart_count, 0) AS heart_count
+	        COALESCE(heart_counts.heart_count, 0) AS heart_count,
+	        COALESCE(comment_counts.comment_count, 0) AS comment_count
 	    FROM (
 	        SELECT
-	            BRD.B_IDX AS B_IDX,
-	            BRD.B_U_IDX AS B_U_IDX,
-	            BRD.B_TITLE AS B_TITLE,
-	            BRD.B_CONTENT AS B_CONTENT,
-	            BRD.B_HITS AS B_HITS,
-	            BRD.B_DATE AS B_DATE,
-	            BRD.B_VOTE AS B_VOTE,
-	            BRD.B_DELETE AS B_DELETE,
-	            USR.U_NICNAME AS U_NICNAME,
-	            IFNULL(COP.C_NAME, '새회사') AS C_NAME
+	            BRD.B_IDX AS B_IDX,					<!-- 게시글 번호 -->
+	            BRD.B_U_IDX AS B_U_IDX,				<!-- 작성자 번호 -->
+	            BRD.B_TITLE AS B_TITLE,				<!--제목-->
+	            BRD.B_CONTENT AS B_CONTENT,			<!--내용-->
+	            BRD.B_HITS AS B_HITS,				<!--조회수-->
+	            BRD.B_DATE AS B_DATE,				<!--작성일자-->
+	            BRD.B_VOTE AS B_VOTE,				<!--투표여부-->
+	            USR.U_NICNAME AS U_NICNAME,			<!--작성자닉네임-->
+	            IFNULL(COP.C_NAME, '새회사') AS C_NAME	<!--작성자 회사명-->
 	        FROM BOARD BRD
-	        LEFT JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-	        LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+	        LEFT JOIN USER USR 
+	        	ON BRD.B_U_IDX = USR.U_IDX
+	        LEFT JOIN COMPANY COP 
+	        	ON USR.U_C_IDX = COP.C_IDX
 	        WHERE BRD.B_DELETE = 'N'
 	        <if test="searchKeyword != null and searchKeyword != ''">
 	            AND (
@@ -36,10 +38,15 @@
 	        LIMIT #{page} OFFSET #{offset}
 	    ) board_data
 	    LEFT JOIN (
-	        SELECT H_B_IDX, COUNT(*) as heart_count
+	        SELECT H_B_IDX, COUNT(1) AS heart_count
 	        FROM HEART
 	        GROUP BY H_B_IDX
 	    ) heart_counts ON board_data.B_IDX = heart_counts.H_B_IDX
+	    LEFT JOIN (
+	        SELECT CM_B_IDX, COUNT(1) AS comment_count
+	        FROM COMMENT
+	        GROUP BY CM_B_IDX
+	    ) comment_counts ON board_data.B_IDX = comment_counts.CM_B_IDX
 	</select>	
 
 	

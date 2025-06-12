@@ -90,6 +90,7 @@ public class CompanyController {
 	        System.out.println("회사 신청 시 보내는 데이터=>>"+map);
 			service.companyInsert(map);
 		} catch (Exception e) {
+			System.out.println("회사신청할때 에러남?");
 			e.getStackTrace();
 		}
 		
