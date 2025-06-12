@@ -19,7 +19,7 @@
 		        USR.U_WITHDRAW AS U_WITHDRAW,		<!--탈퇴일자-->
 		        USR.U_REVIEW AS U_REVIEW,			<!--리뷰작성여부-->
 		        USR.U_STATUS AS U_STATUS,			<!--회원상태-->
-		        COP.C_NAME AS C_NAME				<!--회원회사이름-->
+		        IFNULL(COP.C_NAME, '새회사') AS C_NAME<!--회원회사이름-->
 		FROM USER AS USR
 			LEFT JOIN COMPANY AS COP		
 	    		ON COP.C_IDX = USR.U_C_IDX
@@ -29,9 +29,16 @@
 	<!--회사 변경-->
 	<update id="companyChange">
 		UPDATE USER
-		SET U_C_IDX = 0, U_FILE = #{u_file}, U_STATUS = 'Uncertified', U_REVIEW = 'N'
+		SET U_C_IDX = null, U_FILE = #{u_file}, U_STATUS = 'Uncertified', U_REVIEW = 'N'
 		WHERE U_IDX = #{u_idx}
 	</update>
+	
+	<!--전회사 파일 삭제(를 위한 조회)-->
+	<select id="myCompanyFile" resultType="String">
+		SELECT U_FILE
+		FROM USER
+		WHERE U_IDX = #{u_idx}
+	</select>
 	
 	<!--휴대전화번호 변경-->
 	<update id="phoneUpdate">
@@ -50,7 +57,7 @@
 	<!--회원 탈퇴-->
 	<update id="userWithdraw">
 		UPDATE USER
-		SET U_WITHDRAW = 'Y'
+		SET U_WITHDRAW = 'Y', U_NICNAME = '탈퇴한 회원' U_EMAIL = #{uu_email}, U_PHONE = #{uu_phone}
 		WHERE U_IDX = #{u_idx}
 	</update>
 	
@@ -63,10 +70,13 @@
 		        REW.R_TITLE AS R_TITLE,		<!--리뷰제목-->
 		        REW.R_CONTENT AS R_CONTENT,	<!--리뷰내용-->
 		        DATE_FORMAT(REW.R_DATE,	'%Y-%m-%d') AS R_DATE,		<!--리뷰작성일자-->
-		        REW.R_WORK AS R_WORK,		<!--현직원/전직원-->
+		        CASE 
+				   WHEN REW.R_WORK = 'CURRENT' THEN '현직원'
+				   WHEN REW.R_WORK = 'FORMER' THEN '전직원'			<!--현직원/전직원-->
+				END AS R_WORK,
 		        USR.U_NICNAME AS U_NICNAME,	<!--리뷰작성자-->
         		COP.C_NICNAME AS C_NICNAME,	<!--회사닉네임-->
-        		COP.C_NAME AS C_NAME,		<!--회사이름-->
+        		IFNULL(COP.C_NAME, '새회사') AS C_NAME,		<!--회사이름-->
         		COP.C_LOGO AS C_LOGO		<!--회사로고-->
 		FROM REVIEW AS REW 	
 			INNER JOIN USER AS USR		
@@ -74,7 +84,7 @@
 			LEFT JOIN COMPANY AS COP		
 					ON COP.C_IDX = REW.R_C_IDX
 		WHERE USR.U_IDX = #{u_idx}
-		ORDER BY R_DATE DESC
+		ORDER BY R_IDX DESC
 	</select>
 	
 	<!--리뷰작성유무체크-->
@@ -100,10 +110,18 @@
 		VALUES (#{r_c_idx},#{r_u_idx},#{r_star},#{r_title},#{r_content},#{r_work})
 	</insert>
 	
+	<!--리뷰 작성 처음인 경우-->
+	<!--리뷰 열람 가능 처리 / U_REVIEW 컬럼 'Y' -->
+	<update id="reviewAccessible">
+		UPDATE USER
+		SET U_REVIEW = 'Y'
+		WHERE U_IDX = #{u_idx}
+	</update>
+	
 	<!--리뷰 수정-->
 	<update id="reviewUpdate">
 		UPDATE REVIEW
-		SET R_STAR = #{r_star}, R_TITLE = #{r_title}, R_CONTENT = #{r_content}
+		SET R_STAR = #{r_star}, R_TITLE = #{r_title}, R_CONTENT = #{r_content}, R_WORK = #{r_work}
 		WHERE R_IDX = #{r_idx}
 	</update>
 	
@@ -112,6 +130,16 @@
 		DELETE FROM REVIEW
 		WHERE R_IDX=#{r_idx}
 	</delete>
+	
+	<!--리뷰갯수 카운트 -->
+	<select id="reviewYN" resultType="int">
+		SELECT COUNT(1) AS REVIEW_YN
+		FROM REVIEW	
+		WHERE R_U_IDX = #{u_idx}
+	</select>
+	
+	<!--리뷰 삭제 시 잔여 리뷰가 0이면-->
+	<!-- 리뷰 미열람 처리 / U_REVIEW 컬럼 'N' -->
 	<update id="reviewStatusUpdate">
 		UPDATE USER
 		SET U_REVIEW = 'N'

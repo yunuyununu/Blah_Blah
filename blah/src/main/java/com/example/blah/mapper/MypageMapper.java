@@ -13,6 +13,9 @@ public interface MypageMapper {
 	// 회원 회사 변경
 	void companyChange(Map<String, Object> map);
 	
+	// 회원 전회사 파일 삭제(를 위한 조회)
+	String myCompanyFile(int u_idx);
+	
 	// 휴대전화번호 변경
 	void phoneUpdate(Map<String, Object> map);
 	
@@ -20,7 +23,7 @@ public interface MypageMapper {
 	void nicnameUpdate(Map<String, Object> map);
 	
 	// 회원 탈퇴
-	void userWithdraw(int u_idx);
+	void userWithdraw(Map<String, Object> map);
 	
 	// 리뷰작성유무체크
 	Map<String, Object> reviewCheck(int u_idx);
@@ -31,12 +34,18 @@ public interface MypageMapper {
 	// 리뷰 작성
 	void reviewInsert(Map<String, Object> map);
 	
+	// 리뷰 열람 가능 처리
+	void reviewAccessible(int u_idx);
+	
 	// 리뷰 수정
 	void reviewUpdate(Map<String, Object> map);
 	
 	// 리뷰 삭제
 	void reviewDelete(int r_idx);
 	
-	// 회원 현회사 리뷰 존재 유무
+	// 리뷰 갯수 카운트
+	int reviewYN(int u_idx);
+	
+	// 리뷰 미열람 처리
 	void reviewStatusUpdate(int u_idx);
 }

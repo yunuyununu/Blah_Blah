@@ -38,11 +38,10 @@ public class LoginController {
 
 	    LoginDTO login = service.userLogin(userId,userPw);
 	    String withdraw = service.userWithdrawYN(userId);
-	    System.out.println("로그인 정보 ==> " + login);
-	    System.out.println("탈퇴여부 확인=====>"+withdraw);
+	    
 	    if (login != null && withdraw.equals("N")) { // 로그인 성공
 	    	session.setAttribute("UserIdx", login.getU_idx());
-	    	System.out.println("세션 아이디=="+session);
+	    	
 	    	return ResponseEntity.ok(Map.of("result", "success", "userIdx", session.getAttribute("UserIdx")));
 	    } else if(login != null && withdraw.equals("Y")) {
 	    	return ResponseEntity.ok(Map.of("result","withdraw"));
@@ -55,12 +54,10 @@ public class LoginController {
 	@PostMapping("/checkSession")
 	public ResponseEntity<?> checkSession(HttpSession session) {
 	    Object loginUser = session.getAttribute("UserIdx");
-	    System.out.println("세션 상태 확인 =="+session);
+	    
 	    if (loginUser != null) {
-	    	System.out.println("세션 있을때!!!==>" + loginUser);
 	        return ResponseEntity.ok(Map.of("isLogin", true, "userIdx", loginUser));
 	    } else {
-	    	System.out.println("세션 없을때!!!==>"+loginUser);
 	        return ResponseEntity.ok(Map.of("isLogin", false));
 	    }
 	} 
@@ -69,7 +66,6 @@ public class LoginController {
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(HttpSession session) {
 	    session.invalidate();
-	    System.out.println("세션 아이디 로그아웃시=="+session);
 	    return ResponseEntity.ok("로그아웃 완료");
 	}
 	
@@ -94,12 +90,10 @@ public class LoginController {
 		
 		String userId = request.get("userId");
 		String userEmail = request.get("email");
-		String userPhone = request.get("userTel");
 		
 		Map<String, String> map = new HashMap<>();
 		map.put("u_id",userId);
 		map.put("u_email",userEmail);
-		map.put("u_phone",userPhone.replaceAll("-", ""));
 
 		LoginDTO result = service.searchPw(map);
 		

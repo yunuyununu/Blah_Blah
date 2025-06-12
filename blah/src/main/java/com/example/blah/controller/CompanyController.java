@@ -84,9 +84,9 @@ public class CompanyController {
 	        map.put("cr_u_idx", cr_u_idx);
 	        map.put("cr_name", cr_name);
 	        map.put("cr_intro", cr_intro);
-	        map.put("cr_business", businessNum);
+	        map.put("cr_business", businessNum.replaceAll("-", ""));
 	        map.put("cr_logo", publicUrl);
-	        map.put("cr_est", cr_est);
+	        map.put("cr_est", cr_est.replaceAll("-", ""));
 	        System.out.println("회사 신청 시 보내는 데이터=>>"+map);
 			service.companyInsert(map);
 		} catch (Exception e) {

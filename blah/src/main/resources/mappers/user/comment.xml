@@ -13,10 +13,9 @@
 			   COM.CM_B_IDX AS CM_B_IDX,		<!--게시글 번호-->
 			   COM.CM_CONTENT AS CM_CONTENT,		<!--댓글 내용-->
 			   DATE_FORMAT(COM.CM_DATE, '%y/%m/%d %H:%i') AS CM_DATE,	<!--작성 일자-->
-			   COM.CM_MODIFY AS CM_MODIFY,		<!--수정 일자-->
 			   COM.CM_PARENT_IDX AS CM_PARENT_IDX,	<!--부모 댓글 번호-->
 			   USR.U_NICNAME AS U_NICNAME,		<!--회원 닉네임-->
-			   CPN.C_NICNAME AS C_NICNAME		<!--회사 닉네임-->
+			   IFNULL(CPN.C_NICNAME, '새회사') AS C_NICNAME		<!--회사 닉네임-->
 		FROM COMMENT AS COM 		<!--댓글 테이블-->
 		INNER JOIN USER AS USR		<!--회원 테이블-->
 				ON COM.CM_U_IDX = USR.U_IDX
@@ -50,7 +49,7 @@
     <!--댓글/대댓글 수정-->
     <update id="commentUpdate">
     	UPDATE COMMENT
-		SET CM_CONTENT = #{cm_content}, CM_MODIFY = CURRENT_TIMESTAMP
+		SET CM_CONTENT = #{cm_content}
 		WHERE CM_IDX = #{cm_idx} 
     </update>
 </mapper>

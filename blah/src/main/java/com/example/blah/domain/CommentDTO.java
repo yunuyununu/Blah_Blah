@@ -15,7 +15,7 @@ public class CommentDTO {
     private int cm_u_idx;
     private String cm_content;
     private String cm_date;
-    private String cm_modify;
+    //private String cm_modify;
     private String cm_parent_idx;
     private String u_nicname;
     private String c_nicname;

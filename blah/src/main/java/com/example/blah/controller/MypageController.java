@@ -37,10 +37,16 @@ public class MypageController {
 	    return service.mypage((int)session.getAttribute("UserIdx"));
 	}
 	
+	// 회사 변경 신청
 	@PostMapping("companyChange")
 	public void companyChange(@RequestParam(name = "u_file") MultipartFile u_file, HttpSession session) {
 	
 		try {
+			// 전 회사인증파일 삭제됨
+			int u_idx = (int)session.getAttribute("UserIdx");
+			String url = service.myCompanyFile(u_idx);
+			gcsService.deleteFile(url);
+			
 			// 회사 대표사진 파일 처리
 			// 파일명 처리
 	        String originalFilename = u_file.getOriginalFilename();
@@ -85,14 +91,24 @@ public class MypageController {
 	// 회원 탈퇴
 	@PostMapping("userWithdraw")
 	public void userWithdraw(HttpSession session) {
+		int u_idx = (int)session.getAttribute("UserIdx");
+		String url = service.myCompanyFile(u_idx);
+		gcsService.deleteFile(url);
+		
 		if(session.getAttribute("UserIdx") != null) {
-			service.userWithdraw((int)session.getAttribute("UserIdx"));
+			String uuemail = UUID.randomUUID().toString()+"@example.com";
+			String uuphone = "00000000000";
+			Map<String, Object> map = new HashMap<>();
+	        map.put("u_idx", (int)session.getAttribute("UserIdx"));
+			map.put("uu_email", uuemail);
+			map.put("uu_phone", uuphone);
+			service.userWithdraw(map);
 			
 			session.invalidate(); 
 		}
 	}
 	
-	// 리뷰작성유무체크
+	// 현회사 리뷰작성유무체크
 	@GetMapping("myreviewCheck")
 	public Map<String, Object> myreviewCheck(HttpSession session) {
 		return service.reviewCheck((int)session.getAttribute("UserIdx"));
@@ -107,27 +123,50 @@ public class MypageController {
 	// 리뷰작성
 	@PostMapping("reviewInsert")
 	public void reviewInsert(@RequestBody Map<String, Object> request, HttpSession session) {
-
+		int u_idx = (int)session.getAttribute("UserIdx");
+		
+		String work = "";
+		if(request.get("r_work").equals("현직원")) {
+			work = "CURRENT";
+		} else {
+			work = "FORMER";
+		}
+		
 	    Map<String, Object> map = new HashMap<>();
 	    map.put("r_c_idx", request.get("r_c_idx"));
-	    map.put("r_u_idx", session.getAttribute("UserIdx"));
+	    map.put("r_u_idx", u_idx);
 	    map.put("r_star", request.get("r_star"));
 	    map.put("r_title", request.get("r_title"));
 	    map.put("r_content", request.get("r_content"));
-	    map.put("r_work", request.get("r_work"));
+	    map.put("r_work", work);
 
 	    service.reviewInsert(map);
+	    
+	    // 리뷰 첫 등록 시 
+	    // 리뷰 열람 가능 처리
+		int reviewCount = service.reviewYN(u_idx);
+		// u_review 컬럼 'Y'으로 바뀜
+		if(reviewCount == 1) {
+			service.reviewAccessible(u_idx);
+		}
 	}
 	
 	// 리뷰수정
 	@PostMapping("reviewUpdate")
 	public void reviewUpdate(@RequestBody Map<String, Object> request) {
+		String work = "";
+		if(request.get("r_work").equals("현직원")) {
+			work = "CURRENT";
+		} else {
+			work = "FORMER";
+		}
 		
 		Map<String, Object> map = new HashMap<>();
 	    map.put("r_idx", request.get("r_idx"));
 	    map.put("r_star", request.get("r_star"));
 	    map.put("r_title", request.get("r_title"));
 	    map.put("r_content", request.get("r_content"));
+	    map.put("r_work",work);
 
 	    service.reviewUpdate(map);
 	}
@@ -135,8 +174,15 @@ public class MypageController {
 	// 리뷰 삭제
 	@PostMapping("reviewDelete")
 	public void reviewDelete(@RequestBody Map<String, Integer> request,HttpSession session) {
+		int u_idx = (int)session.getAttribute("UserIdx");
 		service.reviewDelete((int)request.get("r_idx"));
-		service.reviewStatusUpdate((int)session.getAttribute("UserIdx"));
+		
+		// 리뷰 열람 불가능 처리
+		int reviewCount = service.reviewYN(u_idx);
+		// 리뷰 삭제 후 잔여 리뷰 수가 0이면 u_review 컬럼 'N'으로 바뀜
+		if(reviewCount == 0) {
+			service.reviewStatusUpdate(u_idx);
+		}
 	}
 	
 }

@@ -18,7 +18,6 @@
 	            BRD.B_CONTENT AS B_CONTENT,
 	            BRD.B_HITS AS B_HITS,
 	            BRD.B_DATE AS B_DATE,
-	            BRD.B_MODIFY AS B_MODIFY,
 	            BRD.B_VOTE AS B_VOTE,
 	            BRD.B_DELETE AS B_DELETE,
 	            USR.U_NICNAME AS U_NICNAME,
@@ -67,7 +66,6 @@
 			   BRD.B_CONTENT AS B_CONTENT,			<!--게시글 내용-->
 			   BRD.B_HITS AS B_HITS,				<!--게시글 조회수-->
 			   BRD.B_DATE AS B_DATE,				<!--게시글 작성일-->
-			   BRD.B_MODIFY AS B_MODIFY,			<!--수정일-->
 			   BRD.B_VOTE AS B_VOTE,				<!--투표존재여부-->
 			   BRD.B_DELETE AS B_DELETE,			<!--삭제여부-->
 			   USR.U_NICNAME AS U_NICNAME,			<!--회원 닉네임-->
@@ -140,7 +138,7 @@
     <!--게시물 수정-->
     <update id="boardUpdate" parameterType="com.example.blah.domain.BoardDTO" useGeneratedKeys="true" keyProperty="b_idx">
     	UPDATE BOARD
-		SET B_TITLE = #{b_title}, B_CONTENT = #{b_content} , B_MODIFY = CURRENT_TIMESTAMP
+		SET B_TITLE = #{b_title}, B_CONTENT = #{b_content}
 		WHERE B_IDX = #{b_idx}
     </update>
     

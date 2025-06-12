@@ -51,7 +51,10 @@
 		        REW.R_TITLE AS R_TITLE,		<!--리뷰제목-->
 		        REW.R_CONTENT AS R_CONTENT,	<!--리뷰내용-->
 		        REW.R_DATE AS R_DATE,		<!--리뷰작성일자-->
-		        REW.R_WORK AS R_WORK,		<!--현직원/전직원-->
+		        CASE 
+				   WHEN REW.R_WORK = 'CURRENT' THEN '현직원'
+				   WHEN REW.R_WORK = 'FORMER' THEN '전직원'		<!--현직원/전직원-->
+				END AS R_WORK,
 		        USR.U_NICNAME AS U_NICNAME,	<!--리뷰작성자-->
         		COP.C_NICNAME AS C_NICNAME	<!--회사닉네임-->
 		FROM REVIEW AS REW 	

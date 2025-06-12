@@ -35,7 +35,7 @@
 		SELECT U_IDX,	<!--회원번호-->
 			   U_ID		<!--회원아이디-->
 		FROM USER
-		WHERE U_EMAIL=#{u_email} AND U_ID=#{u_id} AND U_PHONE=#{u_phone}
+		WHERE U_EMAIL=#{u_email} AND U_ID=#{u_id}
 	</select>
 	
 	<!--비밀번호 재설정-->

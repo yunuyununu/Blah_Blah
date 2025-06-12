@@ -16,7 +16,6 @@ public class BoardDTO {
     private String b_content;
     private String b_hits;
     private String b_date;
-    private String b_modify;
     private String b_vote;
     private String b_delete;
     private String u_nicname;
