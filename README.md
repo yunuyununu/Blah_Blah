@@ -198,6 +198,7 @@ __[사용기술 및 개발환경]__
 
 * 회사 상세
 ![image](https://github.com/user-attachments/assets/1dfed2ca-6d6f-473f-8125-4a0611251d52)
+![image](https://github.com/user-attachments/assets/f1e864fc-6dee-4cd6-9c96-1ac8fe5557b4)
 
 
 * 회사 신청
