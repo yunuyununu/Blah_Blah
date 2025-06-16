@@ -13,18 +13,18 @@
       <!-- 회사 인증파일 업로드 -->
  <!-- 회사 인증파일 업로드 - 수평 정렬 -->
 <div class="row justify-content-center mb-3">
-  <div class="col-md-5 d-flex align-items-center gap-3 flex-wrap">
+  <div class="col-md-5 d-flex align-items-center gap-2 flex-wrap">
     <!-- 라벨 -->
-    <label class="mb-0" style="white-space: nowrap;">변경 할 회사 인증파일</label>&nbsp;&nbsp;
+    <label class="mb-0" style="white-space: nowrap;">변경 할 회사 인증파일</label>
 
     <!-- 파일 첨부 버튼 -->
-    <label class="file-label mb-0">
+    <label class="file-label mb-0 d-flex align-items-center">
       <span class="upload-button">파일 첨부</span>
       <input type="file" ref="userFileInput" accept=".jpg,.jpeg,.png" @change="handleFileChange" hidden />
     </label>
 
-    <!-- 파일 이름 + 삭제 버튼 -->
-    <div v-if="userFile" class="file-info mb-0 d-flex align-items-center gap-2">
+    <!-- 파일 이름 + 삭제 버튼: 바로 옆에 출력 -->
+    <div v-if="userFile" class="d-flex align-items-center gap-1">
       <span class="file-name">{{ userFile.name }}</span>
       <button type="button" class="remove-file" @click="removeFile">×</button>
     </div>
@@ -233,7 +233,7 @@ input[type="password"] {
 }
 
 .upload-button {
-  background-color: #f8f8f8;
+  background-color: #c0e0fa;
   border: 1px solid #ccc;
   padding: 6px 14px;
   border-radius: 4px;
@@ -251,14 +251,6 @@ input[type="password"] {
   margin-top: 8px;
 }
 
-.file-name {
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 14px;
-}
-
 .remove-file {
   background: none;
   border: none;
@@ -271,5 +263,12 @@ input[type="password"] {
   font-size: 12px;
   color: red;
 }
-
+.file-name {
+  font-size: 14px;
+  color: #333;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
   </style>

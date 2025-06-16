@@ -251,7 +251,9 @@ const errors = ref({
 });
 
 const getImageUrl = (filename) => {
-  if (filename) {
+  if (filename.startsWith('https')) {
+    return filename;
+  } else if (filename !== "") {
     return `https://storage.googleapis.com/blah_blah_bucket/${filename}`;
   } else {
     return `https://storage.googleapis.com/blah_blah_bucket/no_image.png`;

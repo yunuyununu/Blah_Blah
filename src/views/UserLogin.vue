@@ -43,13 +43,19 @@
           </div>
         </div>
 
+        <!-- 로그인 에러 메시지 -->
+        <div v-if="loginError" class="row">
+          <div class="col" style="text-align: center;">
+            <p class="error-text">{{ loginError }}</p>
+          </div>
+        </div>
+
         <!-- 로그인 버튼 -->
         <div class="row">
           <div class="col" style="text-align: center;">
             <br>
             <button type="submit" class="btn btn-outline-dark">로그인</button>&nbsp;&nbsp;
-          <br>
-            <br>
+            <br><br>
           </div>
         </div>
 
@@ -85,6 +91,8 @@
   const userIdInput = ref(null)
   const userPwInput = ref(null)
 
+const loginError = ref('')
+
   const errors = ref({
         userId : '',
         userPw : ''
@@ -93,7 +101,7 @@
   const userStore = useUserStore()
 
 const submit = async () => {
-
+loginError.value = ''
   let isValid = true
 
   // 아이디 체크
@@ -123,9 +131,7 @@ const submit = async () => {
       alert('탈퇴한 회원입니다.\n홈페이지를 이용하시려면 회원가입이 필요합니다.')
       return
       } else { // 로그인 정보 불일치
-       alert('아이디 또는 비밀번호가 일치하지 않습니다. 다시 확인 후 입력해주시기 바랍니다.')
-       errors.value.userId = '아이디를 다시 입력하세요.'
-       errors.value.userPw = '비밀번호를 다시 입력하세요.'
+       loginError.value = '아이디 또는 비밀번호가 일치하지 않습니다.';
      }
   } catch (error) {
      console.error('로그인 전송 실패: '+error)

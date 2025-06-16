@@ -30,11 +30,17 @@
 
             <!-- 회사소개 -->
             <div class="form-group">
-              <label>회사 소개</label>
-              <input type="text" v-model="companyIntro" ref="companyIntroInput" placeholder="200자 이내로 작성하세요."
-              :class="['custom-input', { 'input-error': errors.companyIntro  }]" maxlength="200"/>
-              <p v-if="errors.companyIntro" class="error-text">{{ errors.companyIntro }}</p>
-            </div>
+            <label>회사 소개</label>
+            <textarea
+              v-model="companyIntro"
+              ref="companyIntroInput"
+              placeholder="200자 이내로 작성하세요."
+              :class="['custom-input', { 'input-error': errors.companyIntro }]"
+              maxlength="200"
+              rows="4"
+            ></textarea>
+            <p v-if="errors.companyIntro" class="error-text">{{ errors.companyIntro }}</p>
+          </div>
 
             <!-- 설립일자 -->
             <div class="form-group">
@@ -69,13 +75,14 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
-
+import { useToast } from 'vue-toastification'
 import { useUserStore } from '@/store/userStore'
 
 const userStore = useUserStore()
 
 const router = useRouter()
 
+const toast = useToast()
 const companyName = ref('')
 const companyIntro = ref('')
 const companyEst = ref('')
@@ -153,6 +160,7 @@ const submit = () => {
         'Content-Type': 'multipart/form-data'
       }}).then(response => {
         console.log("회사신청 성공 ==",response.data)
+        toast.success('회사신청이 완료되었습니다.')
         router.push('/')
       }).catch(error => {
         alert('회사신청에 실패했습니다. 관리자에게 문의하세요.')
@@ -242,10 +250,16 @@ label {
 }
 input[type="text"],
 input[type="number"],
-input[type="file"] {
+input[type="file"],
+textarea {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none; /* textarea 사이즈 수동 변경 막기 (필요 시 제거) */
+  width: 100%;
+  box-sizing: border-box;
 }
 .submit-btn {
   background-color: black;
@@ -282,7 +296,7 @@ input[type="file"] {
 
 .upload-button {
   display: inline-block;
-  background-color: #f0f0f0;
+  background-color: #c0e0fa;
   border: 1px solid #ccc;
   padding: 6px 12px;
   border-radius: 4px;

@@ -119,6 +119,10 @@ const onImageChange = (e) => {
 }
 
 const addOption = () => {
+  if (voteOptions.value.length >= 10) {
+    alert('투표 항목은 최대 10개까지 추가할 수 있습니다.')
+    return
+  }
   voteOptions.value.push('')
   errors.value.voteOptions.push('')
 }
@@ -294,7 +298,7 @@ input {
 }
 input[disabled] {
   background-color: #e9ecef;
-  color: #6c757d;
+  color: #a4b3ca;
   cursor: not-allowed;
 }
 .vote-option-input {

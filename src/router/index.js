@@ -57,6 +57,11 @@ const routes = [
         path: 'mycompanychange',
         name: 'mycompanychange',
         component: () => import('@/views/MyCompanyChange')
+      },
+      {
+        path: 'emailchange',
+        name: 'emailchange',
+        component: () => import('@/views/EmailChange')
       }
     ]
   },

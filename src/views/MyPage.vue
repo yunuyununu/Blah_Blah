@@ -26,6 +26,13 @@
             >
               회사 변경 신청
             </RouterLink>
+            <RouterLink 
+              to="/mypage/emailchange"
+              class="menu-tab"
+              :class="{ active: $route.path.includes('/mypage/emailchange') }"
+            >
+              이메일 변경
+            </RouterLink>
           </div>
         </div>
       </div>
