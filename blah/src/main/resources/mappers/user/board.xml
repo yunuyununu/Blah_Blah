@@ -23,7 +23,7 @@
 	            USR.U_NICNAME AS U_NICNAME,			<!--작성자닉네임-->
 	            IFNULL(COP.C_NAME, '새회사') AS C_NAME	<!--작성자 회사명-->
 	        FROM BOARD BRD
-	        LEFT JOIN USER USR 
+	        INNER JOIN USER USR 
 	        	ON BRD.B_U_IDX = USR.U_IDX
 	        LEFT JOIN COMPANY COP 
 	        	ON USR.U_C_IDX = COP.C_IDX
@@ -38,24 +38,28 @@
 	        LIMIT #{page} OFFSET #{offset}
 	    ) board_data
 	    LEFT JOIN (
-	        SELECT H_B_IDX, COUNT(1) AS heart_count
-	        FROM HEART
-	        GROUP BY H_B_IDX
-	    ) heart_counts ON board_data.B_IDX = heart_counts.H_B_IDX
+			        SELECT H_B_IDX, COUNT(1) AS heart_count
+			        FROM HEART
+			        GROUP BY H_B_IDX
+			    	) heart_counts 
+			    	ON board_data.B_IDX = heart_counts.H_B_IDX
 	    LEFT JOIN (
-	        SELECT CM_B_IDX, COUNT(1) AS comment_count
-	        FROM COMMENT
-	        GROUP BY CM_B_IDX
-	    ) comment_counts ON board_data.B_IDX = comment_counts.CM_B_IDX
+			        SELECT CM_B_IDX, COUNT(1) AS comment_count
+			        FROM COMMENT
+			        GROUP BY CM_B_IDX
+			   	   ) comment_counts 
+			   	   ON board_data.B_IDX = comment_counts.CM_B_IDX
 	</select>	
 
 	
-	<!--게시글-->
+	<!--게시글 전체수-->
 	<select id="boardTotalCount" resultType="int">
 		SELECT COUNT(DISTINCT BRD.B_IDX)
 		FROM BOARD BRD
-		JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-		JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		JOIN USER USR 
+			ON BRD.B_U_IDX = USR.U_IDX
+		JOIN COMPANY COP 
+			ON USR.U_C_IDX = COP.C_IDX
 		WHERE BRD.B_DELETE = 'N'
 		<if test="searchKeyword != null and searchKeyword != ''">
 		    AND (
@@ -82,19 +86,23 @@
 			   VT.V_TITLE AS V_TITLE				<!--투표제목-->
 		FROM BOARD BRD
 			JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-			LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
-			LEFT JOIN HEART HRT ON HRT.H_B_IDX = BRD.B_IDX
-			LEFT JOIN VOTE VT ON VT.V_B_IDX = BRD.B_IDX
+			LEFT JOIN COMPANY COP 
+				ON USR.U_C_IDX = COP.C_IDX
+			LEFT JOIN HEART HRT 
+				ON HRT.H_B_IDX = BRD.B_IDX
+			LEFT JOIN VOTE VT 
+				ON VT.V_B_IDX = BRD.B_IDX
 		WHERE BRD.B_IDX = #{b_idx}
 	</select>
 	
 	<!--게시글 상세 이미지-->
 	<select id="boardImages" resultType="java.util.HashMap">
-		SELECT IMG.I_IDX AS I_IDX,
-				IMG.I_B_IDX AS I_B_IDX,
-				IMG.I_IMAGE AS I_IMAGE
+		SELECT IMG.I_IDX AS I_IDX,			<!--이미지 번호-->
+				IMG.I_B_IDX AS I_B_IDX,		<!--게시글 번호-->
+				IMG.I_IMAGE AS I_IMAGE		<!--이미지명-->
 		FROM BOARD BRD
-			LEFT JOIN IMAGE_FILE IMG ON IMG.I_B_IDX = BRD.B_IDX
+			LEFT JOIN IMAGE_FILE IMG 
+				ON IMG.I_B_IDX = BRD.B_IDX
 		WHERE BRD.B_IDX = #{b_idx}
 	</select>
 	
@@ -109,19 +117,37 @@
 	<select id="likePrevent" resultType="int" parameterType="map">
 		SELECT COUNT(1) 
 		FROM HEART 
-		WHERE H_U_IDX = #{h_u_idx} AND H_B_IDX = #{h_b_idx}
+		WHERE H_U_IDX = #{h_u_idx} 
+			AND H_B_IDX = #{h_b_idx}
 	</select>
 	
 	<!--좋아요 입력-->
 	<insert id="boardLike" parameterType="map">
-		INSERT INTO HEART (H_B_IDX, H_U_IDX)
-        VALUES (#{h_b_idx}, #{h_u_idx})
+		INSERT INTO HEART (
+				H_B_IDX,
+				H_U_IDX
+				)
+        		VALUES 
+        		(
+				#{h_b_idx}, 
+				#{h_u_idx})
 	</insert>
 	
 	<!--알람 전송-->
 	<insert id="alarmInsert" parameterType="com.example.blah.domain.AlarmDTO">
-		INSERT INTO ALARM (A_B_IDX, A_RECEIVER_IDX,A_SENDER_IDX,  A_TYPE, A_URL)
-    	VALUES (#{a_b_idx}, #{a_receiver_idx}, #{a_sender_idx}, #{a_type}, #{a_url})
+		INSERT INTO ALARM (
+				A_B_IDX,
+				A_RECEIVER_IDX,
+				A_SENDER_IDX,
+				A_TYPE, A_URL
+				)
+    	VALUES (
+				#{a_b_idx},
+				#{a_receiver_idx},
+				#{a_sender_idx},
+				#{a_type},
+				#{a_url}
+				)
 	</insert>
 	
 	<!--좋아요 취소-->
@@ -164,7 +190,7 @@
     
     <!--하트 갯수-->
     <select id="heartCount" resultType="int">
-    	SELECT COUNT(1) AS COUNT
+    	SELECT COUNT(1) AS COUNT		<!--하트갯수-->
 		FROM HEART HRT
 		JOIN BOARD BRD ON BRD.B_IDX = HRT.H_B_IDX
 		WHERE B_IDX = #{b_idx}
@@ -173,22 +199,22 @@
     <!--주간 토픽 베스트-->
     <select id="weeklyBest" resultType="com.example.blah.domain.BoardDTO">
     	SELECT 
-		    BRD.B_IDX AS B_IDX,
-		    BRD.B_TITLE AS B_TITLE,
-		    BRD.B_CONTENT AS B_CONTENT,
-		    BRD.B_DATE AS B_DATE,
-		    BRD.B_HITS AS B_HITS,
-		    COUNT(DISTINCT HRT.H_IDX) AS LIKE_COUNT,
-		    COUNT(DISTINCT COM.CM_IDX) AS COMMENT_COUNT,
-		    COUNT(I_IDX) AS IMAGE_COUNT
+		    BRD.B_IDX AS B_IDX,						<!--게시물 번호-->
+		    BRD.B_TITLE AS B_TITLE,					<!--게시물 제목-->
+		    BRD.B_CONTENT AS B_CONTENT,				<!--게시물 내용-->
+		    BRD.B_DATE AS B_DATE,					<!--등록일자-->
+		    BRD.B_HITS AS B_HITS,					<!--조회수-->
+		    COUNT(DISTINCT HRT.H_IDX) AS LIKE_COUNT,		<!--좋아요수-->
+		    COUNT(DISTINCT COM.CM_IDX) AS COMMENT_COUNT,	<!--댓글수-->
+		    COUNT(I_IDX) AS IMAGE_COUNT						<!--이미지유무-->
 		FROM BOARD BRD
-		LEFT JOIN HEART HRT
-		    ON BRD.B_IDX = HRT.H_B_IDX
-		    AND HRT.H_IDX IS NOT NULL
-		LEFT JOIN COMMENT COM
-    		ON BRD.B_IDX = COM.CM_B_IDX
-    	LEFT JOIN IMAGE_FILE IMG
-			ON BRD.B_IDX = IMG.I_B_IDX
+			LEFT JOIN HEART HRT
+			    ON BRD.B_IDX = HRT.H_B_IDX
+			    AND HRT.H_IDX IS NOT NULL
+			LEFT JOIN COMMENT COM
+	    		ON BRD.B_IDX = COM.CM_B_IDX
+	    	LEFT JOIN IMAGE_FILE IMG
+				ON BRD.B_IDX = IMG.I_B_IDX
 		WHERE BRD.B_DELETE = 'N'
 		  AND BRD.B_DATE >= DATE_SUB(NOW(), INTERVAL 7 DAY)
 		GROUP BY BRD.B_IDX
@@ -224,14 +250,26 @@
     
     <!--게시물 투표 등록-->
     <insert id="voteInfoInsert" useGeneratedKeys="true" keyProperty="v_idx">
-    	INSERT INTO VOTE (V_B_IDX, V_TITLE)
-    	VALUES (#{v_b_idx}, #{v_title})
+    	INSERT INTO VOTE (
+						V_B_IDX, 
+						V_TITLE
+						)
+    	VALUES (
+			#{v_b_idx}, 
+			#{v_title}
+			)
     </insert>
     
     <!--투표 항목-->
     <insert id="voteOptionInsert">
-    	INSERT INTO VOTE_OPTION (VO_V_IDX, VO_CONTENT)
-    	VALUES (#{vo_v_idx}, #{vo_content})
+    	INSERT INTO VOTE_OPTION (
+								VO_V_IDX, 
+								VO_CONTENT
+								)
+    	VALUES (
+			#{vo_v_idx}, 
+			#{vo_content}
+			)
     </insert>
     
     <!--투표 존재 유무-->
@@ -243,7 +281,7 @@
     
     <!--투표 정보-->
     <select id="voteInfo">
-    	SELECT VO.VO_IDX AS VO_IDX,			<!--항목번호-->
+    	SELECT VO.VO_IDX AS VO_IDX,				<!--항목번호-->
 		        VO.VO_CONTENT AS VO_CONTENT,	<!--항목내용-->
 		        VO.VO_COUNT AS VO_COUNT			<!--항목별 투표수-->
 		FROM VOTE VT
@@ -254,10 +292,12 @@
     <!--투표한 항목상태-->
     <select id="voteCheck">
     	SELECT IFNULL(
-			(SELECT VR.VR_VO_IDX
-			FROM VOTE_RESULT VR
-			  JOIN VOTE_OPTION VO ON VR.VR_VO_IDX = VO.VO_IDX
-			  JOIN VOTE VT ON VO.VO_V_IDX = VT.V_IDX
+			(SELECT VR.VR_VO_IDX			<!--투표결과 항목번호-->
+			FROM VOTE_RESULT VR				
+			  JOIN VOTE_OPTION VO 
+			  		ON VR.VR_VO_IDX = VO.VO_IDX
+			  JOIN VOTE VT 
+			  		ON VO.VO_V_IDX = VT.V_IDX
 			WHERE VT.V_B_IDX = #{v_b_idx}
 			  AND VR.VR_U_IDX = #{vr_u_idx}
 			  LIMIT 1
@@ -279,41 +319,45 @@
     
     <select id="voteBest" resultType="com.example.blah.domain.VoteDTO">
       SELECT
-		    VT.V_IDX AS V_IDX,
-		    VT.V_TITLE AS V_TITLE,
-		    BRD.B_IDX AS B_IDX,
-		    BRD.B_TITLE AS B_TITLE,
-		    IFNULL(COP.C_NAME, '새회사') AS C_NAME,
-		    USR.U_IDX AS U_IDX,
-		    USR.U_NICNAME AS U_NICNAME,
+		    VT.V_IDX AS V_IDX,						<!--투표번호-->
+		    VT.V_TITLE AS V_TITLE,					<!--투표제목-->
+		    BRD.B_IDX AS B_IDX,						<!--게시물번호-->
+		    BRD.B_TITLE AS B_TITLE,					<!--게시물제목-->
+		    IFNULL(COP.C_NAME, '새회사') AS C_NAME,	<!--작성자 회사명-->
+		    USR.U_IDX AS U_IDX,						<!--회원아이디-->
+		    USR.U_NICNAME AS U_NICNAME,				<!--회원닉네임-->
 		    (
-		        SELECT COUNT(1)
-		        FROM VOTE_RESULT VR
-		        JOIN VOTE_OPTION VO ON VR.VR_VO_IDX = VO.VO_IDX
+		        SELECT COUNT(1)						<!--참여자 수-->
+		        FROM VOTE_RESULT VR					
+		        	JOIN VOTE_OPTION VO 			
+		        		ON VR.VR_VO_IDX = VO.VO_IDX	
 		        WHERE VO.VO_V_IDX = VT.V_IDX
 		    ) AS VOTE_PARTICIPANTS,
 		    (
-		        SELECT COUNT(1)
+		        SELECT COUNT(1)						<!--좋아요 수-->
 		        FROM Heart HRT
 		        WHERE HRT.H_B_IDX = BRD.B_IDX
 		    ) AS LIKE_COUNT,
 	    	(
-			SELECT COUNT(1)
+			SELECT COUNT(1)							<!--댓글수-->
 			FROM COMMENT COM
 			WHERE COM.CM_B_IDX = BRD.B_IDX
 		    ) AS COMMENT_COUNT
 		FROM VOTE VT
-		    JOIN BOARD BRD ON VT.V_B_IDX = BRD.B_IDX
-		    JOIN USER USR ON BRD.B_U_IDX = USR.U_IDX
-		    LEFT JOIN COMPANY COP ON USR.U_C_IDX = COP.C_IDX
+		    JOIN BOARD BRD 
+		    	ON VT.V_B_IDX = BRD.B_IDX
+		    JOIN USER USR 
+		    	ON BRD.B_U_IDX = USR.U_IDX
+		    LEFT JOIN COMPANY COP 
+		    	ON USR.U_C_IDX = COP.C_IDX
 		WHERE VT.V_DATE >= DATE_SUB(NOW(), INTERVAL 7 DAY)
 		  AND BRD.B_DELETE = 'N'
 		  AND BRD.B_VOTE = 'Y'
 		ORDER BY (
-		        SELECT SUM(VO.VO_COUNT)
+		        SELECT SUM(VO.VO_COUNT)			<!--항목 옵션 갯수 합계-->
 		        FROM VOTE_OPTION VO
 		        WHERE VO.VO_V_IDX = VT.V_IDX
 		      ) DESC
-		LIMIT 3
+		LIMIT 3			<!--베스트 3개만-->
     </select>
 </mapper>

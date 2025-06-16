@@ -6,40 +6,56 @@
 <mapper namespace="com.example.blah.mapper.CompanyMapper">
 
 	<!--회사목록-->
-    <select id="list" resultType="com.example.blah.domain.CompanyDTO">
-        SELECT C_IDX ,		<!--회사번호-->
-        	   C_NAME,		<!--회사명-->
-        	   C_LOGO,		<!--회사대표사진-->
-        	   C_INDUSTRY,	<!--회사업계-->
-        	   C_EST,		<!--회사 설립일자-->
-        	   C_INTRO,		<!--회사소개-->
-        	   C_NUMBER,	<!--회사인원-->
-        	   C_BUSINESS,	<!--사업자등록번호-->
-        	   C_REGISTER	<!--등록일자-->
-        FROM COMPANY 
-        WHERE C_NAME LIKE CONCAT('%', #{param3}, '%')
-		AND C_STATUS = 'NORMAL'
-        ORDER BY RAND(), C_REGISTER DESC
-        LIMIT #{param1} OFFSET #{param2}
-    </select>
+    <select id="list" resultType="map">
+    SELECT 
+        C_IDX,          <!-- 회사 번호 -->
+        C_NAME,         <!-- 회사명 -->
+        C_LOGO,         <!-- 회사 로고 -->
+        C_INDUSTRY,     <!-- 업계 -->
+        C_EST,          <!-- 설립일 -->
+        C_INTRO,        <!-- 회사 소개 -->
+        C_NUMBER,       <!-- 인원 수 -->
+        C_BUSINESS,     <!-- 사업자등록번호 -->
+        C_REGISTER      <!-- 등록일 -->
+    FROM COMPANY
+    WHERE C_STATUS = 'NORMAL'
+    <if test="searchKeyword != null and searchKeyword != ''">
+        AND (
+            C_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+        )
+    </if>
+    ORDER BY C_IDX DESC
+    LIMIT #{page} OFFSET #{offset}
+</select>
+
+<select id="companyTotalCount" resultType="int">
+    SELECT COUNT(DISTINCT C_IDX) 
+    FROM COMPANY
+    WHERE C_STATUS = 'NORMAL'
+    <if test="searchKeyword != null and searchKeyword != ''">
+        AND (
+            C_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+        )
+    </if>
+</select>
 
 	<!--회사상세-->	
 	<select id="companyDetails" resultType="map">
-		SELECT COP.C_IDX AS C_IDX,			<!--회사번호-->
-			   COP.C_NAME AS C_NAME,			<!--회사명-->
-			   COP.C_NICNAME AS C_NICNAME,	<!--회사닉네임-->	
-			   COP.C_LOGO AS C_LOGO,			<!--회사대표사진-->
-			   COP.C_INDUSTRY AS C_INDUSTRY,	<!--회사업계-->
-			   COP.C_EST AS C_EST,			<!--회사 설립일자-->
-			   COP.C_INTRO AS C_INTRO,		<!--회사소개-->
-			   COP.C_NUMBER AS C_NUMBER,		<!--회사인원-->
-			   COP.C_BUSINESS AS C_BUSINESS,	<!--사업자등록번호-->
-			   COP.C_REGISTER AS C_REGISTER,	<!--등록일자-->
-               COP.C_UPDATE AS C_UPDATE,		<!--수정일자-->
-               COP.C_STATUS AS C_STATUS,		<!--회사상태-->
-               COP.C_CR_IDX AS C_CR_IDX		<!--회사신청번호-->
-		FROM COMPANY COP
-		WHERE COP.C_IDX = #{c_idx}
+		SELECT C_IDX,			<!--회사번호-->
+			   C_NAME,			<!--회사명-->
+			   C_NICNAME,	<!--회사닉네임-->	
+			   C_LOGO,			<!--회사대표사진-->
+			   C_INDUSTRY,	<!--회사업계-->
+			   C_EST,			<!--회사 설립일자-->
+			   C_INTRO,		<!--회사소개-->
+			   C_NUMBER,		<!--회사인원-->
+			   C_BUSINESS,	<!--사업자등록번호-->
+			   C_REGISTER,	<!--등록일자-->
+               C_UPDATE,		<!--수정일자-->
+               C_STATUS,		<!--회사상태-->
+               C_CR_IDX		<!--회사신청번호-->
+		FROM COMPANY 
+		WHERE C_IDX = #{c_idx}
 	</select>
 	
 	<!--리뷰리스트-->
@@ -82,21 +98,35 @@
 	
 	<!--회사 신청-->
 	<insert id="companyInsert">
-		INSERT INTO COMPANY_REQUEST (CR_U_IDX,CR_NAME,CR_INTRO,CR_BUSINESS,CR_LOGO,CR_EST)
-		VALUES (#{cr_u_idx}, #{cr_name}, #{cr_intro}, #{cr_business},#{cr_logo},#{cr_est})
+		INSERT INTO COMPANY_REQUEST (
+									CR_U_IDX,
+									CR_NAME,
+									CR_INTRO,
+									CR_BUSINESS,
+									CR_LOGO,
+									CR_EST)
+		VALUES (
+			#{cr_u_idx}, 
+			#{cr_name}, 
+			#{cr_intro}, 
+			#{cr_business},
+			#{cr_logo},
+			#{cr_est}
+			)
 	</insert>
 	
 	<select id="companyScore" resultType="com.example.blah.domain.CompanyDTO">
 		SELECT 
-		    COP.C_IDX,
-		    COP.C_NAME,
-		    COP.C_NICNAME,
-		    COP.C_LOGO,
-		    COP.C_INDUSTRY,
-		    IFNULL(ROUND(SUM(REW.R_STAR)/COUNT(REW.R_STAR),1),0) AS STAR,
-		    COUNT(REW.R_IDX) AS REVIEW_COUNT
+		    COP.C_IDX,					<!--회사 번호-->
+		    COP.C_NAME,					<!--회사명-->
+		    COP.C_NICNAME,				<!--회사닉네임-->
+		    COP.C_LOGO,					<!--회사대표사진-->
+		    COP.C_INDUSTRY,				<!--회사업계-->
+		    IFNULL(ROUND(SUM(REW.R_STAR)/COUNT(REW.R_STAR),1),0) AS STAR,	<!--회사평점-->
+		    COUNT(REW.R_IDX) AS REVIEW_COUNT		<!--리뷰갯수-->
 		FROM COMPANY COP
-		JOIN REVIEW REW ON COP.C_IDX = REW.R_C_IDX
+			JOIN REVIEW REW 
+				ON COP.C_IDX = REW.R_C_IDX
 		WHERE COP.C_STATUS = 'NORMAL'
 		GROUP BY COP.C_IDX
 		HAVING REVIEW_COUNT >= 1
@@ -105,15 +135,15 @@
 	</select>
 	
 	<select id="companySearch">
-		SELECT COP.C_IDX,		<!--회사번호-->
-        	   COP.C_NAME,		<!--회사명-->
-        	   COP.C_LOGO,		<!--회사대표사진-->
-        	   COP.C_INDUSTRY,	<!--회사업계-->
-        	   COP.C_EST,		<!--회사 설립일자-->
-        	   COP.C_INTRO,		<!--회사소개-->
-        	   COP.C_NUMBER,	<!--회사인원-->
-        	   COP.C_BUSINESS,	<!--사업자등록번호-->
-        	   COP.C_REGISTER	<!--등록일자-->
+		SELECT COP.C_IDX,			<!--회사번호-->
+        	   COP.C_NAME,			<!--회사명-->
+        	   COP.C_LOGO,			<!--회사대표사진-->
+        	   COP.C_INDUSTRY,		<!--회사업계-->
+        	   COP.C_EST,			<!--회사 설립일자-->
+        	   COP.C_INTRO,			<!--회사소개-->
+        	   COP.C_NUMBER,		<!--회사인원-->
+        	   COP.C_BUSINESS,		<!--사업자등록번호-->
+        	   COP.C_REGISTER		<!--등록일자-->
 		FROM COMPANY COP
 		WHERE COP.C_NAME LIKE CONCAT('%', #{c_name}, '%')
 		  AND COP.C_STATUS = 'NORMAL'

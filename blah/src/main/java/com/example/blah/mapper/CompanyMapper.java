@@ -3,14 +3,19 @@ package com.example.blah.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.example.blah.domain.CompanyDTO;
 
 public interface CompanyMapper {
 	
 	// 회사 목록
-	List<CompanyDTO> list(int limit, int offset,String c_name);
+	List<Map<String, Object>> list(@Param("searchKeyword") String searchKeyword,@Param("page") int page,@Param("offset") int offset);
 	
-	// 게시물 상세
+	// 회사 총 갯수
+	int companyTotalCount(String searchKeyword);
+	
+		// 게시물 상세
 	Map<String, Object> companyDetails(int c_idx);
 	
 	// 회사 리뷰 목록

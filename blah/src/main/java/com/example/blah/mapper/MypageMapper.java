@@ -48,4 +48,7 @@ public interface MypageMapper {
 	
 	// 리뷰 미열람 처리
 	void reviewStatusUpdate(int u_idx);
+	
+	// 이메일 수정
+	void emailChange(Map<String, Object> map);
 }

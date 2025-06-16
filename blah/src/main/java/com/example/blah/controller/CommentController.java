@@ -40,10 +40,6 @@ public class CommentController {
 			dto.setCm_b_idx(Integer.parseInt(request.get("cm_b_idx")));
 			dto.setCm_content(request.get("cm_content"));
 			service.commentInsert(dto);
-			System.out.println("댓글uuuuuu--->"+dto.getCm_u_idx());
-			System.out.println("댓글bbbbbb--->"+dto.getCm_b_idx());
-			System.out.println("댓글content--->"+dto.getCm_content());
-			System.out.println("댓글 입력--->"+service);
 			result = "success";
 		} catch (Exception e) {
 			e.printStackTrace();

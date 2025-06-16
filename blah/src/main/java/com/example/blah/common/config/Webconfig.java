@@ -7,12 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
-
-import com.example.blah.common.intercepter.LoginCheckInterceptor;
 
 @Configuration
 public class Webconfig implements WebMvcConfigurer {
@@ -29,12 +26,12 @@ public class Webconfig implements WebMvcConfigurer {
                 .maxAge(3600); // CORS 요청을 캐시할 수 있는 시간(초)
 	}
 	
-	@Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginCheckInterceptor())
-                .addPathPatterns("/mypage/**")     // 로그인 체크할 경로
-                .excludePathPatterns("/login", "/join"); // 로그인, 회원가입은 예외
-    }
+	/*
+	 * @Override public void addInterceptors(InterceptorRegistry registry) {
+	 * registry.addInterceptor(new LoginCheckInterceptor())
+	 * .addPathPatterns("/mypage/**") // 로그인 체크할 경로 .excludePathPatterns("/login",
+	 * "/join"); // 로그인, 회원가입은 예외 }
+	 */
 	
 	/* vue에서 새로고침 시 에러 해결
 	요청을 보내면 서버에서 설정한 값에 의헤 index.html을 반환

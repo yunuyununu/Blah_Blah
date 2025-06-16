@@ -146,7 +146,7 @@ public class MypageController {
 	    // 리뷰 열람 가능 처리
 		int reviewCount = service.reviewYN(u_idx);
 		// u_review 컬럼 'Y'으로 바뀜
-		if(reviewCount == 1) {
+		if(reviewCount >= 1) {
 			service.reviewAccessible(u_idx);
 		}
 	}
@@ -183,6 +183,17 @@ public class MypageController {
 		if(reviewCount == 0) {
 			service.reviewStatusUpdate(u_idx);
 		}
+	}
+	
+	// 이메일수정
+	@PostMapping("emailChange")
+	public void emailChange(@RequestParam(name="u_email", defaultValue="") String u_email,HttpSession session) {
+		
+		Map<String, Object> map = new HashMap<>();
+	    map.put("u_idx", (int)session.getAttribute("UserIdx"));
+	    map.put("u_email", u_email);
+
+	    service.emailChange(map);
 	}
 	
 }

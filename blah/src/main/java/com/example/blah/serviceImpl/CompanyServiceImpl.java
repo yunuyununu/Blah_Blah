@@ -18,8 +18,16 @@ public class CompanyServiceImpl implements CompanyService {
 	 private CompanyMapper companyMapper;
 	
 	@Override
-	public List<CompanyDTO> list(int limit, int offset,String c_name) {
-		return companyMapper.list(limit, offset,c_name);
+	public List<Map<String, Object>> list(String searchKeyword,int page, int offset) {
+		System.out.println("여기확인해=>"+companyMapper.list(searchKeyword, page, offset));
+
+		return companyMapper.list(searchKeyword, page,offset);
+	}
+	
+	// 게시물 총 갯수
+	@Override
+	public int companyTotalCount(String searchKeyword) {
+		return companyMapper.companyTotalCount(searchKeyword);
 	}
 	
 	@Override

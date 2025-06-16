@@ -48,4 +48,7 @@ public interface MypageService {
 	
 	// 회원 현회사 리뷰 존재 유무
 	void reviewStatusUpdate(int u_idx);
+	
+	// 이메일 수정
+	void emailChange(Map<String, Object> map);
 }

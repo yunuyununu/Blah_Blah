@@ -6,12 +6,12 @@
 <mapper namespace="com.example.blah.mapper.LoginMapper">
 	<!--회원 로그인-->
     <select id="userLogin" parameterType="string" resultType="com.example.blah.domain.LoginDTO">
-		SELECT U_IDX,		<!--회원번호-->
-			   U_ID,		<!--회원아이디-->
-			   U_PASSWORD,	<!--비밀번호-->
-			   U_NICNAME,	<!--회원닉네임-->
-			   U_EMAIL,		<!--회원이메일-->
-			   U_PHONE		<!--회원전화번호-->
+		SELECT U_IDX,			<!--회원번호-->
+			   U_ID,			<!--회원아이디-->
+			   U_PASSWORD,		<!--비밀번호-->
+			   U_NICNAME,		<!--회원닉네임-->
+			   U_EMAIL,			<!--회원이메일-->
+			   U_PHONE			<!--회원전화번호-->
 		FROM USER
 		WHERE U_ID = #{u_id}
     </select>

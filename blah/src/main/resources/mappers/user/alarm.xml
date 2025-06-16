@@ -7,27 +7,28 @@
     <!--알림 리스트-->
  	<select id="alarmList" resultType="com.example.blah.domain.AlarmDTO">
 		SELECT 
-		    ARM.A_IDX AS A_IDX,
-		    ARM.A_B_IDX A_B_IDX,
-		    ARM.A_RECEIVER_IDX AS A_RECEIVER_IDX,
-		    ARM.A_TYPE AS A_TYPE, 
-		    ARM.A_URL AS A_URL,
-		    ARM.A_DATE AS A_DATE,
-		    ARM.A_READ AS A_READ,
-		    ARM.A_SENDER_IDX ASVA_SENDER_IDX,
-		    USR.U_NICNAME AS R_U_NAME,
-		    BRD.B_TITLE AS B_TITLE,
-		    HUSR.U_NICNAME AS S_U_NAME
+		    ARM.A_IDX AS A_IDX,					<!--알림번호-->
+		    ARM.A_B_IDX A_B_IDX,				<!--게시글 번호-->
+		    ARM.A_RECEIVER_IDX AS A_RECEIVER_IDX,<!--받는 회원번호-->
+		    ARM.A_TYPE AS A_TYPE, 				<!--투표타입-->
+		    ARM.A_URL AS A_URL,					<!--경로-->
+		    ARM.A_DATE AS A_DATE,				<!--알림날짜-->
+		    ARM.A_READ AS A_READ,				<!--읽음유무-->
+		    ARM.A_SENDER_IDX ASVA_SENDER_IDX,	<!--보내는 회원번호-->
+		    USR.U_NICNAME AS R_U_NAME,			<!--보내는 회원닉네임-->
+		    BRD.B_TITLE AS B_TITLE,				<!--게시글제목-->
+		    HUSR.U_NICNAME AS S_U_NAME			<!--회원 닉네임-->
 		FROM ALARM ARM
-		JOIN USER USR ON USR.U_IDX = ARM.A_RECEIVER_IDX
-		JOIN BOARD BRD ON BRD.B_IDX = ARM.A_B_IDX
-		LEFT JOIN HEART HRT ON HRT.H_B_IDX = BRD.B_IDX
-		LEFT JOIN USER HUSR ON HUSR.U_IDX = HRT.H_U_IDX
+			JOIN USER USR ON USR.U_IDX = ARM.A_RECEIVER_IDX
+			JOIN BOARD BRD ON BRD.B_IDX = ARM.A_B_IDX
+			LEFT JOIN HEART HRT ON HRT.H_B_IDX = BRD.B_IDX
+			LEFT JOIN USER HUSR ON HUSR.U_IDX = HRT.H_U_IDX
 		WHERE A_RECEIVER_IDX = #{a_receiver_idx}
 			AND A_READ = 'N'
 		ORDER BY A_DATE DESC
  	</select>
  	
+ 	<!--읽음유무처리-->
  	<update id="isRead">
  		UPDATE ALARM
 		SET A_READ = 'Y'

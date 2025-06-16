@@ -7,8 +7,21 @@
 
 	<!--회원가입-->
     <insert id="userjoin">
-		INSERT INTO USER (U_ID,U_PASSWORD,U_NICNAME,U_EMAIL,U_PHONE,U_FILE) 
-		VALUES (#{u_id},#{u_password},#{u_nicname},#{u_email},#{u_tel},#{u_file})
+		INSERT INTO USER (
+						U_ID,U_PASSWORD,
+						U_NICNAME,
+						U_EMAIL,
+						U_PHONE,
+						U_FILE
+						) 
+		VALUES (
+			#{u_id},
+			#{u_password},
+			#{u_nicname},
+			#{u_email},
+			#{u_tel},
+			#{u_file}
+			)
         
     </insert>
     

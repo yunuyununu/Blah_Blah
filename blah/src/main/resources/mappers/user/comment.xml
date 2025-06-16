@@ -8,18 +8,18 @@
 	<!--댓글 리스트-->
     <select id="commentList" resultType="com.example.blah.domain.CommentDTO">
     
-		SELECT COM.CM_IDX AS CM_IDX,			<!--댓글 번호-->
-			   COM.CM_U_IDX AS CM_U_IDX,
-			   COM.CM_B_IDX AS CM_B_IDX,		<!--게시글 번호-->
-			   COM.CM_CONTENT AS CM_CONTENT,		<!--댓글 내용-->
+		SELECT COM.CM_IDX AS CM_IDX,									<!--댓글 번호-->
+			   COM.CM_U_IDX AS CM_U_IDX,								<!--댓글 쓴 회원번호-->
+			   COM.CM_B_IDX AS CM_B_IDX,								<!--게시글 번호-->
+			   COM.CM_CONTENT AS CM_CONTENT,							<!--댓글 내용-->
 			   DATE_FORMAT(COM.CM_DATE, '%y/%m/%d %H:%i') AS CM_DATE,	<!--작성 일자-->
-			   COM.CM_PARENT_IDX AS CM_PARENT_IDX,	<!--부모 댓글 번호-->
-			   USR.U_NICNAME AS U_NICNAME,		<!--회원 닉네임-->
+			   COM.CM_PARENT_IDX AS CM_PARENT_IDX,				<!--부모 댓글 번호-->
+			   USR.U_NICNAME AS U_NICNAME,						<!--회원 닉네임-->
 			   IFNULL(CPN.C_NICNAME, '새회사') AS C_NICNAME		<!--회사 닉네임-->
-		FROM COMMENT AS COM 		<!--댓글 테이블-->
-		INNER JOIN USER AS USR		<!--회원 테이블-->
+		FROM COMMENT AS COM 							<!--댓글 테이블-->
+		INNER JOIN USER AS USR							<!--회원 테이블-->
 				ON COM.CM_U_IDX = USR.U_IDX
-		LEFT JOIN COMPANY AS CPN		<!--회사 테이블-->
+		LEFT JOIN COMPANY AS CPN						<!--회사 테이블-->
 				ON CPN.C_IDX = USR.U_C_IDX
 		WHERE CM_B_IDX = #{cm_b_idx}
         ORDER BY 
@@ -30,14 +30,32 @@
     
     <!--댓글 등록-->
     <insert id="commentInsert">
-    	INSERT INTO COMMENT (CM_B_IDX,CM_U_IDX,CM_CONTENT)
-		VALUES (#{cm_b_idx}, #{cm_u_idx}, #{cm_content})
+    	INSERT INTO COMMENT (
+							CM_B_IDX,
+							CM_U_IDX,
+							CM_CONTENT
+							)
+		VALUES (
+			#{cm_b_idx}, 
+			#{cm_u_idx}, 
+			#{cm_content}
+			)
     </insert>
     
     <!--대댓글 등록-->
     <insert id="replyInsert">
-    	INSERT INTO COMMENT (CM_B_IDX,CM_U_IDX,CM_CONTENT,CM_PARENT_IDX)
-		VALUES (#{cm_b_idx}, #{cm_u_idx}, #{cm_content}, #{cm_parent_idx})
+    	INSERT INTO COMMENT (
+							CM_B_IDX,
+							CM_U_IDX,
+							CM_CONTENT,
+							CM_PARENT_IDX
+							)
+		VALUES (
+			#{cm_b_idx}, 
+			#{cm_u_idx}, 
+			#{cm_content}, 
+			#{cm_parent_idx}
+			)
     </insert>
 	
 	<!--댓글/대댓글 삭제-->	

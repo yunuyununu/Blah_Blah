@@ -29,7 +29,10 @@
 	<!--회사 변경-->
 	<update id="companyChange">
 		UPDATE USER
-		SET U_C_IDX = null, U_FILE = #{u_file}, U_STATUS = 'Uncertified', U_REVIEW = 'N'
+		SET U_C_IDX = null, 
+			U_FILE = #{u_file}, 
+			U_STATUS = 'Uncertified', 
+			U_REVIEW = 'N'
 		WHERE U_IDX = #{u_idx}
 	</update>
 	
@@ -57,7 +60,10 @@
 	<!--회원 탈퇴-->
 	<update id="userWithdraw">
 		UPDATE USER
-		SET U_WITHDRAW = 'Y', U_NICNAME = '탈퇴한 회원' U_EMAIL = #{uu_email}, U_PHONE = #{uu_phone}
+		SET U_WITHDRAW = 'Y',
+			 U_NICNAME = '탈퇴한 회원', 
+		 	U_EMAIL = #{uu_email}, 
+		 	U_PHONE = #{uu_phone}
 		WHERE U_IDX = #{u_idx}
 	</update>
 	
@@ -93,7 +99,7 @@
 		        IFNULL(C_IDX,0) AS C_IDX,			<!--회사번호-->
 		        IFNULL(C_NAME,'회사 확인중') AS C_NAME,	<!--회사명-->
 		        (
-			        SELECT COUNT(*) 
+			        SELECT COUNT(*) 				
 			        FROM REVIEW RE
 			        WHERE RE.R_C_IDX = USR.U_C_IDX
 			          AND RE.R_U_IDX = USR.U_IDX
@@ -106,8 +112,22 @@
 	
 	<!--리뷰 작성-->
 	<insert id="reviewInsert">
-		INSERT INTO REVIEW (R_C_IDX,R_U_IDX,R_STAR,R_TITLE,R_CONTENT,R_WORK)
-		VALUES (#{r_c_idx},#{r_u_idx},#{r_star},#{r_title},#{r_content},#{r_work})
+		INSERT INTO REVIEW (
+							R_C_IDX,
+							R_U_IDX,
+							R_STAR,
+							R_TITLE,
+							R_CONTENT,
+							R_WORK
+							)
+					VALUES (
+							#{r_c_idx},
+							#{r_u_idx},
+							#{r_star},
+							#{r_title},
+							#{r_content},
+							#{r_work}
+							)
 	</insert>
 	
 	<!--리뷰 작성 처음인 경우-->
@@ -121,7 +141,10 @@
 	<!--리뷰 수정-->
 	<update id="reviewUpdate">
 		UPDATE REVIEW
-		SET R_STAR = #{r_star}, R_TITLE = #{r_title}, R_CONTENT = #{r_content}, R_WORK = #{r_work}
+		SET R_STAR = #{r_star},
+			 R_TITLE = #{r_title}, 
+			 R_CONTENT = #{r_content}, 
+			 R_WORK = #{r_work}
 		WHERE R_IDX = #{r_idx}
 	</update>
 	
@@ -133,7 +156,7 @@
 	
 	<!--리뷰갯수 카운트 -->
 	<select id="reviewYN" resultType="int">
-		SELECT COUNT(1) AS REVIEW_YN
+		SELECT COUNT(1) AS REVIEW_YN  <!--리뷰 갯수 카운트-->
 		FROM REVIEW	
 		WHERE R_U_IDX = #{u_idx}
 	</select>
@@ -144,5 +167,12 @@
 		UPDATE USER
 		SET U_REVIEW = 'N'
 		WHERE U_IDX = #{u_idx}
+	</update>
+	
+	<!--이메일 수정-->
+	<update id="emailChange">
+		UPDATE USER
+		SET U_EMAIL = #{u_email}
+		WHERE U_IDX = #{u_idx}	
 	</update>
 </mapper>

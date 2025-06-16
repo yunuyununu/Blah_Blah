@@ -32,9 +32,23 @@ public class CompanyController {
 	
 	// 회사 목록
 	@GetMapping("list")
-	public List<CompanyDTO> list(@RequestParam(name = "limit") int limit, @RequestParam(name = "offset") int offset,@RequestParam(name = "c_name", defaultValue="") String c_name) {
-		List<CompanyDTO> list = service.list(limit, offset,c_name);
-		return list;
+	public Map<String, Object> list(
+			@RequestParam(name = "searchKeyword", defaultValue="") String searchKeyword,
+		    @RequestParam(name = "page", defaultValue = "1") int page,
+		    @RequestParam(name = "pageSize", defaultValue = "15") int pageSize) {
+		//List<CompanyDTO> list = service.list(limit, offset,c_name);
+		int offset = (page - 1) * pageSize;
+	    List<Map<String, Object>> list = service.list(searchKeyword, pageSize, offset);
+	    int totalCount = service.companyTotalCount(searchKeyword);
+	    int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("list", list);
+	    result.put("totalCount", totalCount);
+	    result.put("totalPages", totalPages);
+	    result.put("currentPage", page);
+	    System.out.println("여기여기==>"+result);
+	    return result;
 	}
 	
 	// 회사 상세페이지

@@ -102,8 +102,10 @@ public class BoardController {
 	    map.put("h_b_idx", h_b_idx);
 	    map.put("h_u_idx", userIdx);
 	    
+	    // 좋아요 중복체크
 	    int liked = service.likePrevent(map); // 0 or 1
-	    int totalLikes = service.heartCount(h_b_idx); // 게시글 총 좋아요 수
+	 // 게시글 총 좋아요 수
+	    int totalLikes = service.heartCount(h_b_idx);
 
 	    Map<String, Object> result = new HashMap<>();
 	    result.put("liked", liked == 1); // true or false
@@ -167,14 +169,10 @@ public class BoardController {
 		
 		try {
 			Integer userIdx = (Integer) session.getAttribute("UserIdx");
-			System.out.println("게시판 등록 시 세션아이디=>>"+userIdx);
 		    if (userIdx == null) {
 		    	result.put("result", "unauthorized");
 	            return result;
 		    }
-		    System.out.println("게시물 제목=>>"+b_title);
-		    System.out.println("내용 답장 확인=>>"+b_content);
-		    System.out.println("이미지들=>"+images);
 	        int b_idx = service.boardInsert(userIdx,b_title,b_content,images);
 	        result.put("result", "success");
 	        result.put("b_idx", b_idx);
@@ -191,11 +189,7 @@ public class BoardController {
 		Integer b_idx = Integer.parseInt((String)request.get("b_idx"));
 		String b_title = String.valueOf(request.get("b_title"));
 		String b_content = String.valueOf(request.get("b_content"));
-		System.out.println("b_idx : "+b_idx);
-		System.out.println("b_title : "+b_title);
-		System.out.println("b_content : "+b_content);
 		try {
-			System.out.println("글/내용만 수정!!!!");
 			service.boardUpdate(b_idx,b_title,b_content);
 		} catch (Exception e) {
 	        e.printStackTrace();
@@ -211,19 +205,13 @@ public class BoardController {
 		try {
 			if (originalImages != null && !originalImages.isEmpty()) {
 			    for (String originalimage : originalImages) {
-			    	 // 2-1. GCS에서 이미지 삭제
+			    	 // 1) GCS에서 이미지 삭제
 		            gcsService.deleteFile(originalimage);
 
-		            // 2-2. DB에서 이미지 레코드 삭제
+		            // 2) DB에서 이미지 레코드 삭제
 		            service.imageDelete(originalimage);
 			    }
 			}
-			
-			System.out.println("b_idx : "+b_idx);
-			System.out.println("b_title : "+b_title);
-			System.out.println("b_content : "+b_content);
-			System.out.println("images : "+images);
-			System.out.println("글/내용/사진까지 수정!!");
 	        service.boardImageUpdate(b_idx,b_title,b_content,images);
 
 	    } catch (Exception e) {
@@ -239,10 +227,10 @@ public class BoardController {
 		try {
 			if (originalImages != null && !originalImages.isEmpty()) {
 			    for (String originalimage : originalImages) {
-			    	 // 2-1. GCS에서 이미지 삭제
+			    	 // 1) GCS에서 이미지 삭제
 		            gcsService.deleteFile(originalimage);
 
-		            // 2-2. DB에서 이미지 레코드 삭제
+		            // 2) DB에서 이미지 레코드 삭제
 		            service.imageDelete(originalimage);
 			    }
 			}
@@ -268,7 +256,6 @@ public class BoardController {
 			@RequestParam(name="v_title") String v_title,@RequestParam(name="options") List<String> options) {
 		Object userIdx = session.getAttribute("UserIdx");
 		try {
-			System.out.println("투표 등록 시 idx=>>"+userIdx);
 	        service.voteInfoInsert(v_b_idx,v_title, options);
 
 	    } catch (Exception e) {
@@ -293,7 +280,6 @@ public class BoardController {
 		map.put("v_b_idx", v_b_idx);
 		
 		int hasVoted =service.voteCheck(map);
-		System.out.println("hasVoted===>"+hasVoted);
 		
 		return hasVoted;
 	}
@@ -305,7 +291,6 @@ public class BoardController {
 		int vr_u_idx = (int)session.getAttribute("UserIdx");
 		
 		try {
-			System.out.println("회원 투표 선택=>>"+vr_vo_idx);
 	        service.votePick(vr_u_idx, vr_vo_idx);
 
 	    } catch (Exception e) {

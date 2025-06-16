@@ -97,4 +97,10 @@ public class MypageServiceImpl implements MypageService {
 	public void reviewStatusUpdate(int u_idx) {
 		mypageMapper.reviewStatusUpdate(u_idx);
 	}
+	
+	// 이메일 수정
+	@Override
+	public void emailChange(Map<String, Object> map) {
+		mypageMapper.emailChange(map);
+	}
 }

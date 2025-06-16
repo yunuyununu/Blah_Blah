@@ -7,7 +7,9 @@ import com.example.blah.domain.CompanyDTO;
 
 public interface CompanyService {
 	
-	List<CompanyDTO> list(int limit, int offset,String c_name);
+	List<Map<String, Object>> list(String searchKeyword,int page, int offset);
+	
+	int companyTotalCount(String searchKeyword);
 	
 	Map<String, Object> details(int c_idx);
 	

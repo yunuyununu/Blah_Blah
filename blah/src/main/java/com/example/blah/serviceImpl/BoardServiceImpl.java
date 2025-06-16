@@ -37,7 +37,7 @@ public class BoardServiceImpl implements BoardService {
 	// 게시글 목록
 	@Override
 	public List<Map<String, Object>> getBoard(String searchKeyword,int page, int offset) {
-		System.out.println("여기확인해=>"+boardMapper.boardList(searchKeyword, page, offset));
+		//System.out.println("여기확인해=>"+boardMapper.boardList(searchKeyword, page, offset));
 	    return boardMapper.boardList(searchKeyword, page, offset);
 	}
 	
@@ -142,7 +142,6 @@ public class BoardServiceImpl implements BoardService {
 	public void boardImageUpdate(int b_idx,String b_title, String b_content, List<MultipartFile> images) throws IOException {
 		
 		BoardDTO dto = new BoardDTO(b_title,b_idx, b_content);
-		System.out.println("여기 글수정 디티오===>"+dto);
 		boardMapper.boardUpdate(dto);
 		
 		if (images != null && !images.isEmpty()) {
@@ -182,11 +181,13 @@ public class BoardServiceImpl implements BoardService {
 		return boardMapper.heartCount(b_idx);
 	}
 	
+	// 주간 베스트
 	@Override
 	public List<BoardDTO> weeklyBest() {
 		return boardMapper.weeklyBest();
 	}
 	
+	// 월간 베스트
 	@Override
 	public List<BoardDTO> monthlyBest() {
 		return boardMapper.monthlyBest();
