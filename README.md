@@ -223,6 +223,42 @@ __[사용기술 및 개발환경]__
 
 
 
+#### __ [BO] 리뷰 관리
+![image](https://github.com/user-attachments/assets/0c2541bd-1104-4c4d-87e4-ab8bbb3ca27d)
+
+
+
+
+#### __ [BO] 회원 관리
+
+* 회원 조회
+![image](https://github.com/user-attachments/assets/e2f74391-df9b-4dfc-a773-713ea54a937c)
+
+
+
+* 회원 인증
+![image](https://github.com/user-attachments/assets/456381a5-29e6-4bf6-bdd6-75d9b8c949e5)
+![image](https://github.com/user-attachments/assets/9dab9228-3ad0-4dcd-8f5c-7489da472132)
+
+
+
+#### __ [BO] 게시판 관리
+
+![image](https://github.com/user-attachments/assets/94b04902-1368-459e-816a-9469601957f0)
+
+
+
+
+#### __ [BO] 회사 관리
+
+* 회사 조회
+![image](https://github.com/user-attachments/assets/f64868f3-25f3-4cb4-bb0d-7c91e65228e7)
+
+
+* 회사 인증
+![image](https://github.com/user-attachments/assets/964f81c3-f5bf-48a2-b73e-da9146a7e7f5)
+
+
 * * *
 
 
