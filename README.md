@@ -201,12 +201,13 @@ __[사용기술 및 개발환경]__
 
 
 * 게시판 목록
-![image](https://github.com/user-attachments/assets/1bd0344f-dd87-453c-a0ef-6f12401b545a)
+![image](https://github.com/user-attachments/assets/c7921acc-d940-497b-ab6b-4c57cba43427)
 
 - 게시글 최신순 정렬
 - 한페이지에 12개씩 정렬됨.
 - 처음, 마지막, 이전, 다음 버튼으로 페이지 이동
 - 게시글 제목, 내용으로 검색
+- 이미지 첨부파일 있으면 썸네일로 띄움
 
 * 게시판 상세
 - 게시판 상세 전체
