@@ -201,7 +201,8 @@ __[사용기술 및 개발환경]__
 
 
 * 게시판 목록
-![image](https://github.com/user-attachments/assets/c7921acc-d940-497b-ab6b-4c57cba43427)
+![image](https://github.com/user-attachments/assets/66592490-0feb-4057-98b4-c5ed57a345f6)
+
 
 - 게시글 최신순 정렬
 - 한페이지에 12개씩 정렬됨.
