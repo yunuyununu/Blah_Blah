@@ -1,16 +1,16 @@
 <template>
   <div class="main-wrapper">
     <!-- 검색창 -->
-   <!-- <div class="search-bar">
+   <div class="search-bar">
       <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-</svg></span>
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+      </svg></span>
       <input type="text" placeholder="관심있는 내용을 검색해보세요!" />
-    </div> -->
+    </div>
 
     <div class="content-wrapper">
       <!-- 좌측: 주간/월간 토픽 -->
-      <div class="topics-wrapper">
+      <div class="middle-section">
         <!-- 주간 베스트 -->
         <div class="topic-box">
           <div class="header">
@@ -27,7 +27,6 @@
                 <span class="category">{{ week.category }}</span>
                 <span class="title" style="display: flex; align-items: center; gap: 4px;">
                   <template v-if="week.image_COUNT > 0">
-                    <!-- SVG 아이콘 -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                       class="bi bi-image" viewBox="0 0 16 16">
                       <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
@@ -39,8 +38,8 @@
               </div>
               <div class="right">
                 <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart" viewBox="0 0 16 16">
-  <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.6 7.6 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
-</svg> {{ week.like_COUNT }}</span>
+                  <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.6 7.6 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+                </svg> {{ week.like_COUNT }}</span>
                 <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat" viewBox="0 0 16 16">
                   <path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894m-.493 3.905a22 22 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a10 10 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105"/>
                 </svg> {{ week.comment_COUNT }}</span>
@@ -56,42 +55,64 @@
             <h2>게시글 월간 토픽 베스트</h2>
           </div>
           <ul class="post-list">
-    <li v-for="month in monthlyPosts" :key="month.b_idx" class="post-item">
-      <a href="#" @click.prevent="goToBoardDetail(month.b_idx)" class="monthly-link">
-        <div class="left">
-          <span class="category">{{ month.category }}</span>
-          <span class="title" style="display: flex; align-items: center; gap: 4px;">
-            <template v-if="month.image_COUNT > 0">
-              <!-- SVG 아이콘 -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                class="bi bi-image" viewBox="0 0 16 16">
-                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
-                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/>
-              </svg>
-            </template>
-            {{ month.b_title }}
-          </span>
+            <li v-for="month in monthlyPosts" :key="month.b_idx" class="post-item">
+              <a href="#" @click.prevent="goToBoardDetail(month.b_idx)" class="monthly-link">
+                <div class="left">
+                  <span class="category">{{ month.category }}</span>
+                  <span class="title" style="display: flex; align-items: center; gap: 4px;">
+                    <template v-if="month.image_COUNT > 0">
+                      <!-- SVG 아이콘 -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-image" viewBox="0 0 16 16">
+                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                        <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/>
+                      </svg>
+                    </template>
+                    {{ month.b_title }}
+                  </span>
+                </div>
+                <div class="right">
+                  <span class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart" viewBox="0 0 16 16">
+                    <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.6 7.6 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+                  </svg> {{ month.like_COUNT }}
+                  </span>
+                  <span class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat" viewBox="0 0 16 16">
+                      <path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894m-.493 3.905a22 22 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a10 10 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105"/>
+                    </svg> {{ month.comment_COUNT }}
+                  </span>
+                </div>
+              </a>
+            </li>
+        </ul>
         </div>
-        <div class="right">
-          <span class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart" viewBox="0 0 16 16">
-  <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.6 7.6 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
-</svg> {{ month.like_COUNT }}
-          </span>
-          <span class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat" viewBox="0 0 16 16">
-              <path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894m-.493 3.905a22 22 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a10 10 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105"/>
-            </svg> {{ month.comment_COUNT }}
-          </span>
+
+              <!-- 우측: 실시간 인기 회사 -->
+      <div class="ranking-box">
+        <div class="header">
+          <h2>평점 높은 회사 순위</h2>
         </div>
-      </a>
-    </li>
-  </ul>
-        </div>
+        <ol class="rank-list">
+          <li
+            v-for="(company, index) in topCompanies"
+            :key="company.c_idx"
+            @click="goToCompanyDetail(company.c_idx)"
+            class="rank-item"
+          >
+            <span class="rank-number">{{ index + 1 }}</span>
+            <span class="rank-name">{{ company.c_name }}</span>
+          </li>
+        </ol>
+        <div class="rank-info"></div>
+      </div>
+      
+    </div>
+
 <div class="topic-box2">
   <div class="header">
     <h2>투표 베스트</h2>
-  </div>
+</div>
   
   <div class="vote-cards-container">
     <div 
@@ -133,26 +154,7 @@
 </div>
 
 
-      </div>
 
-      <!-- 우측: 실시간 인기 회사 -->
-      <div class="ranking-box">
-        <div class="header">
-          <h2>평점 높은 회사 순위</h2>
-        </div>
-        <ol class="rank-list">
-          <li
-            v-for="(company, index) in topCompanies"
-            :key="company.c_idx"
-            @click="goToCompanyDetail(company.c_idx)"
-            class="rank-item"
-          >
-            <span class="rank-number">{{ index + 1 }}</span>
-            <span class="rank-name">{{ company.c_name }}</span>
-          </li>
-        </ol>
-        <div class="rank-info"></div>
-      </div>
     </div>
   </div>
 </template>
@@ -299,7 +301,7 @@ const goToCompanyDetail = (c_idx) => {
 
 /* 좌측 베스트 토픽들 */
 .topics-wrapper {
-  flex: 1 1 700px;
+  flex: 1 1 300px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -310,6 +312,7 @@ const goToCompanyDetail = (c_idx) => {
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 16px;
+  max-width: 600px;
   padding: 24px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
@@ -354,11 +357,11 @@ const goToCompanyDetail = (c_idx) => {
 }
 
 .left {
-  display: flex;        
-  flex-wrap: nowrap;    
-  max-width: 400px;
-  gap: 8px;             
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
+  gap: 8px;
+  max-width: 400px; /* 적절히 조정 */
 }
 
 .category {
@@ -373,7 +376,10 @@ const goToCompanyDetail = (c_idx) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 280px; /* 원하는 길이로 조정 가능 */
+  display: inline-block;
 }
+
 
 .right {
   display: flex;
@@ -665,6 +671,16 @@ white-space: nowrap;
     .vote-card {
         min-width: unset;
     }
+}
+
+.middle-section {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  max-width: 1300px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
 }
 
 </style>

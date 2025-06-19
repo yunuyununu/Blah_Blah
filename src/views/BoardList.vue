@@ -16,18 +16,29 @@
 
     <!-- 게시글 카드 목록 -->
     <div v-if="board.length > 0" class="card-grid">
+      <!-- 카드 -->
       <div class="card" v-for="item in board" :key="item.B_IDX" @click="goBoardDetails(item.B_IDX)">
-        <div class="card-title">{{ item.B_TITLE }}</div>
-        <div class="card-content" v-if="item.B_CONTENT">{{ item.B_CONTENT.slice(0, 80) }}...</div>
-        <div class="card-info">
-          <span>{{ item.C_NAME }} · {{ item.U_NICNAME }}</span>
-          <span>♥ {{ item.heart_count }}</span>
-          <span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat" viewBox="0 0 16 16">
-  <path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 0 7-2.807 7-6s-3.004-6-7-6-7 2.808-7 6c0 1.468.617 2.83 1.678 3.894m-.493 3.905a22 22 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a10 10 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105"/>
-</svg>&nbsp;{{ item.comment_count }}
-          </span>
-          <span>{{ formatDate(item.B_DATE) }}</span>
+        <div class="card-inner">
+          <!-- 텍스트 영역 -->
+          <div class="card-text">
+            <div class="card-title">{{ item.B_TITLE }}</div>
+            <div class="card-content" v-if="item.B_CONTENT">{{ item.B_CONTENT.slice(0, 80) }}...</div>
+            <div class="card-info">
+              <span>{{ item.C_NAME }} · {{ item.U_NICNAME }}</span>
+              <span>♥ {{ item.heart_count }}</span>
+              <span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat" viewBox="0 0 16 16">
+                  <path d="..."/>
+                </svg>&nbsp;{{ item.comment_count }}
+              </span>
+              <span>{{ formatDate(item.B_DATE) }}</span>
+            </div>
+          </div>
+
+          <!-- 썸네일 이미지 영역 -->
+          <div v-if="item.I_IMAGE" class="card-thumbnail">
+            <img :src="item.I_IMAGE" alt="썸네일" />
+          </div>
         </div>
       </div>
     </div>
@@ -210,9 +221,10 @@ onMounted(() => {
 .card {
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 20px;
+  padding: 0;
   cursor: pointer;
   transition: box-shadow 0.2s;
+  overflow: hidden;
 }
 
 .card:hover {
@@ -233,15 +245,48 @@ onMounted(() => {
 
 .card-info {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;  /* 넘치면 줄바꿈 */
+  gap: 6px 10px;     /* 줄과 요소 간 간격 */
   font-size: 12px;
   color: #888;
+  margin-top: auto; /* 항상 맨 아래로 */
 }
 
 .card-info span {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
+}
+
+.card-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding: 20px;
+  gap: 10px;
+  height: 100%;
+}
+
+.card-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+}
+
+.card-thumbnail {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .pagination {

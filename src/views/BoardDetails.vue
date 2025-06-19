@@ -46,7 +46,20 @@
         />
       </div>
       <br>
-      <input v-if="isEditing && userStore.userIdx === post.B_U_IDX" type="file" multiple @change="onImageChange" accept=".jpg,.jpeg,.png,.pdf"/>
+      <!-- 이미지 업로드 버튼 (스타일 적용) -->
+        <div class="file-upload-wrapper" v-if="isEditing && userStore.userIdx === post.B_U_IDX">
+          <label for="fileInput" class="file-upload-label">
+            이미지 선택
+          </label>
+          <input
+            id="fileInput"
+            type="file"
+            multiple
+            @change="onImageChange"
+            accept=".jpg,.jpeg,.png,.pdf"
+            class="file-input-hidden"
+          />
+        </div>
 
       <div class="image-preview" v-if="previewImages.length > 0">
         <img v-for="(img, i) in previewImages" :key="i" :src="img" />
@@ -906,8 +919,8 @@ hr {
 }
 
 .image-preview img {
-  width: 100px;
-  height: 100px;
+  width: 200px;
+  height: 200px;
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
@@ -1114,4 +1127,28 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+.file-upload-wrapper {
+  margin: 10px 0;
+}
+
+.file-upload-label {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.file-upload-label:hover {
+  background-color: #2563eb;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
 </style>
