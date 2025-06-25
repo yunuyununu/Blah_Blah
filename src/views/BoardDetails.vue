@@ -200,16 +200,16 @@
       </div>
   </div>
   <div v-else class="loading">불러오는 중...</div>
+  <ScrollTopButton />
 </template>
 
 <script setup>
 import CommentItem from '@/views/CommentItem.vue';
+import ScrollTopButton from '@/components/ScrollTopButton.vue';
 import { useUserStore } from '@/store/userStore'
-// import { useAlarmStore } from '@/store/alarmStore'
 import { useRouter } from 'vue-router'
 
 
-// const alarmStore = useAlarmStore()
 const userStore = useUserStore()
 const isLogin = computed(() => userStore.isLogin)
 const router = useRouter()
